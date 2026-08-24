@@ -1,0 +1,13 @@
+AirFiber Refund Policy
+Effective date: 1 August 2026
+
+Customers may request a refund within 7 days of first installation if measured speed stays below 50% of the subscribed plan during three official speed tests.
+
+Refunds are not available for:
+- Partial months on prepaid packs after the 7-day window
+- Charges for optional OTT add-ons once the promo code is redeemed
+- Equipment that is damaged or not returned
+
+Approved refunds are paid back to the original payment method within 10 business days.
+
+To raise a refund request, open a ticket in the AirFiber app and attach the three speed-test screenshots. Support ticket category: Billing > Refund.
