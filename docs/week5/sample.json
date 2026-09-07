@@ -1,0 +1,46 @@
+{
+  "seed": 20260907,
+  "algorithm": "random.Random(f'{seed}:{pool}').sample(sorted(trace_ids_in_pool), n), sorted for presentation",
+  "python": "3.12.3",
+  "traces": "docs/week5/traces.jsonl",
+  "traces_sha256": "61f4e9637ddcf089f23a739f070c0c74bd1d15b7f4ef4ae346a10ae20a133133",
+  "pool_sizes": {
+    "demo": 14,
+    "demo_unscoped": 14,
+    "random": 120
+  },
+  "random": [
+    "TR-0012",
+    "TR-0023",
+    "TR-0026",
+    "TR-0035",
+    "TR-0037",
+    "TR-0045",
+    "TR-0055",
+    "TR-0060",
+    "TR-0071",
+    "TR-0072",
+    "TR-0073",
+    "TR-0077",
+    "TR-0084",
+    "TR-0089",
+    "TR-0090",
+    "TR-0098",
+    "TR-0111",
+    "TR-0112",
+    "TR-0114",
+    "TR-0115"
+  ],
+  "demo": [
+    "TD-0002",
+    "TD-0003",
+    "TD-0004",
+    "TD-0005",
+    "TD-0006",
+    "TD-0007",
+    "TD-0009",
+    "TD-0010",
+    "TD-0011",
+    "TD-0012"
+  ]
+}
