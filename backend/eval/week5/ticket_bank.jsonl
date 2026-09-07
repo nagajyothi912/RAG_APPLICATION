@@ -1,0 +1,121 @@
+{"_bank": {"version": 1, "count": 120, "authored_on": "2026-09-07", "shuffle_seed": 20260907, "note": "Support tickets authored from article headings only. No labels, no expected answers, no per-ticket category: the quotas below are an authoring device and are deliberately not resolvable to a ticket.", "quotas": {"well_formed": 12, "identifier": 8, "paraphrase": 14, "typo": 12, "fragment": 10, "compound": 10, "plan_name": 12, "dated": 8, "followup": 8, "uncovered": 12, "out_of_scope": 8, "buried": 6}}}
+{"ticket_id": "T001", "question": "Do you have a business plan with an SLA?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T002", "question": "upgrade", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T003", "question": "What counts as an official speed test for a refund claim?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T004", "question": "I have been a customer for four years and this is the worst experience I have had with any provider. The connection drops every evening between 8 and 10, exactly when we need it. I have called support five times and each time they tell me to restart the router, which I have done more times than I can count. I am not restarting it again. What I want to know is whether there is an actual fault on your side that I can escalate.", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T005", "question": "How much does the 1249 pack cost?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T006", "question": "What are the payment options and what happens if I miss the due date twice?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T007", "question": "Do I need to be present for the transfer to a new address, is there a charge, and how long does it take?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T008", "question": "refund", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T009", "question": "Can I get a static IP on the 599 plan for an extra fee?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T010", "question": "We moved into this flat in July and asked for the connection to be shifted. It has been six weeks. Six. Every week someone promises a call back and nobody calls. My husband has been working from a cafe. I want to know what the actual timeline is supposed to be for a relocation and whether we are owed anything for the delay.", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T011", "question": "Is the late fee refundable if the outage was your fault?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T012", "question": "What is the difference between the 599 and 1999 plans and which one includes the OTT bundle?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T013", "question": "how to susspend servise temporarly", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T014", "question": "is that included?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T015", "question": "What is AirFiber_1249_1M?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T016", "question": "What are the conditions for getting a refund on my plan?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T017", "question": "Third time I am writing about this. Nobody has called back. I paid 1999 on the 2nd of the month, the engineer never turned up, my daughter has online school and I have lost two days of work sitting at home waiting. This is completely unacceptable. Just tell me whether I get my money back.", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T018", "question": "instalation charge for 599 plan?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T019", "question": "Difference between AirFiber_1199_1M and AirFiber_1199_3M?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T020", "question": "Write me a python script to test my internet speed.", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T021", "question": "What does the AirFiber_599_1M plan include?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T022", "question": "I am closing my account, what equipment do I return, what does it cost if I do not, and when do I get my deposit?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T023", "question": "Is GST included in the 1199 price or added on top?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T024", "question": "What should I do before the installation appointment?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T025", "question": "speed test", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T026", "question": "AF401 eror", "channel": "phone-notes", "authored_on": "2026-09-07"}
+{"ticket_id": "T027", "question": "LED is red and the app says AF-620, do I raise a ticket or wait, and do I get a refund for the downtime?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T028", "question": "Is the 500 rupee installation charge still applicable after the July update?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T029", "question": "Who won the IPL in 2025?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T030", "question": "Is AirFiber_1199_3M just AirFiber_1199_1M with longer validity?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T031", "question": "billng cycle for prepaid conection", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T032", "question": "Is relocating my connection to a different city free of charge?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T033", "question": "Can I pay my bill in instalments?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T034", "question": "What is the upload speed on the 1999 plan?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T035", "question": "How long is installation, is it free, and do I need to be at home for it?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T036", "question": "How do I change my plan in the middle of a billing cycle?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T037", "question": "Can I suspend my connection for two months, will I still be charged, and does my plan validity extend?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T038", "question": "AF-511 error, what do I do?", "channel": "phone-notes", "authored_on": "2026-09-07"}
+{"ticket_id": "T039", "question": "What is the weather in Mumbai tomorrow?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T040", "question": "Can I port my landline number to AirFiber?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T041", "question": "what about for postpaid?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T042", "question": "AF-620", "channel": "phone-notes", "authored_on": "2026-09-07"}
+{"ticket_id": "T043", "question": "What is the capital of Australia?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T044", "question": "airfber 1999 3m speeed", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T045", "question": "I am in Chennai, can I get AirFiber_1299_1M?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T046", "question": "Are the plan prices from last year still valid?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T047", "question": "I need a copy of my bill for company reimbursement.", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T048", "question": "same question but for the 3-month pack", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T049", "question": "1199", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T050", "question": "What is the price of AirFiber_1149_1M?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T051", "question": "and the second one?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T052", "question": "Has the refund window changed from what it used to be?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T053", "question": "Tell me about AirFiber_1999_3M.", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T054", "question": "wat does AF 5111 mean", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T055", "question": "how much is that?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T056", "question": "Is there a referral bonus if I bring a friend?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T057", "question": "When does my legacy plan stop being supported?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T058", "question": "What was the refund policy before August 2026?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T059", "question": "How do I set up port forwarding for my PS5?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T060", "question": "Are legacy plans cheaper than the current ones?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T061", "question": "My neighbour is moving into my flat and taking over the connection, how does that work?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T062", "question": "My plan was migrated last month, can I go back to the old one?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T063", "question": "grace period?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T064", "question": "My Jio sim is not working.", "channel": "phone-notes", "authored_on": "2026-09-07"}
+{"ticket_id": "T065", "question": "refnud policy for slow speeed", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T066", "question": "I signed up in June 2026, am I grandfathered on my legacy pack?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T067", "question": "airfiber 1199 1m benifits", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T068", "question": "My speed is half of what I pay for and I have run a test, do I qualify for a refund and how long does it take?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T069", "question": "Can I sign up for AirFiber_1099_1M?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T070", "question": "How do I temporarily suspend my service while I am travelling?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T071", "question": "changng account holdr documents", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T072", "question": "Look, I am not trying to be difficult, but I have now been told three different things by three different people. One said my plan was migrated automatically, another said I had to opt in, and the third said my old plan is still active. Can someone please just tell me which plan I am actually on and what it costs?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T073", "question": "My box has an orange light that is not flashing, what does that mean?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T074", "question": "late fee postpayd", "channel": "phone-notes", "authored_on": "2026-09-07"}
+{"ticket_id": "T075", "question": "What happens if my auto-pay does not go through?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T076", "question": "AF-620 keeps showing up on my app, what is it?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T077", "question": "Is AirFiber_999_1M still available for new customers?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T078", "question": "What payment methods can I use to pay my AirFiber bill?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T079", "question": "I want the three month 1199 plan, how do I subscribe?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T080", "question": "How do I stop the service permanently and what do I owe?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T081", "question": "Is the 1299 plan available everywhere?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T082", "question": "When are postpaid bills generated and when are they due?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T083", "question": "AF-408, how many times should I retry before raising a ticket?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T084", "question": "500", "channel": "phone-notes", "authored_on": "2026-09-07"}
+{"ticket_id": "T085", "question": "LED", "channel": "phone-notes", "authored_on": "2026-09-07"}
+{"ticket_id": "T086", "question": "What does error code AF-401 mean?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T087", "question": "Does the cheap plan come with the wifi booster?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T088", "question": "What ID does the new account holder need when transferring the connection?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T089", "question": "How do I reset my Gmail password?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T090", "question": "what if I don't?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T091", "question": "What happens if I want to close my account, do I need to return the equipment?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T092", "question": "What is the contention ratio on AirFiber?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T093", "question": "How long does installation usually take after I place the order?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T094", "question": "Recommend a good router brand.", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T095", "question": "ok and after that?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T096", "question": "How do I change the wifi password after setup?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T097", "question": "The light on the router is red and blinking.", "channel": "phone-notes", "authored_on": "2026-09-07"}
+{"ticket_id": "T098", "question": "How high above the floor should the mesh extender be placed?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T099", "question": "slow", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T100", "question": "Which 1199 plan should I choose?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T101", "question": "meash extender placment", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T102", "question": "What speed do I get on the 1199 three-month pack?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T103", "question": "ont retrun charge", "channel": "phone-notes", "authored_on": "2026-09-07"}
+{"ticket_id": "T104", "question": "Can I put my connection on hold for a month?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T105", "question": "Is there a charge if I shift my connection within the same city?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T106", "question": "I am seeing AF-503 on the ONT display.", "channel": "phone-notes", "authored_on": "2026-09-07"}
+{"ticket_id": "T107", "question": "Which plans include a static IP and is there an extra charge for it?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T108", "question": "How do I cancel my Netflix subscription?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T109", "question": "Do I get charged for the engineer visit?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T110", "question": "I want to upgrade to the 1999 pack and I am moving house next month, what happens to my pro-rata credit and is the relocation free?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T111", "question": "I want to move to a bigger pack mid-month, will I be charged the full amount?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T112", "question": "I have been on AirFiber_999_1M since 2024, is it still valid?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T113", "question": "and in Bangalore?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T114", "question": "Do you offer a landline bundle?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T115", "question": "Where should I put the second wifi box for best coverage?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T116", "question": "installation", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T117", "question": "The internet is crawling in the evenings, what can I check?", "channel": "chat", "authored_on": "2026-09-07"}
+{"ticket_id": "T118", "question": "Honestly I am at the end of my patience. Your app shows an error, the helpline puts me on hold for forty minutes, and the chat keeps sending me articles that have nothing to do with my problem. All I need is a straight answer: am I being charged a late fee this month or not?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T119", "question": "How long do I have to complain about slow speeds and get money back?", "channel": "email", "authored_on": "2026-09-07"}
+{"ticket_id": "T120", "question": "I do not normally write complaints but this has crossed a line. The installation was supposed to be free on my plan and now I see a charge of 500 on my bill that nobody explained to me. I want to know why.", "channel": "email", "authored_on": "2026-09-07"}
