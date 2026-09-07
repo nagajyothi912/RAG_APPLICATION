@@ -244,9 +244,69 @@ $ git diff --stat e9c2c55..HEAD -- '*.py' '*.ts' '*.tsx'
 
 $ git show --stat --oneline HEAD
 week5: open coding, 20 traces, one sentence each - no code changes
- docs/week5/notes.md | 41 +++++++++++++++++++++++++++++++++++++++++
+ docs/week5/notes.md | 47 +++++++++++++++++++++++++++++++++++++++++++++++
 ```
 
 `test_no_source_file_changed_during_the_open_coding_commit` re-derives the second
 command from `git log` and asserts the file list is exactly
 `["docs/week5/notes.md"]`, so the claim cannot go stale.
+
+---
+
+## 4. Clustering into failure modes
+
+Written after section 3 was committed, from the 20 sentences rather than from the
+traces. Five modes, ranked by count with severity breaking ties.
+
+### 4.1 Trace to mode
+
+| mode | traces |
+| --- | --- |
+| 1. Refuses while the chunk that answers it is ranked first | `TR-0055`, `TR-0072`, `TR-0084` |
+| 2. Says it does not know and still names a source file | `TR-0012`, `TR-0111` |
+| 3. Prints the citation in a bracket style no other answer uses | `TR-0045`, `TR-0077` |
+| 4. Tells a paying legacy subscriber it cannot say whether their plan is valid | `TR-0112` |
+| 5. Stops mid-word at the length cap and never reaches the last question | `TR-0035` |
+| — no defect seen | `TR-0023`, `TR-0026`, `TR-0037`, `TR-0060`, `TR-0071`, `TR-0073`, `TR-0089`, `TR-0090`, `TR-0098`, `TR-0114`, `TR-0115` |
+
+### 4.2 Why these names and not shorter ones
+
+Every name states what a reader of the answer would see. "Refuses while the chunk
+that answers it is ranked first" tells a manager where to look: the answer was
+retrieved and then thrown away, so the problem is downstream of retrieval. The
+shorter version of that sentence is "retrieval issue", which is both a diagnosis
+and wrong — retrieval worked.
+
+Mode 2 and mode 4 are the two that would embarrass us in front of a client, and
+they are embarrassing for different reasons. Mode 2 attaches a source line to a
+non-answer, so a refusal reads as though the named document was consulted and
+came back empty. Mode 4 is worse in kind and rarer: a paying subscriber asked
+whether the pack they have been on since 2024 is still valid, and the corpus
+answers that question in the first paragraph of the very article that was cited.
+
+### 4.3 The three traces that were hardest to place
+
+- `TR-0072` sits in mode 1 on a judgement call. The buried question — *"which
+  plan am I actually on and what does it cost"* — is genuinely unanswerable from
+  a knowledge base, so the refusal is defensible. It is counted as a defect
+  because the migration-rules chunk was ranked first and directly addresses the
+  customer's stated confusion about whether migration was automatic, and none of
+  it reached the answer.
+- `TR-0112` also names a source while refusing, so it could have gone in mode 2.
+  It is separated because the two have different consequences: mode 2 is a
+  cosmetic overreach on an answer that was correctly refused, whereas `TR-0112`
+  refused a question the corpus answers.
+- `TR-0084` is the single token "500", which is ambiguous between two different
+  ₹500 charges in the corpus. Refusing an ambiguous query is reasonable; what
+  puts it in mode 1 is that both candidate chunks were retrieved and the model
+  was never given the chance to ask which one the customer meant.
+
+### 4.4 What the residual is doing
+
+Eleven traces show no defect, and six of those are refusals that were correct:
+GST, legacy pricing, a Gmail password, a landline bundle, a context-free
+follow-up, and a plan-comparison question under a mismatched filter. Two of them
+are worth noting individually because they show the two refusal layers working
+as designed. `TR-0089` scored 0.188, cleared the 0.15 gate, reached the model,
+and was refused by the system prompt alone — the layer `results.md` section 5
+argues is load-bearing. `TR-0090` scored 0.1022 and never left the process.
