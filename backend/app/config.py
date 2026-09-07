@@ -17,10 +17,11 @@ class Settings(BaseSettings):
     groq_model: str = "openai/gpt-oss-120b"
 
     embed_model_name: str = "all-MiniLM-L6-v2"
-    chunk_size: int = 500
-    chunk_overlap: int = 50
-    top_k: int = 3
-    score_threshold: float = 0.08
+    chunk_strategy: str = "heading"  # fixed | recursive | heading
+    chunk_size: int = 1000
+    chunk_overlap: int = 100
+    top_k: int = 5
+    score_threshold: float = 0.15
 
     docs_dir: Path = BACKEND_ROOT / "data" / "docs"
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"

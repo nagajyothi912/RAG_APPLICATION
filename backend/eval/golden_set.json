@@ -1,0 +1,164 @@
+{
+  "description": "Golden set surfaced in the chat UI so a reviewer can reproduce a known-good answer without inventing a question. Two questions per indexed document, plus G13/G14 - a matched pair that Week 3 retrieval fails and Week 4 recovers, kept so the mode toggle can be demonstrated on a real case rather than described. Separate from golden_set.jsonl, which drives results.md sections 9-14 and must not shift when this list changes.",
+  "questions": [
+    {
+      "id": "G01",
+      "question": "What speed and data allowance does the AirFiber_1199_1M plan include?",
+      "source_file": "airfiber_plans.md",
+      "article_id": "KB-001",
+      "product_area": "plans",
+      "kind": "prose",
+      "answer_contains": [
+        "200 Mbps"
+      ]
+    },
+    {
+      "id": "G02",
+      "question": "Does the AirFiber_599_1M plan include a mesh extender or an OTT bundle?",
+      "source_file": "airfiber_plans.md",
+      "article_id": "KB-001",
+      "product_area": "plans",
+      "kind": "prose",
+      "answer_contains": [
+        "AirFiber_599_1M"
+      ]
+    },
+    {
+      "id": "G03",
+      "question": "What happens if my auto-pay payment fails?",
+      "source_file": "billing_faq.md",
+      "article_id": "KB-002",
+      "product_area": "billing",
+      "kind": "prose",
+      "answer_contains": [
+        "grace"
+      ]
+    },
+    {
+      "id": "G04",
+      "question": "Is there a late fee on prepaid packs?",
+      "source_file": "billing_faq.md",
+      "article_id": "KB-002",
+      "product_area": "billing",
+      "kind": "prose",
+      "answer_contains": [
+        "not charged a late fee"
+      ]
+    },
+    {
+      "id": "G05",
+      "question": "Within how many days of installation can I request a speed refund, and what evidence do I need?",
+      "source_file": "refund_policy.txt",
+      "article_id": "KB-003",
+      "product_area": "billing",
+      "kind": "prose",
+      "answer_contains": [
+        "7 days",
+        "three official speed tests"
+      ]
+    },
+    {
+      "id": "G06",
+      "question": "Are OTT add-on charges refundable?",
+      "source_file": "refund_policy.txt",
+      "article_id": "KB-003",
+      "product_area": "billing",
+      "kind": "prose",
+      "answer_contains": [
+        "promo code is redeemed"
+      ]
+    },
+    {
+      "id": "G07",
+      "question": "What does a solid red status LED on the ONT mean and what should I do?",
+      "source_file": "troubleshooting_connectivity.md",
+      "article_id": "KB-004",
+      "product_area": "troubleshooting",
+      "kind": "table",
+      "answer_contains": [
+        "No optical signal"
+      ]
+    },
+    {
+      "id": "G08",
+      "question": "What is error code AF-511 and how do I fix it?",
+      "source_file": "troubleshooting_connectivity.md",
+      "article_id": "KB-004",
+      "product_area": "troubleshooting",
+      "kind": "table",
+      "answer_contains": [
+        "whitelisted"
+      ]
+    },
+    {
+      "id": "G09",
+      "question": "What do I need ready before the installation engineer arrives?",
+      "source_file": "installation_setup.md",
+      "article_id": "KB-005",
+      "product_area": "installation",
+      "kind": "prose",
+      "answer_contains": [
+        "OTP"
+      ]
+    },
+    {
+      "id": "G10",
+      "question": "Where should I place the mesh extender for the best coverage?",
+      "source_file": "installation_setup.md",
+      "article_id": "KB-005",
+      "product_area": "installation",
+      "kind": "prose",
+      "answer_contains": [
+        "halfway"
+      ]
+    },
+    {
+      "id": "G11",
+      "question": "Can I downgrade my plan in the middle of a billing cycle?",
+      "source_file": "account_management.md",
+      "article_id": "KB-006",
+      "product_area": "account",
+      "kind": "prose",
+      "answer_contains": [
+        "next billing cycle"
+      ]
+    },
+    {
+      "id": "G12",
+      "question": "What happens if I do not return the equipment after closing my account?",
+      "source_file": "account_management.md",
+      "article_id": "KB-006",
+      "product_area": "account",
+      "kind": "prose",
+      "answer_contains": [
+        "2500"
+      ]
+    },
+    {
+      "id": "G13",
+      "question": "Does the AirFiber_1199_1M pack have a fair usage cap?",
+      "source_file": "airfiber_plans.md",
+      "article_id": "KB-001",
+      "product_area": "plans",
+      "kind": "prose",
+      "answer_contains": [
+        "no fair-usage cap"
+      ],
+      "contrast": "week3-miss-week4-hit",
+      "note": "Dense ranks the answer 7th - six legacy packs in KB-007 describe data allowances in near-identical language, and 'fair usage cap' is generic phrasing that matches all of them. The literal AirFiber_1199_1M is the only disambiguator, which is precisely what BM25 scores and MiniLM averages away. Ask it with no document selected."
+    },
+    {
+      "id": "G14",
+      "question": "How long is the OTT bundle valid on AirFiber_1999_3M?",
+      "source_file": "airfiber_plans.md",
+      "article_id": "KB-001",
+      "product_area": "plans",
+      "kind": "prose",
+      "answer_contains": [
+        "for the full 3 months"
+      ],
+      "contrast": "week3-miss-week4-hit",
+      "note": "Same failure, different chunk: KB-007's AirFiber_1199_3M is a three-month pack whose description competes directly, so dense ranks the true answer 7th. Ask it with no document selected."
+    }
+  ]
+}

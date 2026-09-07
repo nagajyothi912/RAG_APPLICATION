@@ -4,6 +4,7 @@ import {
   deleteDocument,
   listDocuments,
   uploadDocuments,
+  type DocumentMetadata,
   type SkippedFile,
   type UploadStatusKind,
 } from '../services/api';
@@ -15,12 +16,16 @@ export function useDocuments() {
   const [status, setStatus] = useState<UploadStatusKind>('idle');
   const [error, setError] = useState<string | null>(null);
   const [skipped, setSkipped] = useState<SkippedFile[]>([]);
+  const [metadata, setMetadata] = useState<DocumentMetadata[]>([]);
+  const [productAreas, setProductAreas] = useState<string[]>([]);
 
   const refresh = useCallback(async () => {
     try {
       const data = await listDocuments();
       setDocuments(data.documents);
       setIndexedChunks(data.indexed_chunks);
+      setMetadata(data.metadata || []);
+      setProductAreas(data.product_areas || []);
     } catch {
       // Listing is best-effort until the backend is up.
     }
@@ -61,6 +66,8 @@ export function useDocuments() {
       const result = await deleteDocument(name);
       setDocuments(result.documents);
       setIndexedChunks(result.indexed_chunks);
+      setMetadata(result.metadata || []);
+      setProductAreas(result.product_areas || []);
     } catch (err) {
       setStatus('error');
       setError(err instanceof Error ? err.message : 'Failed to delete document.');
@@ -85,17 +92,20 @@ export function useDocuments() {
       setSkipped(result.skipped || []);
       setSelectedFiles([]);
       setStatus('success');
+      void refresh();
     } catch (err) {
       setStatus('error');
       setError(err instanceof Error ? err.message : 'Upload failed.');
       setSkipped(err instanceof ApiError ? err.extra?.skipped || [] : []);
     }
-  }, [selectedFiles]);
+  }, [selectedFiles, refresh]);
 
   return {
     selectedFiles,
     documents,
     indexedChunks,
+    metadata,
+    productAreas,
     status,
     error,
     skipped,

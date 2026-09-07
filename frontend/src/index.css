@@ -372,10 +372,9 @@ p {
 }
 
 .chat-input {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  align-items: end;
 }
 
 .text-area {
@@ -412,5 +411,430 @@ p {
   .chat-window {
     min-height: 0;
     border-radius: 20px;
+  }
+}
+
+/* ---- metadata badges on indexed documents ---- */
+.document-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.document-meta {
+  margin-top: 6px;
+  font-size: 0.76rem;
+  color: rgba(244, 239, 228, 0.55);
+}
+
+/* ---- retrieval controls above the message box ----
+   These sit on the light .chat-window panel (--white), not on the dark sidebar,
+   so everything below is ink-on-paper. The earlier rules here were written for
+   the sidebar and rendered near-invisible once reused in the chat panel. */
+.chat-input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.chat-input-actions {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+
+.retrieval-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #e2d7c2;
+  border-radius: 16px;
+  background: var(--paper);
+}
+
+.control-label,
+.filter-select > span {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+}
+
+.filter-select {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.filter-select select {
+  font: inherit;
+  font-size: 0.85rem;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--ink);
+  background: var(--white);
+  border: 1px solid #d8ccb6;
+  border-radius: 10px;
+  padding: 8px 10px;
+  max-width: 15rem;
+}
+
+.filter-select select:focus-visible {
+  outline: 2px solid rgba(196, 92, 38, 0.45);
+  border-color: var(--copper);
+}
+
+.filter-select select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---- Week 3 / Week 4 segmented toggle ---- */
+.mode-toggle-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mode-toggle {
+  display: inline-flex;
+  padding: 3px;
+  gap: 3px;
+  background: var(--white);
+  border: 1px solid #d8ccb6;
+  border-radius: 12px;
+}
+
+.mode-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  line-height: 1.2;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.mode-option strong {
+  font-size: 0.85rem;
+}
+
+.mode-option span {
+  font-size: 0.68rem;
+  opacity: 0.85;
+}
+
+.mode-option:hover:not(:disabled):not(.is-active) {
+  background: var(--paper-2);
+}
+
+.mode-option.is-active {
+  background: var(--copper);
+  color: var(--white);
+}
+
+.mode-option:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.mode-warning {
+  font-size: 0.7rem;
+  color: var(--danger);
+}
+
+/* ---- golden set of questions ---- */
+.golden-set {
+  border: 1px solid #e2d7c2;
+  border-radius: 16px;
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.golden-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+}
+
+.golden-toggle:hover {
+  background: var(--paper-2);
+}
+
+.golden-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--copper);
+  color: var(--white);
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.golden-count {
+  margin-left: auto;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.golden-panel {
+  max-height: 15rem;
+  overflow-y: auto;
+  padding: 4px 14px 14px;
+  border-top: 1px solid #e2d7c2;
+}
+
+.golden-hint {
+  margin: 10px 0 12px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.golden-group + .golden-group {
+  margin-top: 12px;
+}
+
+.golden-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-family: var(--sans);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--copper-dark);
+}
+
+.golden-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.golden-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--ink);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.golden-item:hover:not(:disabled) {
+  border-color: var(--copper);
+  background: #fff4ea;
+}
+
+.golden-item.is-active {
+  border-color: var(--copper);
+  background: rgba(196, 92, 38, 0.1);
+}
+
+.golden-item:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.golden-id {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+
+.golden-question {
+  flex: 1;
+}
+
+/* ---- badges and citations on the light chat panel ---- */
+.message-assistant .badge,
+.message-options .badge,
+.golden-set .badge {
+  background: rgba(27, 36, 32, 0.08);
+  color: var(--ink-soft);
+}
+
+.message-assistant .badge-accent,
+.message-options .badge-accent,
+.golden-set .badge-accent {
+  background: rgba(196, 92, 38, 0.16);
+  color: var(--copper-dark);
+}
+
+.message-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.message-user .badge {
+  background: rgba(244, 239, 228, 0.16);
+  color: var(--paper);
+}
+
+.message-user .badge-accent {
+  background: rgba(196, 92, 38, 0.35);
+  color: #ffd9c2;
+}
+
+.retrieval-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(27, 36, 32, 0.1);
+}
+
+.retrieval-gate {
+  font-size: 0.74rem;
+  color: var(--ink-soft);
+}
+
+.citation-list {
+  margin-top: 12px;
+  border-top: 1px solid rgba(27, 36, 32, 0.1);
+  padding-top: 10px;
+}
+
+.citation-list > summary {
+  cursor: pointer;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+
+.citation-list ol {
+  list-style: decimal;
+  margin: 10px 0 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.citation-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.86rem;
+}
+
+.citation-head .badge {
+  margin-top: 0;
+}
+
+.citation-score {
+  font-size: 0.74rem;
+  color: var(--ink-soft);
+}
+
+.citation-section {
+  margin-top: 3px;
+  font-size: 0.76rem;
+  color: var(--copper-dark);
+}
+
+/* Per-stage scores: dense / bm25 / rerank shown side by side so it is visible
+   which retriever put a chunk here, not just that it ranked. */
+.citation-scores {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.score-pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(27, 36, 32, 0.06);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.score-pill em {
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.64rem;
+  color: var(--ink-soft);
+}
+
+.score-pill-strong {
+  background: rgba(47, 111, 78, 0.14);
+}
+
+.score-pill-strong em {
+  color: var(--moss);
+}
+
+.score-move {
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--copper-dark);
+}
+
+.citation-preview {
+  margin: 5px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.citation-meta {
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: rgba(61, 74, 67, 0.75);
+}
+
+@media (max-width: 720px) {
+  .retrieval-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-select select {
+    max-width: none;
   }
 }

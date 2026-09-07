@@ -1,3 +1,10 @@
+---
+article_id: KB-003
+title: AirFiber refund policy
+product_area: billing
+last_updated: 2026-08-01
+---
+
 AirFiber Refund Policy
 Effective date: 1 August 2026
 

@@ -1,13 +1,64 @@
+export type RetrievalMode = 'week3' | 'week4';
+
 export type SourceChunk = {
   source: string;
   chunk_id: number;
+  /** Dense cosine in both modes - the number SCORE_THRESHOLD is compared against. */
   score: number;
   preview: string;
+  article_id: string;
+  product_area: string;
+  last_updated: string;
+  section: string;
+  dense_score: number;
+  keyword_score: number;
+  fused_score: number;
+  /** null in Week 3, and in Week 4 whenever the cross-encoder could not load. */
+  rerank_score: number | null;
+  dense_rank: number | null;
+  keyword_rank: number | null;
+  retriever: string;
+};
+
+export type RetrievalInfo = {
+  mode: RetrievalMode;
+  top_k: number;
+  hybrid: boolean;
+  reranked: boolean;
+  gate_score: number;
+  score_threshold: number;
+  refused: boolean;
 };
 
 export type ChatResponse = {
   answer: string;
   sources: SourceChunk[];
+  mode: RetrievalMode;
+  retrieval: RetrievalInfo;
+};
+
+export type GoldenQuestion = {
+  id: string;
+  question: string;
+  source_file: string;
+  article_id: string;
+  product_area: string;
+  kind: string;
+  /** "week3-miss-week4-hit" for the pair kept to demonstrate the mode toggle; "" otherwise. */
+  contrast: string;
+  available: boolean;
+};
+
+export type GoldenSetResponse = {
+  questions: GoldenQuestion[];
+};
+
+/** Everything the chat controls can vary for a single question. */
+export type AskOptions = {
+  mode: RetrievalMode;
+  topK: number;
+  productArea: string | null;
+  sourceFile: string | null;
 };
 
 export type SkippedFile = {
@@ -22,9 +73,19 @@ export type UploadResponse = {
   documents: string[];
 };
 
+export type DocumentMetadata = {
+  source_file: string;
+  article_id: string;
+  product_area: string;
+  last_updated: string;
+  chunks: number;
+};
+
 export type DocumentListResponse = {
   documents: string[];
   indexed_chunks: number;
+  metadata: DocumentMetadata[];
+  product_areas: string[];
 };
 
 export type HealthResponse = {
@@ -32,6 +93,15 @@ export type HealthResponse = {
   embedder_ready: boolean;
   llm_configured: boolean;
   indexed_chunks: number;
+  chunk_strategy: string;
+  chunk_size: number;
+  chunk_overlap: number;
+  top_k: number;
+  score_threshold: number;
+  hybrid_available: boolean;
+  reranker_available: boolean;
+  reranker_loaded: boolean;
+  reranker_model: string;
 };
 
 export type ChatMessage = {
@@ -39,6 +109,10 @@ export type ChatMessage = {
   role: 'user' | 'assistant';
   content: string;
   sources?: SourceChunk[];
+  filter?: string;
+  /** Echoed onto both bubbles so scrollback stays readable after the controls move on. */
+  options?: AskOptions;
+  retrieval?: RetrievalInfo;
 };
 
 export type UploadStatusKind = 'idle' | 'uploading' | 'success' | 'error';
@@ -101,12 +175,22 @@ export function uploadDocuments(files: File[]) {
   });
 }
 
-export function sendChat(message: string) {
+export function sendChat(message: string, options: AskOptions) {
   return request<ChatResponse>('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({
+      message,
+      product_area: options.productArea || null,
+      source_file: options.sourceFile || null,
+      top_k: options.topK,
+      mode: options.mode,
+    }),
   });
+}
+
+export function listGoldenQuestions() {
+  return request<GoldenSetResponse>('/api/golden-questions');
 }
 
 export function listDocuments() {

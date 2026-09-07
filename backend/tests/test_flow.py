@@ -101,15 +101,14 @@ def test_mixed_valid_and_invalid(client: TestClient):
     assert body["skipped"][0]["filename"] == "not_supported.bin"
 
 
-def test_upload_pdf(client: TestClient):
-    pdf_path = Path(__file__).resolve().parents[2] / "Week3_Module2_Retrieval_and_RAG.pdf"
+def test_upload_pdf(client: TestClient, sample_pdf: bytes):
     response = client.post(
         "/api/documents/upload",
-        files=[("files", (pdf_path.name, pdf_path.read_bytes(), "application/pdf"))],
+        files=[("files", ("quarterly_report.pdf", sample_pdf, "application/pdf"))],
     )
     assert response.status_code == 200, response.text
     body = response.json()
-    assert pdf_path.name in body["uploaded"]
+    assert "quarterly_report.pdf" in body["uploaded"]
     assert body["indexed_chunks"] > 0
 
 
@@ -158,7 +157,7 @@ def test_retrieval_finds_airfiber_plan(client: TestClient):
     assert results
     chunk, score = results[0]
     assert "airfiber_plans" in chunk.source.lower()
-    assert score > 0.08
+    assert score > rag_module.SCORE_THRESHOLD
     assert "1199" in chunk.text or "200 Mbps" in chunk.text
 
 

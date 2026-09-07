@@ -1,3 +1,10 @@
+---
+article_id: KB-001
+title: AirFiber broadband plans
+product_area: plans
+last_updated: 2026-07-15
+---
+
 # AirFiber broadband plans
 
 This help-centre article describes current AirFiber prepaid fiber plans.
@@ -25,3 +32,11 @@ The AirFiber_599_1M plan is a one-month prepaid plan priced at ₹599. It includ
 ## AirFiber_1999_3M plan
 
 The AirFiber_1999_3M plan is a three-month prepaid plan priced at ₹1999. It includes 300 Mbps unlimited speed, a mesh extender, and the same OTT bundle as AirFiber_1199_1M for the full 3 months.
+
+## Plan comparison
+
+| Plan | Price | Speed | Data | Mesh extender | OTT bundle |
+| --- | --- | --- | --- | --- | --- |
+| AirFiber_599_1M | ₹599 | 100 Mbps | 1 TB | No | No |
+| AirFiber_1199_1M | ₹1199 | 200 Mbps | Unlimited | Yes | Yes, 1 month |
+| AirFiber_1999_3M | ₹1999 | 300 Mbps | Unlimited | Yes | Yes, 3 months |

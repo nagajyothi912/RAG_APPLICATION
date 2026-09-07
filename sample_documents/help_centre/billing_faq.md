@@ -1,3 +1,10 @@
+---
+article_id: KB-002
+title: Billing and payments FAQ
+product_area: billing
+last_updated: 2026-08-01
+---
+
 # Billing and payments FAQ
 
 How do I pay for AirFiber?

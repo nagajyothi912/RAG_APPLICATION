@@ -1,0 +1,97 @@
+{
+  "known_answer": [
+    {
+      "id": "Q1",
+      "question": "What are the benefits of the AirFiber_1199_1M plan?",
+      "expected_article_id": "KB-001",
+      "expected_source": "help_centre/airfiber_plans.md",
+      "kind": "prose",
+      "answer_contains": ["200 Mbps"]
+    },
+    {
+      "id": "Q2",
+      "question": "What does a blinking red LED on the AirFiber ONT mean?",
+      "expected_article_id": "KB-004",
+      "expected_source": "help_centre/troubleshooting_connectivity.md",
+      "kind": "table",
+      "answer_contains": ["Fiber cut"]
+    },
+    {
+      "id": "Q3",
+      "question": "What should I do about error code AF-503?",
+      "expected_article_id": "KB-004",
+      "expected_source": "help_centre/troubleshooting_connectivity.md",
+      "kind": "table",
+      "answer_contains": ["oversubscribed"]
+    },
+    {
+      "id": "Q4",
+      "question": "Why is my broadband slow only in the evening between 7 PM and 11 PM?",
+      "expected_article_id": "KB-004",
+      "expected_source": "help_centre/troubleshooting_connectivity.md",
+      "kind": "table",
+      "answer_contains": ["congestion"]
+    },
+    {
+      "id": "Q5",
+      "question": "What happens if my auto-pay payment fails?",
+      "expected_article_id": "KB-002",
+      "expected_source": "help_centre/billing_faq.md",
+      "kind": "prose",
+      "answer_contains": ["grace period"]
+    },
+    {
+      "id": "Q6",
+      "question": "How long does an approved refund take to be credited?",
+      "expected_article_id": "KB-003",
+      "expected_source": "policies/refund_policy.txt",
+      "kind": "prose",
+      "answer_contains": ["10 business days"]
+    },
+    {
+      "id": "Q7",
+      "question": "Can I downgrade my plan in the middle of a billing cycle?",
+      "expected_article_id": "KB-006",
+      "expected_source": "policies/account_management.md",
+      "kind": "prose",
+      "answer_contains": ["next billing cycle"]
+    },
+    {
+      "id": "Q8",
+      "question": "What do I need ready before the installation engineer arrives?",
+      "expected_article_id": "KB-005",
+      "expected_source": "help_centre/installation_setup.md",
+      "kind": "prose",
+      "answer_contains": ["OTP"]
+    }
+  ],
+  "ambiguous": [
+    { "id": "A1", "question": "How do I fix it?" },
+    { "id": "A2", "question": "What is the charge?" }
+  ],
+  "out_of_scope": [
+    { "id": "O1", "question": "What is the capital of Mongolia?" },
+    { "id": "O2", "question": "Who won the 2022 FIFA World Cup?" },
+    { "id": "O3", "question": "How do I reset my Netflix password?" }
+  ],
+  "filter_cases": [
+    {
+      "id": "F1",
+      "question": "What is the 500 rupee charge for?",
+      "product_area": "installation",
+      "expected_article_id": "KB-005"
+    },
+    {
+      "id": "F2",
+      "question": "How do I raise a ticket?",
+      "product_area": "troubleshooting",
+      "expected_article_id": "KB-004"
+    },
+    {
+      "id": "F3",
+      "question": "What are the speed test rules?",
+      "product_area": "billing",
+      "expected_article_id": "KB-003"
+    }
+  ]
+}

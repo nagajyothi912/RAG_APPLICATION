@@ -1,12 +1,21 @@
 import DocumentItem from '../molecules/DocumentItem';
+import type { DocumentMetadata } from '../../services/api';
 
 type DocumentListProps = {
   documents: string[];
   indexedChunks: number;
+  metadata: DocumentMetadata[];
   onDelete: (name: string) => void;
 };
 
-export default function DocumentList({ documents, indexedChunks, onDelete }: DocumentListProps) {
+export default function DocumentList({
+  documents,
+  indexedChunks,
+  metadata,
+  onDelete,
+}: DocumentListProps) {
+  const byName = new Map(metadata.map((row) => [row.source_file, row]));
+
   return (
     <section className="indexed-documents">
       <header className="section-heading">
@@ -21,7 +30,13 @@ export default function DocumentList({ documents, indexedChunks, onDelete }: Doc
       ) : (
         <ul className="document-list">
           {documents.map((name) => (
-            <DocumentItem key={name} name={name} actionLabel="Delete" onRemove={onDelete} />
+            <DocumentItem
+              key={name}
+              name={name}
+              meta={byName.get(name)}
+              actionLabel="Delete"
+              onRemove={onDelete}
+            />
           ))}
         </ul>
       )}

@@ -25,6 +25,14 @@ npm run dev      # local UI
 npm run build    # typecheck + production bundle
 ```
 
+There is no linter and no test runner here. `npm run build` runs `tsc --noEmit` first, so it is the correctness gate.
+
 ## Layout
 
 Atomic Design under `src/components/`: atoms → molecules → organisms → templates → pages.
+
+## Features
+
+- **Citations.** `MessageBubble` renders every retrieved chunk under the answer with its `article_id`, `product_area`, section path, similarity score, and preview.
+- **Metadata filter.** The product-area dropdown beside Send restricts retrieval to one `product_area`; the list comes from `/api/documents`.
+- **Document metadata.** The indexed library shows each file's article ID, product area, chunk count, and last-updated date.
