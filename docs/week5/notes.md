@@ -334,14 +334,26 @@ in the direction that flatters me.
 
 ### 5.2 The commit
 
-
+```
+$ git log -1 --format='%H%n author %ad%n commit %cd%n %s' 4f78158
+4f78158f0b36f1fbeca5a6a1ada0fde4b60ae079
+ author Mon Sep 7 22:50:39 2026 +0530
+ commit Mon Sep 7 22:50:39 2026 +0530
+ week5: prediction for mode 1, dated 2026-09-07, before any fix
+```
 
 Hash **`4f78158`**, tagged `week5-prediction`. Author date and commit date agree;
 neither was back-dated.
 
 ### 5.3 Proof it predates any fix
 
+```
+$ git show --stat --name-only --format= 4f78158
+docs/week5/prediction.md
 
+$ git log --oneline 4f78158..HEAD -- backend/app backend/scripts frontend/src
+(no output)
+```
 
 The first shows the commit contained the prediction and nothing else, which is
 why it lives in its own file: a section of `notes.md` cannot be committed alone,
@@ -366,3 +378,92 @@ distribution chosen by someone else, while every mode here came out of twenty
 traces drawn from our own traffic mix, and mode 1's frequency is a direct function
 of a threshold that results.md section 5 already proves cannot separate answerable
 from out-of-scope on this corpus, which is a property no external score can observe.
+
+---
+
+## 7. Bonus — the curated demo set
+
+### 7.1 The seeded draw of 10
+
+```bash
+python scripts/sample_traces.py --seed 20260907 --n 20 --demo-n 10
+# stream "20260907:demo", independent of the random pool's stream
+```
+
+`TD-0002` `TD-0003` `TD-0004` `TD-0005` `TD-0006` `TD-0007` `TD-0009` `TD-0010`
+`TD-0011` `TD-0012` — that is, G02 through G12 of the 14 one-click questions the
+chat UI offers, run the way the UI runs them: scoped to the answering document,
+week4, top_k 5.
+
+### 7.2 Open coding, 10 sentences
+
+1. `TD-0002` — The five chunks returned were all from the plans article, the answer said the 599 pack includes neither a mesh extender nor an OTT bundle, and the citation was rendered as 【help_centre/airfiber_plans.md】.
+2. `TD-0003` — One chunk came back, and the answer gave the two retries, the 48 hours, the 5-day grace period, the 2 Mbps reduction and the suspension, in that order.
+3. `TD-0004` — One chunk came back and the answer said prepaid packs carry no late fee because the service expires, again citing in the 【】 bracket style.
+4. `TD-0005` — One chunk came back and the answer gave both the 7-day window and the three official speed tests the question asked for.
+5. `TD-0006` — One chunk came back and the answer said OTT add-on charges stop being refundable once the promo code is redeemed.
+6. `TD-0007` — All five troubleshooting chunks came back with the LED table first, and the answer gave the solid-red meaning, the sharp-bend check and the Line Fault ticket.
+7. `TD-0009` — Four installation chunks came back and the answer listed the photo ID, the power socket, the building-manager permission and the six-digit OTP.
+8. `TD-0010` — Four installation chunks came back and the answer gave the halfway placement, the one-metre height and the microwave warning.
+9. `TD-0011` — Five account chunks came back and the answer said downgrades take effect at the start of the next cycle with no pro-rata credit, citing in the 【】 bracket style.
+10. `TD-0012` — Five account chunks came back and the answer gave the 14-day window and both non-return charges, ₹2,500 and ₹1,500.
+
+Every one of the ten is correct and complete. The only mode that appears at all
+is mode 3, the bracket citation, in `TD-0002`, `TD-0004` and `TD-0011`.
+
+### 7.3 The top mode, in two numbers
+
+| | random sample | curated demo set |
+| --- | ---: | ---: |
+| Mode 1, refuses while the answering chunk is ranked first | **3/20 (15%)** | **0/10 (0%)** |
+| Any mode at all | 9/20 (45%) | 3/10 (30%) |
+| No defect seen | 11/20 (55%) | 7/10 (70%) |
+
+### 7.4 The control, and what it rules out
+
+I expected the demo set's cleanliness to come partly from the UI scoping each
+golden question to its own document, which removes every competing article
+including all nine legacy-plan chunks. So the same 14 questions were also run
+with the scoping removed, as `pool: demo_unscoped`, excluded from every draw.
+
+**It made no difference.** All ten unscoped runs answered correctly, and in all
+ten the correct chunk was still ranked first even with the whole corpus
+competing. The scoping is not what is holding the demo up.
+
+### 7.5 What the team has been telling itself
+
+The story we have been telling ourselves is that the assistant works, and the
+evidence for it is that the demo works. The control run above shows the demo is
+not propped up by the UI narrowing the search, which was my first guess and would
+have been the comfortable answer. The real reason is duller and harder to fix: the
+14 demo questions were written from the articles, by us, with the answer sentence
+in view, so each one is a paraphrase of a sentence that exists, aimed at a corpus
+where exactly one chunk contains it. Mode 1 cannot occur on a question like that,
+because mode 1 needs a query whose phrasing does not resemble its own answer — "how
+much is that?", "500" — and no question we would ever put in a demo looks like
+that. So the demo set is not a weak test of the assistant; it is a test of a
+different thing entirely, and it has been standing in for the real one for a month.
+The number that should worry us is not 15% versus 0%. It is that the 15% was
+invisible until somebody drew twenty traces at random and read them, and that
+nothing in our week ever would have.
+
+---
+
+## Appendix A. Traffic actually drawn
+
+| dimension | random pool (120) |
+| --- | --- |
+| mode | week4 94, week3 26 |
+| top_k | 5 → 81, 3 → 21, 8 → 13, 10 → 5 |
+| filters | none 100, document 10, product area 10 |
+| outcome | answered 136, refused 12, error 0 (all 148 traces) |
+
+## Appendix B. Every command, in order
+
+```bash
+cd backend
+python scripts/simulate_support_traffic.py --sleep 0.6
+python scripts/sample_traces.py --seed 20260907 --n 20 --demo-n 10 --markdown
+python scripts/replay_trace.py --from sample --pick-seed 20260907 --out ../docs/week5/replay.md
+python -m pytest tests/test_week5_deliverables.py -v
+```
