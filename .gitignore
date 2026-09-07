@@ -13,6 +13,10 @@ frontend/.vite/
 backend/data/docs/**
 !backend/data/docs/.gitkeep
 
+# Ad-hoc traces from a running server. The one curated Week 5 collection run
+# is committed under docs/week5/ instead, as the evidence the write-up cites.
+backend/data/traces/
+
 .DS_Store
 .idea/
 .vscode/

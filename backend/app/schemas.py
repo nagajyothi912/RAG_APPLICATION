@@ -61,6 +61,9 @@ class ChatResponse(BaseModel):
     sources: list[SourceChunk]
     mode: str = "week3"
     retrieval: RetrievalInfo = RetrievalInfo()
+    # Returned so a user reporting a bad answer can quote one string that finds
+    # the whole trace. Empty when tracing is off, which is the default.
+    trace_id: str = ""
 
 
 class GoldenQuestion(BaseModel):

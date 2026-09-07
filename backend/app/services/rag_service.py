@@ -29,14 +29,26 @@ Added for the Week 4 retrieval upgrade (not in the notebook):
 - RETRIEVAL_MODES: "week3" is the notebook path unchanged, "week4" adds
   the two stages above. Week 3 remains the default so the notebook
   behaviour, and every number in results.md, is still reproducible.
+
+Added for the Week 5 error analysis (not in the notebook):
+- the Groq prompt strings lifted out of answer_with_groq into module constants
+  with a PROMPT_ID derived from their hash, so a trace records which prompt
+  produced it and an edit cannot silently relabel old traces
+- an optional `capture` out-parameter on answer_with_groq that records the
+  rendered prompt, the model parameters and the raw output for a trace
+- per-request tracing emitted from ask() (see tracing.py). Off by default.
+  The generated request itself is unchanged.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
 import shutil
+import time
+import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, List, Optional, Sequence
@@ -48,6 +60,7 @@ from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
 
 from app.config import settings
+from app.services import tracing
 from app.services.chunking import DEFAULT_STRATEGY, STRATEGIES, chunk_document, chunk_fixed_text
 from app.services.retrieval import (
     BM25Index,
@@ -90,6 +103,30 @@ MMR_LAMBDA_DEFAULT = None
 # eval/gold_questions.json, which drives results.md - editing the UI list must
 # not move any number in the report.
 GOLDEN_SET_PATH = Path(__file__).resolve().parents[2] / "eval" / "golden_set.json"
+
+# The Groq prompt, lifted out of answer_with_groq so a trace can record which
+# prompt produced it. The strings are byte-identical to what the notebook port
+# has always sent.
+SYSTEM_PROMPT = (
+    "Answer ONLY using the provided context. Every answer must name "
+    "the source file it came from. If the context does not contain "
+    "the answer, say exactly: \"I don't know based on the provided "
+    "documents.\" Never use outside knowledge."
+)
+USER_PROMPT_TEMPLATE = "Context:\n{context}\n\nQuestion: {question}"
+MAX_TOKENS = 400
+
+# Two halves, because neither works alone. PROMPT_VERSION is hand-bumped and is
+# what groups traces into before/after cohorts - a bare hash gives no ordering
+# and no intent. PROMPT_SHA is derived, so the version cannot drift away from
+# the strings it names: edit either template and it changes, and the test
+# pinning the literal goes red. Both templates are hashed, because the user
+# prompt's framing is as much a prompt choice as the system message.
+PROMPT_VERSION = "v1"
+PROMPT_SHA = hashlib.sha256(
+    (SYSTEM_PROMPT + "\x00" + USER_PROMPT_TEMPLATE).encode("utf-8")
+).hexdigest()[:12]
+PROMPT_ID = f"{PROMPT_VERSION}-{PROMPT_SHA}"
 
 # Kept as a module-level name because the notebook and the existing tests import it.
 chunk_text = chunk_fixed_text
@@ -264,6 +301,7 @@ class VectorStore:
         self.chunks: List[Chunk] = []
         self.faiss_index = None
         self.bm25: BM25Index | None = None
+        self.fingerprint = tracing.corpus_fingerprint([])
 
     def _embed(self, texts):
         vecs = self.embedder.encode(texts, normalize_embeddings=True)
@@ -271,6 +309,12 @@ class VectorStore:
 
     def index(self, chunks: Sequence[Chunk]):
         self.chunks = list(chunks)
+        # One short hash naming exactly which chunks are indexed. A trace
+        # records it so a replay can tell "the corpus moved under me" from "the
+        # retriever changed" - chunk ids are positional, so a rechunk silently
+        # renumbers everything and a replay would otherwise produce a
+        # plausible-looking but meaningless diff.
+        self.fingerprint = tracing.corpus_fingerprint(self.chunks)
         if not chunks:
             self.faiss_index = None
             self.bm25 = None
@@ -457,6 +501,12 @@ def format_citation(chunk: Chunk) -> str:
     return "[" + ", ".join(bits) + "]"
 
 
+def _cap(capture: dict | None, **fields) -> None:
+    """One `if` when tracing is off, which is the common case."""
+    if capture is not None:
+        capture.update(fields)
+
+
 def answer_with_groq(
     client: OpenAI,
     model: str,
@@ -464,6 +514,8 @@ def answer_with_groq(
     results,
     gate_score: float | None = None,
     temperature: float | None = None,
+    *,
+    capture: dict | None = None,
 ) -> str:
     """
     `gate_score` exists because Week 4 reorders the results. A cross-encoder
@@ -478,38 +530,89 @@ def answer_with_groq(
     to 0 so re-running the report does not silently change the generation column
     - at the default temperature the same question produced a differently-worded
     answer on each run, which is enough to move the G tally between runs.
+
+    `capture` is the Week 5 tracing channel and is keyword-only. It is an
+    out-parameter rather than a richer return type because this function's
+    return value is compared against a bare refusal string by both evaluation
+    scripts and six tests; widening it would break every one of them. A plain
+    dict, not a dataclass, so this module needs no import from tracing.py.
+
+    The prompt fields are written into `capture` *before* the network call, so
+    a generation that fails still records the prompt that failed - which is the
+    trace you most want when a request 502s.
     """
+    _cap(
+        capture,
+        called=False,
+        prompt_id=PROMPT_ID,
+        prompt_version=PROMPT_VERSION,
+        prompt_sha256=PROMPT_SHA,
+        model=model,
+        refusal=None,
+    )
     if not results:
+        _cap(capture, refusal="gate")
         return "I don't know. That isn't covered in the documents I have."
     top_score = results[0][1] if gate_score is None else gate_score
     if top_score < SCORE_THRESHOLD:
+        _cap(capture, refusal="gate")
         return "I don't know. That isn't covered in the documents I have."
 
     context = "\n\n".join(f"{format_citation(c)}\n{c.text}" for c, score in results)
 
-    system = (
-        "Answer ONLY using the provided context. Every answer must name "
-        "the source file it came from. If the context does not contain "
-        "the answer, say exactly: \"I don't know based on the provided "
-        "documents.\" Never use outside knowledge."
+    system = SYSTEM_PROMPT
+    prompt = USER_PROMPT_TEMPLATE.format(context=context, question=question)
+    _cap(
+        capture,
+        called=True,
+        system_prompt=system,
+        user_prompt=prompt,
+        user_prompt_sha256=hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
+        context_chars=len(context),
+        params={"temperature": temperature, "max_tokens": MAX_TOKENS},
     )
-    prompt = f"Context:\n{context}\n\nQuestion: {question}"
+    started = time.perf_counter()
     response = client.chat.completions.create(
         model=model,
         messages=[
             {"role": "system", "content": system},
             {"role": "user", "content": prompt},
         ],
-        max_tokens=400,
+        max_tokens=MAX_TOKENS,
         **({} if temperature is None else {"temperature": temperature}),
     )
+    api_ms = (time.perf_counter() - started) * 1000
 
-    content = (response.choices[0].message.content or "").strip()
+    # Every read off the response is getattr-guarded. The suite's fake clients
+    # are minimal objects carrying only choices[0].message.content, and an
+    # AttributeError raised here would surface to the user as a 502 from ask().
+    choice = response.choices[0]
+    raw = getattr(getattr(choice, "message", None), "content", None)
+    usage_obj = getattr(response, "usage", None)
+    _cap(
+        capture,
+        # Deliberately the value *before* .strip(), so an all-whitespace answer
+        # is recorded as whitespace rather than as an empty string. Which of
+        # the two refusal layers fired is not recoverable otherwise.
+        raw_output=raw,
+        finish_reason=getattr(choice, "finish_reason", None),
+        usage=None
+        if usage_obj is None
+        else {
+            "prompt_tokens": getattr(usage_obj, "prompt_tokens", None),
+            "completion_tokens": getattr(usage_obj, "completion_tokens", None),
+            "total_tokens": getattr(usage_obj, "total_tokens", None),
+        },
+        api_latency_ms=api_ms,
+    )
+
+    content = (raw or "").strip()
     if not content:
         # Groq can return empty content - observed on weak, low-similarity context.
         # Passing that through would show the user a blank answer with citations
         # attached, which reads as a confident empty claim.
         logger.warning("LLM returned an empty answer for %r; falling back to refusal", question)
+        _cap(capture, refusal="empty_content")
         return "I don't know based on the provided documents."
     return content
 
@@ -744,12 +847,154 @@ class RagService:
             )
         ]
 
+    def trace_config(self) -> dict:
+        """Everything a replay needs in order to rebuild this index identically."""
+        reranker = get_reranker()
+        return {
+            "embed_model": EMBED_MODEL_NAME,
+            "chunk_strategy": self.strategy,
+            "chunk_size": self.chunk_size,
+            "chunk_overlap": self.overlap,
+            "top_k_default": self.top_k,
+            "score_threshold": SCORE_THRESHOLD,
+            "docs_dir": str(self.docs_dir),
+            "groq_base_url": settings.groq_base_url,
+            "groq_model": settings.groq_model,
+            "groq_temperature": settings.groq_temperature,
+            "rerank_model": getattr(reranker, "model_name", None),
+            "reranker_unavailable": bool(getattr(reranker, "unavailable", False)),
+            "candidate_multiplier": CANDIDATE_MULTIPLIER,
+            "min_candidates": MIN_CANDIDATES,
+            "mmr_lambda": MMR_LAMBDA_DEFAULT,
+            "hybrid_available": bool(self.store.bm25 and self.store.bm25.available),
+            "reranker_loaded": bool(getattr(reranker, "loaded", False)),
+            "prompt_id": PROMPT_ID,
+            "corpus": {
+                "documents": len({c.source for c in self.store.chunks}),
+                "chunks": len(self.store.chunks),
+                "sources": sorted({c.source for c in self.store.chunks}),
+                "fingerprint": self.store.fingerprint,
+            },
+        }
+
     def ask(
         self,
         question: str,
         top_k: int | None = None,
         filters: Optional[dict] = None,
         mode: str = WEEK3,
+        *,
+        trace_extra: Optional[dict] = None,
+    ) -> dict:
+        """
+        `trace_extra` is written straight onto the emitted trace record and is
+        used only by the Week 5 traffic simulator, to mark which pool a trace
+        came from. It has no effect on retrieval or generation.
+
+        Tracing is emitted from here rather than from the route because this is
+        the only scope where the question, every stage's score, the rendered
+        prompt, the raw model output and the answer all coexist. The route sees
+        only the returned dict, and route files in this app carry no RAG logic.
+        HTTP-level rejections - an empty message, an unresolvable source_file -
+        never reach here and are deliberately not traced: they are input
+        validation and carry no retrieval or generation to analyse.
+        """
+        trace_id = uuid.uuid4().hex
+        started_at = tracing.utc_now_iso()
+        t_start = time.perf_counter()
+        writer = tracing.get_trace_writer()
+        # Read once into a local: a mid-request toggle must not be able to
+        # produce a half-built record.
+        tracing_on = writer.enabled
+        capture: dict | None = {} if tracing_on else None
+
+        results: list = []
+        answer = ""
+        mode_effective = mode if mode in RETRIEVAL_MODES else WEEK3
+        gate_score = 0.0
+        reranked = False
+        failure: BaseException | None = None
+        t_retrieval_ms = 0.0
+        t_generation_ms = 0.0
+
+        try:
+            payload = self._ask_inner(
+                question, top_k, filters, mode_effective, capture, trace_id
+            )
+            results = payload["_results"]
+            answer = payload["answer"]
+            gate_score = payload["_gate_score"]
+            reranked = payload["retrieval"]["reranked"]
+            t_retrieval_ms = payload["_retrieval_ms"]
+            t_generation_ms = payload["_generation_ms"]
+            for key in ("_results", "_gate_score", "_retrieval_ms", "_generation_ms"):
+                payload.pop(key)
+            # Only when a record was actually written. Handing back an id
+            # that resolves to nothing is worse than handing back nothing.
+            payload["trace_id"] = trace_id if tracing_on else ""
+            return payload
+        except BaseException as exc:  # noqa: BLE001 - re-raised in the finally-free path below
+            failure = exc
+            raise
+        finally:
+            if tracing_on:
+                # A trace must never break a request. Record construction is
+                # inside the guard too: a None where a str was expected must not
+                # turn a good answer into a 500. Same degrade-rather-than-fail
+                # posture retrieval.py takes for BM25 and the cross-encoder.
+                try:
+                    refusal = (capture or {}).get("refusal")
+                    answer_source = (
+                        "none"
+                        if failure is not None
+                        else {"gate": "gate_refusal", "empty_content": "empty_fallback"}.get(
+                            refusal, "llm"
+                        )
+                    )
+                    writer.write(
+                        tracing.build_chat_record(
+                            trace_id=trace_id,
+                            started_at=started_at,
+                            finished_at=tracing.utc_now_iso(),
+                            question=question,
+                            mode_requested=mode,
+                            mode_effective=mode_effective,
+                            top_k_requested=top_k,
+                            top_k_effective=top_k or self.top_k,
+                            filters=filters,
+                            config=self.trace_config(),
+                            results=results,
+                            gate_score=gate_score,
+                            score_threshold=SCORE_THRESHOLD,
+                            hybrid=mode_effective == WEEK4
+                            and bool(self.store.bm25 and self.store.bm25.available),
+                            reranked=reranked,
+                            answer_text=answer,
+                            answer_source=answer_source,
+                            capture=capture,
+                            error=failure,
+                            latency_ms={
+                                "retrieval": t_retrieval_ms,
+                                "generation": t_generation_ms,
+                                "llm_api": (capture or {}).get("api_latency_ms"),
+                                "total": (time.perf_counter() - t_start) * 1000,
+                            },
+                            include_prompts=writer.include_prompts,
+                            pool=(trace_extra or {}).get("pool"),
+                            source_id=(trace_extra or {}).get("source_id"),
+                        )
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning("Failed to record trace %s: %s", trace_id, exc)
+
+    def _ask_inner(
+        self,
+        question: str,
+        top_k: int | None,
+        filters: Optional[dict],
+        mode: str,
+        capture: Optional[dict],
+        trace_id: str,
     ) -> dict:
         if self.store.faiss_index is None or len(self.store.chunks) == 0:
             raise NoDocumentsError(
@@ -759,9 +1004,12 @@ class RagService:
             raise RagGenerationError(
                 "GROQ_API_KEY is not set. Add it to backend/.env and restart the server."
             )
-        mode = mode if mode in RETRIEVAL_MODES else WEEK3
 
+        t0 = time.perf_counter()
         results = self.retrieve(question, top_k=top_k, filters=filters, mode=mode)
+        # Stopped before the logging loop below, which does five stderr writes
+        # that must not be charged to retrieval.
+        retrieval_ms = (time.perf_counter() - t0) * 1000
         logger.info("Q: %s (mode=%s, filters=%s)", question, mode, filters or {})
         for chunk, scored in results:
             preview = chunk.text.strip()[:80].replace("\n", " ")
@@ -783,12 +1031,21 @@ class RagService:
         gate_score = max((s.dense_score for _, s in results), default=0.0)
         llm_results = [(chunk, s.dense_score) for chunk, s in results]
 
+        t1 = time.perf_counter()
         try:
             answer = answer_with_groq(
-                self.client, settings.groq_model, question, llm_results, gate_score=gate_score
+                self.client,
+                settings.groq_model,
+                question,
+                llm_results,
+                gate_score=gate_score,
+                temperature=settings.groq_temperature,
+                capture=capture,
             )
         except Exception as exc:
             raise RagGenerationError(f"The language model failed to generate an answer: {exc}") from exc
+        finally:
+            generation_ms = (time.perf_counter() - t1) * 1000
 
         sources = [
             {
@@ -826,6 +1083,12 @@ class RagService:
                 "score_threshold": SCORE_THRESHOLD,
                 "refused": gate_score < SCORE_THRESHOLD,
             },
+            # Underscore keys are stripped by ask() before the dict reaches the
+            # route; they exist only to hand the trace what the response omits.
+            "_results": results,
+            "_gate_score": gate_score,
+            "_retrieval_ms": retrieval_ms,
+            "_generation_ms": generation_ms,
         }
 
     def delete_document(self, raw_name: str) -> dict:

@@ -1,6 +1,8 @@
+import json
 import os
 import tempfile
 import zlib
+from pathlib import Path
 
 import pytest
 
@@ -19,6 +21,13 @@ os.environ["CHUNK_SIZE"] = "1000"
 os.environ["CHUNK_OVERLAP"] = "100"
 os.environ["TOP_K"] = "5"
 os.environ["SCORE_THRESHOLD"] = "0.15"
+
+# Tracing must be off for the suite, and pointed somewhere harmless if a test
+# turns it on. Same reason DOCS_DIR is redirected above: a developer with
+# TRACE_ENABLED=true in backend/.env must not be able to make the test run
+# append to the real trace file.
+os.environ["TRACE_ENABLED"] = "false"
+os.environ["TRACE_PATH"] = str(Path(TMP_DOCS).parent / "rag-traces" / "test.jsonl")
 
 
 def _pdf_bytes(text: str) -> bytes:
@@ -66,3 +75,28 @@ def _pdf_bytes(text: str) -> bytes:
 @pytest.fixture(scope="session")
 def sample_pdf() -> bytes:
     return _pdf_bytes("AirFiber quarterly retrieval report")
+
+
+@pytest.fixture
+def traces(tmp_path, monkeypatch):
+    """
+    Tracing on, into a temp file, for the life of one test.
+
+    Monkeypatches the module-level writer rather than `settings`, which is how
+    this suite already handles `service.client`: it is explicit, monkeypatch
+    reverses it automatically, and it does not depend on settings-reload
+    semantics. Yields a reader returning the parsed records written so far.
+    """
+    from app.services import tracing
+
+    path = tmp_path / "traces.jsonl"
+    monkeypatch.setattr(tracing, "_writer", tracing.TraceWriter(path=path, enabled=True))
+
+    def read():
+        if not path.exists():
+            return []
+        return [json.loads(line) for line in path.read_text("utf-8").splitlines() if line.strip()]
+
+    read.path = path
+    yield read
+    monkeypatch.setattr(tracing, "_writer", None)

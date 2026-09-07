@@ -35,6 +35,8 @@ export type ChatResponse = {
   sources: SourceChunk[];
   mode: RetrievalMode;
   retrieval: RetrievalInfo;
+  /** Present only when backend tracing is on; empty string otherwise. */
+  trace_id?: string;
 };
 
 export type GoldenQuestion = {
