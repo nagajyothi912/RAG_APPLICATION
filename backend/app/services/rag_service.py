@@ -889,7 +889,9 @@ class RagService:
         """
         `trace_extra` is written straight onto the emitted trace record and is
         used only by the Week 5 traffic simulator, to mark which pool a trace
-        came from. It has no effect on retrieval or generation.
+        came from and to assign a readable trace id. It accepts `pool`,
+        `source_id` and `trace_id`, and has no effect on retrieval or
+        generation.
 
         Tracing is emitted from here rather than from the route because this is
         the only scope where the question, every stage's score, the rendered
@@ -899,7 +901,10 @@ class RagService:
         never reach here and are deliberately not traced: they are input
         validation and carry no retrieval or generation to analyse.
         """
-        trace_id = uuid.uuid4().hex
+        # A live request gets a uuid. The Week 5 traffic simulator passes a
+        # readable, stable id instead, because every trace id in the taxonomy
+        # and the open coding is quoted by a human reading the write-up.
+        trace_id = (trace_extra or {}).get("trace_id") or uuid.uuid4().hex
         started_at = tracing.utc_now_iso()
         t_start = time.perf_counter()
         writer = tracing.get_trace_writer()
