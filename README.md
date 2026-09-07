@@ -24,7 +24,7 @@ You need Python 3.11+ (**arm64 build on Apple Silicon**), Node.js 18+, and a Gro
 
 ## Corpus
 
-Six mock help-centre articles in [sample_documents/](sample_documents/). Every article carries YAML front-matter that becomes per-chunk metadata.
+Seven mock help-centre articles in [sample_documents/](sample_documents/). Every article carries YAML front-matter that becomes per-chunk metadata.
 
 | article_id | file | product_area | last_updated |
 | --- | --- | --- | --- |
@@ -34,6 +34,7 @@ Six mock help-centre articles in [sample_documents/](sample_documents/). Every a
 | KB-004 | `help_centre/troubleshooting_connectivity.md` | troubleshooting | 2026-08-10 |
 | KB-005 | `help_centre/installation_setup.md` | installation | 2026-06-20 |
 | KB-006 | `policies/account_management.md` | account | 2026-07-28 |
+| KB-007 | `help_centre/airfiber_legacy_plans.md` | plans | 2026-08-22 |
 
 KB-004 contains three troubleshooting tables (LED status, error codes, slow-speed diagnosis). Documents without front-matter still get metadata: `product_area` falls back to the top-level folder and `article_id` to the file stem, so uploaded PDFs stay filterable and citable.
 
@@ -65,6 +66,32 @@ cd backend && python scripts/evaluate_week4.py        # results.md sections 9-15
 - Section 5 pastes real transcripts: three cited answers and all three refusals, verbatim at temperature 0. Two different refusal strings appear, and the difference is the point. "How do I reset my Netflix password?" scores 0.310, clears the threshold, reaches Groq, and is refused by the system prompt alone.
 - **MMR was measured and not shipped.** At the tuned lambda hit-rate@3 does not move and neither does the diversity number a person would notice; only mean pairwise cosine shifts, which is MMR reordering chunks of the same document. Push lambda far enough to change what the reader sees and it evicts the answer from the top-3 on two questions. Each golden question has exactly one correct chunk, so variety is neutral at best.
 - Grading a generated answer by substring match reported 7 false generation failures out of 12 — `₹2,500` against `2500`, a Unicode hyphen in `5‑day`. Every one of those answers was correct.
+
+## Error analysis (Week 5)
+
+The app writes a complete trace of every `/api/chat` request when `TRACE_ENABLED=true`:
+the question, the configuration the index was built under, every retrieved chunk with
+each stage's score, the rendered prompt, the model and its parameters, and the raw
+output. Off by default. Enough to replay an answer offline, which is the point.
+
+```bash
+cd backend
+python scripts/simulate_support_traffic.py                # 148 traces -> docs/week5/traces.jsonl
+python scripts/sample_traces.py --seed 20260907 --markdown  # seeded draw of 20 + 10
+python scripts/replay_trace.py --from sample --pick-seed 20260907   # original vs replayed
+```
+
+Deliverables: [docs/week5/taxonomy.md](docs/week5/taxonomy.md) (5 named failure modes over
+20 randomly sampled traces) and [docs/week5/notes.md](docs/week5/notes.md) (the verbatim
+open coding, the replay evidence, the dated prediction and the demo-set comparison).
+
+Headline: the largest mode, **refuses while the chunk that answers it is ranked first**,
+is 3/20 (15%) in the random sample and 0/10 in the curated demo set. The prediction
+targeting it is committed at `4f78158`, dated 2026-09-07, before any fix.
+
+**`results.md` is generated and must never be hand-edited. `docs/week5/*.md` are
+hand-written analysis and must never be regenerated.** The two are opposite in exactly
+the way that invites getting it backwards.
 
 ## Environment
 
