@@ -27,49 +27,51 @@ Two hit rates are reported. **Article Hit@k** asks only whether a chunk from the
 
 ## 1. Chunking strategy comparison
 
-Same 6 articles, same embedding model, one index per configuration.
+Same 7 articles, same embedding model, one index per configuration.
 
 ### Top-3
 
 | Strategy / size / overlap | Chunks | Avg chars | Article Hit@3 | Answer Hit@1 | Answer Hit@3 | MRR | Table Answer Hit@3 | Citation accuracy |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `fixed/150/15` | 86 | 142 | 100% | 62% | 62% | 0.625 | 67% | 62% |
-| `fixed/500/50` | 28 | 432 | 100% | 88% | 100% | 0.938 | 100% | 88% |
-| `fixed/500/125` | 33 | 427 | 100% | 88% | 100% | 0.917 | 100% | 88% |
-| `fixed/1200/120` | 14 | 848 | 100% | 75% | 100% | 0.875 | 100% | 75% |
-| `recursive/500/50` | 34 | 364 | 100% | 88% | 100% | 0.938 | 100% | 88% |
-| `recursive/800/80` | 19 | 634 | 100% | 88% | 100% | 0.938 | 100% | 88% |
-| `heading/500/50` | 42 | 307 | 100% | 75% | 100% | 0.854 | 100% | 75% |
-| `heading/800/80` | 33 | 368 | 100% | 88% | 100% | 0.938 | 100% | 88% |
-| `heading/1000/100` | 30 | 391 | 100% | 100% | 100% | 1.000 | 100% | 100% |
+| `fixed/150/15` | 86 | 142 | 8/8 (100%) | 5/8 (62%) | 5/8 (62%) | 0.625 | 2/3 (67%) | 5/8 (62%) |
+| `fixed/500/50` | 28 | 432 | 8/8 (100%) | 7/8 (88%) | 8/8 (100%) | 0.938 | 3/3 (100%) | 7/8 (88%) |
+| `fixed/500/125` | 33 | 427 | 8/8 (100%) | 7/8 (88%) | 8/8 (100%) | 0.917 | 3/3 (100%) | 7/8 (88%) |
+| `fixed/1200/120` | 14 | 848 | 8/8 (100%) | 6/8 (75%) | 8/8 (100%) | 0.875 | 3/3 (100%) | 6/8 (75%) |
+| `recursive/500/50` | 34 | 364 | 8/8 (100%) | 7/8 (88%) | 8/8 (100%) | 0.938 | 3/3 (100%) | 7/8 (88%) |
+| `recursive/800/80` | 19 | 634 | 8/8 (100%) | 7/8 (88%) | 8/8 (100%) | 0.938 | 3/3 (100%) | 7/8 (88%) |
+| `heading/500/50` | 42 | 307 | 8/8 (100%) | 6/8 (75%) | 8/8 (100%) | 0.854 | 3/3 (100%) | 6/8 (75%) |
+| `heading/800/80` | 33 | 368 | 8/8 (100%) | 7/8 (88%) | 8/8 (100%) | 0.938 | 3/3 (100%) | 7/8 (88%) |
+| `heading/1000/100` | 30 | 391 | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | 1.000 | 3/3 (100%) | 8/8 (100%) |
 
 ### Top-5
 
 | Strategy / size / overlap | Chunks | Avg chars | Article Hit@5 | Answer Hit@1 | Answer Hit@5 | MRR | Table Answer Hit@5 | Citation accuracy |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `fixed/150/15` | 86 | 142 | 100% | 62% | 88% | 0.688 | 67% | 62% |
-| `fixed/500/50` | 28 | 432 | 100% | 88% | 100% | 0.938 | 100% | 88% |
-| `fixed/500/125` | 33 | 427 | 100% | 88% | 100% | 0.917 | 100% | 88% |
-| `fixed/1200/120` | 14 | 848 | 100% | 75% | 100% | 0.875 | 100% | 75% |
-| `recursive/500/50` | 34 | 364 | 100% | 88% | 100% | 0.938 | 100% | 88% |
-| `recursive/800/80` | 19 | 634 | 100% | 88% | 100% | 0.938 | 100% | 88% |
-| `heading/500/50` | 42 | 307 | 100% | 75% | 100% | 0.854 | 100% | 75% |
-| `heading/800/80` | 33 | 368 | 100% | 88% | 100% | 0.938 | 100% | 88% |
-| `heading/1000/100` | 30 | 391 | 100% | 100% | 100% | 1.000 | 100% | 100% |
+| `fixed/150/15` | 86 | 142 | 8/8 (100%) | 5/8 (62%) | 7/8 (88%) | 0.688 | 2/3 (67%) | 5/8 (62%) |
+| `fixed/500/50` | 28 | 432 | 8/8 (100%) | 7/8 (88%) | 8/8 (100%) | 0.938 | 3/3 (100%) | 7/8 (88%) |
+| `fixed/500/125` | 33 | 427 | 8/8 (100%) | 7/8 (88%) | 8/8 (100%) | 0.917 | 3/3 (100%) | 7/8 (88%) |
+| `fixed/1200/120` | 14 | 848 | 8/8 (100%) | 6/8 (75%) | 8/8 (100%) | 0.875 | 3/3 (100%) | 6/8 (75%) |
+| `recursive/500/50` | 34 | 364 | 8/8 (100%) | 7/8 (88%) | 8/8 (100%) | 0.938 | 3/3 (100%) | 7/8 (88%) |
+| `recursive/800/80` | 19 | 634 | 8/8 (100%) | 7/8 (88%) | 8/8 (100%) | 0.938 | 3/3 (100%) | 7/8 (88%) |
+| `heading/500/50` | 42 | 307 | 8/8 (100%) | 6/8 (75%) | 8/8 (100%) | 0.854 | 3/3 (100%) | 6/8 (75%) |
+| `heading/800/80` | 33 | 368 | 8/8 (100%) | 7/8 (88%) | 8/8 (100%) | 0.938 | 3/3 (100%) | 7/8 (88%) |
+| `heading/1000/100` | 30 | 391 | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | 1.000 | 3/3 (100%) | 8/8 (100%) |
 
 ## 2. Top-3 vs Top-5
 
+Both hit rates are counted over the same 8 known-answer questions in every row. The assignment asks for hit-in-top-5 as a number out of 8, and that is the left-hand figure in each cell.
+
 | Strategy / size / overlap | Article Hit@3 | Article Hit@5 | Answer Hit@3 | Answer Hit@5 | Answer gain |
 | --- | --- | --- | --- | --- | --- |
-| `fixed/150/15` | 100% | 100% | 62% | 88% | 25% |
-| `fixed/500/50` | 100% | 100% | 100% | 100% | 0% |
-| `fixed/500/125` | 100% | 100% | 100% | 100% | 0% |
-| `fixed/1200/120` | 100% | 100% | 100% | 100% | 0% |
-| `recursive/500/50` | 100% | 100% | 100% | 100% | 0% |
-| `recursive/800/80` | 100% | 100% | 100% | 100% | 0% |
-| `heading/500/50` | 100% | 100% | 100% | 100% | 0% |
-| `heading/800/80` | 100% | 100% | 100% | 100% | 0% |
-| `heading/1000/100` | 100% | 100% | 100% | 100% | 0% |
+| `fixed/150/15` | 8/8 (100%) | 8/8 (100%) | 5/8 (62%) | 7/8 (88%) | +2 questions |
+| `fixed/500/50` | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | +0 questions |
+| `fixed/500/125` | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | +0 questions |
+| `fixed/1200/120` | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | +0 questions |
+| `recursive/500/50` | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | +0 questions |
+| `recursive/800/80` | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | +0 questions |
+| `heading/500/50` | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | +0 questions |
+| `heading/800/80` | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | +0 questions |
+| `heading/1000/100` | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | 8/8 (100%) | +0 questions |
 
 ## 3. Per-question detail (best configuration, Top-5)
 
@@ -98,7 +100,140 @@ Filter applied on `product_area`. Comparison run on the best configuration (`hea
 
 Filtering changed the returned ranking in 3 of 3 cases, and moved the expected article into the result set in 2 case(s) where the unfiltered search missed it.
 
-## 5. Refusal behaviour
+### Full result lists, unfiltered vs filtered
+
+Both complete Top-5 lists with their cosine scores, so the change in ranking can be read rather than taken on trust. The filter is exact: `VectorStore.search` widens the FAISS search to the whole corpus and applies the filter to the ranked list, so a matching chunk is never lost to a fixed candidate window.
+
+**F1 - What is the 500 rupee charge for?**  (filter `product_area = installation`, expected KB-005)
+
+| # | Unfiltered | Score | Area | Filtered | Score | Area |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | `policies/account_management.md` #4 (KB-006) | 0.230 | account | `help_centre/installation_setup.md` #0 (KB-005) | 0.186 | installation |
+| 2 | `help_centre/airfiber_legacy_plans.md` #4 (KB-007) | 0.219 | plans | `help_centre/installation_setup.md` #1 (KB-005) | 0.173 | installation |
+| 3 | `help_centre/airfiber_legacy_plans.md` #3 (KB-007) | 0.196 | plans | `help_centre/installation_setup.md` #3 (KB-005) | -0.009 | installation |
+| 4 | `help_centre/airfiber_plans.md` #3 (KB-001) | 0.192 | plans | `help_centre/installation_setup.md` #2 (KB-005) | -0.111 | installation |
+| 5 | `policies/account_management.md` #1 (KB-006) | 0.191 | account | - | - | - |
+
+Top-1 moved from `policies/account_management.md` (0.230) to `help_centre/installation_setup.md` (0.186), a drop of 0.045. Filtering always lowers the top score: it removes higher-scoring chunks from other product areas rather than promoting anything, which is why a threshold tuned on unfiltered retrieval refuses filtered queries.
+
+**F2 - How do I raise a ticket?**  (filter `product_area = troubleshooting`, expected KB-004)
+
+| # | Unfiltered | Score | Area | Filtered | Score | Area |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | `help_centre/billing_faq.md` #0 (KB-002) | 0.187 | billing | `help_centre/troubleshooting_connectivity.md` #1 (KB-004) | 0.095 | troubleshooting |
+| 2 | `policies/refund_policy.txt` #0 (KB-003) | 0.186 | billing | `help_centre/troubleshooting_connectivity.md` #3 (KB-004) | 0.084 | troubleshooting |
+| 3 | `policies/account_management.md` #4 (KB-006) | 0.180 | account | `help_centre/troubleshooting_connectivity.md` #2 (KB-004) | 0.044 | troubleshooting |
+| 4 | `policies/account_management.md` #1 (KB-006) | 0.152 | account | `help_centre/troubleshooting_connectivity.md` #4 (KB-004) | 0.025 | troubleshooting |
+| 5 | `help_centre/airfiber_plans.md` #1 (KB-001) | 0.147 | plans | `help_centre/troubleshooting_connectivity.md` #0 (KB-004) | -0.061 | troubleshooting |
+
+Top-1 moved from `help_centre/billing_faq.md` (0.187) to `help_centre/troubleshooting_connectivity.md` (0.095), a drop of 0.092. Filtering always lowers the top score: it removes higher-scoring chunks from other product areas rather than promoting anything, which is why a threshold tuned on unfiltered retrieval refuses filtered queries.
+
+**F3 - What are the speed test rules?**  (filter `product_area = billing`, expected KB-003)
+
+| # | Unfiltered | Score | Area | Filtered | Score | Area |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | `help_centre/troubleshooting_connectivity.md` #4 (KB-004) | 0.553 | troubleshooting | `policies/refund_policy.txt` #0 (KB-003) | 0.305 | billing |
+| 2 | `help_centre/troubleshooting_connectivity.md` #3 (KB-004) | 0.403 | troubleshooting | `help_centre/billing_faq.md` #0 (KB-002) | 0.063 | billing |
+| 3 | `policies/refund_policy.txt` #0 (KB-003) | 0.305 | billing | - | - | - |
+| 4 | `help_centre/airfiber_legacy_plans.md` #7 (KB-007) | 0.235 | plans | - | - | - |
+| 5 | `help_centre/airfiber_plans.md` #4 (KB-001) | 0.218 | plans | - | - | - |
+
+Top-1 moved from `help_centre/troubleshooting_connectivity.md` (0.553) to `policies/refund_policy.txt` (0.305), a drop of 0.248. Filtering always lowers the top score: it removes higher-scoring chunks from other product areas rather than promoting anything, which is why a threshold tuned on unfiltered retrieval refuses filtered queries.
+
+## 5. Grounded generation and refusal behaviour
+
+### Cited answers (3 answerable questions)
+
+Generated through the shipped path - `VectorStore.search` at Top-5, then `answer_with_groq` against `openai/gpt-oss-120b` at temperature 0. The answers are verbatim. Under each one is every chunk that was put in the context window, so a cited `chunk_id` can be resolved against the index and read.
+
+**Q1 - What are the benefits of the AirFiber_1199_1M plan?**  (expected KB-001)
+
+```text
+**Benefits of the AirFiber_1199_1M plan:**  
+- 200 Mbps unlimited download and upload speed  
+- Unlimited data with no fair‑usage cap  
+- Complimentary AirFiber mesh extender  
+- Free installation within 48 hours of payment  
+- 24/7 priority support on chat, phone, and email  
+- OTT bundle: Disney+ Hotstar, SonyLIV, and Amazon Prime Video for 1 month  
+- Static IP available on request at no extra charge  
+- No traffic shaping between 12:00 AM and 6:00 AM  
+
+*Source: help_centre/airfiber_plans.md*
+```
+
+| Rank | chunk_id | Citation | Score | Contains the gold answer |
+| --- | --- | --- | --- | --- |
+| 1 | `help_centre/airfiber_plans.md#1` | `[Source: help_centre/airfiber_plans.md, article_id: KB-001, section: AirFiber broadband plans > AirFiber_1199_1M plan, chunk #1]` | 0.615 | yes |
+| 2 | `help_centre/airfiber_legacy_plans.md#3` | `[Source: help_centre/airfiber_legacy_plans.md, article_id: KB-007, section: Legacy and regional AirFiber plans > AirFiber_1199_3M plan, chunk #3]` | 0.601 | no |
+| 3 | `help_centre/airfiber_plans.md#2` | `[Source: help_centre/airfiber_plans.md, article_id: KB-001, section: AirFiber broadband plans > AirFiber_599_1M plan, chunk #2]` | 0.590 | no |
+| 4 | `help_centre/airfiber_plans.md#3` | `[Source: help_centre/airfiber_plans.md, article_id: KB-001, section: AirFiber broadband plans > AirFiber_1999_3M plan, chunk #3]` | 0.574 | no |
+| 5 | `help_centre/airfiber_legacy_plans.md#1` | `[Source: help_centre/airfiber_legacy_plans.md, article_id: KB-007, section: Legacy and regional AirFiber plans > AirFiber_1099_1M plan, chunk #1]` | 0.555 | no |
+
+Answer-bearing chunk in the context: `help_centre/airfiber_plans.md#1`. Every citation above names a chunk_id that exists in the index at `heading/1000/100` and the article it came from.
+
+**Q2 - What does a blinking red LED on the AirFiber ONT mean?**  (expected KB-004)
+
+```text
+A blinking red LED indicates that a fiber cut has been detected between your home and the exchange. You should raise a Line Fault ticket so a field engineer can be dispatched.  
+
+**Source:** help_centre/troubleshooting_connectivity.md (KB‑004, “Router LED status reference”).
+```
+
+| Rank | chunk_id | Citation | Score | Contains the gold answer |
+| --- | --- | --- | --- | --- |
+| 1 | `help_centre/troubleshooting_connectivity.md#1` | `[Source: help_centre/troubleshooting_connectivity.md, article_id: KB-004, section: Troubleshooting AirFiber connectivity > Router LED status reference, chunk #1]` | 0.540 | yes |
+| 2 | `help_centre/installation_setup.md#2` | `[Source: help_centre/installation_setup.md, article_id: KB-005, section: Installation and first-time setup > First-time setup, chunk #2]` | 0.363 | no |
+| 3 | `help_centre/troubleshooting_connectivity.md#0` | `[Source: help_centre/troubleshooting_connectivity.md, article_id: KB-004, section: Troubleshooting AirFiber connectivity, chunk #0]` | 0.352 | no |
+| 4 | `help_centre/troubleshooting_connectivity.md#2` | `[Source: help_centre/troubleshooting_connectivity.md, article_id: KB-004, section: Troubleshooting AirFiber connectivity > Error codes, chunk #2]` | 0.338 | no |
+| 5 | `help_centre/troubleshooting_connectivity.md#3` | `[Source: help_centre/troubleshooting_connectivity.md, article_id: KB-004, section: Troubleshooting AirFiber connectivity > Slow speed diagnosis, chunk #3]` | 0.329 | no |
+
+Answer-bearing chunk in the context: `help_centre/troubleshooting_connectivity.md#1`. Every citation above names a chunk_id that exists in the index at `heading/1000/100` and the article it came from.
+
+**Q3 - What should I do about error code AF-503?**  (expected KB-004)
+
+```text
+**Resolution for error code AF‑503**  
+- The exchange port is oversubscribed. You should **wait 15 minutes and retry**. If the problem continues, **request a port reallocation from support**. If it still persists after an hour, you should consider escalating the issue.  
+
+*Source: help_centre/troubleshooting_connectivity.md (article KB‑004, “Troubleshooting AirFiber connectivity > Error codes”).*
+```
+
+| Rank | chunk_id | Citation | Score | Contains the gold answer |
+| --- | --- | --- | --- | --- |
+| 1 | `help_centre/troubleshooting_connectivity.md#2` | `[Source: help_centre/troubleshooting_connectivity.md, article_id: KB-004, section: Troubleshooting AirFiber connectivity > Error codes, chunk #2]` | 0.507 | yes |
+| 2 | `help_centre/troubleshooting_connectivity.md#1` | `[Source: help_centre/troubleshooting_connectivity.md, article_id: KB-004, section: Troubleshooting AirFiber connectivity > Router LED status reference, chunk #1]` | 0.305 | no |
+| 3 | `help_centre/troubleshooting_connectivity.md#0` | `[Source: help_centre/troubleshooting_connectivity.md, article_id: KB-004, section: Troubleshooting AirFiber connectivity, chunk #0]` | 0.275 | no |
+| 4 | `help_centre/troubleshooting_connectivity.md#3` | `[Source: help_centre/troubleshooting_connectivity.md, article_id: KB-004, section: Troubleshooting AirFiber connectivity > Slow speed diagnosis, chunk #3]` | 0.242 | no |
+| 5 | `policies/account_management.md#4` | `[Source: policies/account_management.md, article_id: KB-006, section: Account and plan management > Closing the account, chunk #4]` | 0.221 | no |
+
+Answer-bearing chunk in the context: `help_centre/troubleshooting_connectivity.md#2`. Every citation above names a chunk_id that exists in the index at `heading/1000/100` and the article it came from.
+
+### Refusal transcripts (3 out-of-corpus questions)
+
+Verbatim. Two different refusal strings appear, and the difference matters: `I don't know. That isn't covered in the documents I have.` is the pre-LLM gate in `answer_with_groq` firing below `SCORE_THRESHOLD = 0.15` and costs no API call, while `I don't know based on the provided documents.` is the system prompt refusing after the model has read the context. A question that clears the threshold can only be refused by the second, which is why the prompt-level layer is load-bearing rather than redundant.
+
+**O1 - What is the capital of Mongolia?**  (top-1 cosine 0.060, refused by the pre-LLM gate (no Groq call))
+
+```text
+I don't know. That isn't covered in the documents I have.
+```
+
+**O2 - Who won the 2022 FIFA World Cup?**  (top-1 cosine 0.072, refused by the pre-LLM gate (no Groq call))
+
+```text
+I don't know. That isn't covered in the documents I have.
+```
+
+**O3 - How do I reset my Netflix password?**  (top-1 cosine 0.310, refused by the system prompt, after a Groq call)
+
+```text
+I don't know based on the provided documents.
+```
+
+3 of 3 out-of-corpus questions were refused rather than answered from model knowledge; 2 never reached Groq at all.
+
+### Refusal scores
 
 Out-of-scope questions. A question is refused before any LLM call when the best similarity is below `0.15`.
 
@@ -163,12 +298,40 @@ Failures across every configuration, to show which are systematic rather than ar
 | `heading/800/80` | none | none | Q2 |
 | `heading/1000/100` | none | none | none |
 
+### The retrieval that embarrassed us
+
+**Q2 - What does a blinking red LED on the AirFiber ONT mean?** (expected KB-004), under `fixed/150/15`.
+
+It fails in 7 of 9 configurations and is the most persistent failure in the sweep, which is what makes it a diagnosis rather than an anecdote.
+
+| Rank | Chunk | Score | Contains the answer |
+| --- | --- | --- | --- |
+| 1 | `help_centre/troubleshooting_connectivity.md` #1 | 0.576 | no |
+| 2 | `help_centre/installation_setup.md` #6 | 0.459 | no |
+| 3 | `help_centre/troubleshooting_connectivity.md` #7 | 0.450 | no |
+| 4 | `help_centre/troubleshooting_connectivity.md` #6 | 0.422 | no |
+| 5 | `help_centre/troubleshooting_connectivity.md` #3 | 0.422 | no |
+
+**Diagnosis.** The chunk at rank 1 scores 0.576 and does not contain the answer; the chunk that does is at rank nowhere in the top-5. No chunk in the top-5 carries it at all, so the answer is not merely out-ranked - the chunk boundary at `fixed/150/15` cut it away from the text that makes it findable. The app would cite a source that does not support the claim, or refuse a question the corpus answers.
+
+Under `heading/1000/100` the same question returns the answer-bearing chunk at rank 1:
+
+| Rank | Chunk | Score | Contains the answer |
+| --- | --- | --- | --- |
+| 1 | `help_centre/troubleshooting_connectivity.md` #1 - Troubleshooting AirFiber connectivity > Router LED status reference | 0.540 | yes |
+| 2 | `help_centre/installation_setup.md` #2 - Installation and first-time setup > First-time setup | 0.363 | no |
+| 3 | `help_centre/troubleshooting_connectivity.md` #0 - Troubleshooting AirFiber connectivity | 0.352 | no |
+| 4 | `help_centre/troubleshooting_connectivity.md` #2 - Troubleshooting AirFiber connectivity > Error codes | 0.338 | no |
+| 5 | `help_centre/troubleshooting_connectivity.md` #3 - Troubleshooting AirFiber connectivity > Slow speed diagnosis | 0.329 | no |
+
+The lesson generalises past this one question: the embedding is computed over the whole chunk, so a chunk that is mostly the *subject* of a question out-scores the smaller chunk that holds the *answer*. Chunk boundaries are a retrieval parameter, not a formatting one.
+
 ## 7. Observations
 
 - `fixed` chunking averages 92% Answer Hit@5 on the three table-answered questions across its 4 configurations.
 - `heading` chunking averages 100% Answer Hit@5 on the three table-answered questions across its 3 configurations.
 - `recursive` chunking averages 100% Answer Hit@5 on the three table-answered questions across its 2 configurations.
-- Article-level Hit@5 averages 100% across all 9 configurations and is effectively saturated, while Answer-level Hit@5 averages 99% and spreads from 88% to 100%. With a six-article corpus, article-level hit rate cannot tell two chunking strategies apart; only the chunk-level metric can.
+- Article-level Hit@5 averages 100% across all 9 configurations and is effectively saturated, while Answer-level Hit@5 averages 99% and spreads from 88% to 100%. With a 7-article corpus, article-level hit rate cannot tell two chunking strategies apart; only the chunk-level metric can.
 - Chunk size drives the result far more than overlap: fixed/150 produces 86 chunks at Answer Hit@5 88% (small chunks fragment the answer), while fixed/1200 produces 14 chunks at Answer Hit@5 100% (large chunks dilute the embedding).
 - Raising overlap from 50 to 125 at chunk size 500 leaves unchanged Answer Hit@5 (100% -> 100%) while adding 5 chunks to the index. Overlap buys recovery of answers that straddle a boundary, at a proportional cost in index size.
 - Moving from Top-3 to Top-5 changes Answer Hit rate by 3% on average across configurations, at the cost of a longer prompt and more tokens per answer.
@@ -192,6 +355,50 @@ CHUNK_STRATEGY=heading
 CHUNK_SIZE=1000
 CHUNK_OVERLAP=100
 TOP_K=5
+```
+
+### Ingest scope
+
+Only the 7 help-centre articles under `sample_documents/` are indexed. No historical corpus was re-indexed for this report, and there is none to re-index: the index is in-memory and rebuilt from the files on disk at startup, so `DOCS_DIR` is the whole corpus by definition. Each configuration in section 1 is a fresh index over those same 7 articles - 9 indexes over one document set, not 9 document sets.
+
+### Code diff
+
+Two changes carry this report: a structure-aware chunker that never separates a table row from its header, and the four metadata fields every chunk must carry. Both live behind the same `build_chunks` entry point the notebook used, so nothing above the chunker changed.
+
+```diff
+  # backend/app/services/chunking.py - the structure-aware strategy
++ def chunk_by_heading(text, chunk_size, overlap):
++     """Split on markdown headings first, then pack sections up to chunk_size.
++
++     A markdown table is a run of lines that must stay together: the header row
++     names the columns the answer row depends on. Sections are therefore packed
++     whole and only split when a single section exceeds chunk_size, which is why
++     chunk_size has to exceed the largest table (740 chars in KB-004).
++     """
++     sections = split_on_headings(text)
++     return pack_sections(sections, chunk_size, overlap)
+
+  # backend/app/services/rag_service.py - strategy selection
+- def build_chunks(docs_dir, chunk_size, overlap):
+-     return chunk_fixed_text(load_documents(docs_dir), chunk_size, overlap)
++ def build_chunks(docs_dir, chunk_size, overlap, strategy=settings.chunk_strategy):
++     splitter = {"fixed": chunk_fixed_text,
++                 "recursive": chunk_recursive,
++                 "heading": chunk_by_heading}[strategy]
++     return splitter(load_documents(docs_dir), chunk_size, overlap)
+
+  # backend/app/services/rag_service.py - metadata on every chunk
++ METADATA_FIELDS = ("source_file", "article_id", "product_area", "last_updated")
++
++ def derive_metadata(path, docs_dir, front_matter):
++     # A chunk with no source_file is a failed ingest, so nothing is left to
++     # chance: front-matter wins, then the folder name, then the file stem.
++     return {
++         "source_file": relative_path(path, docs_dir),
++         "article_id": front_matter.get("article_id") or path.stem,
++         "product_area": front_matter.get("product_area") or top_level_folder(path),
++         "last_updated": front_matter.get("last_updated") or "unknown",
++     }
 ```
 
 <!-- week4:start -->
@@ -223,7 +430,7 @@ Chunk ids are stable for the shipped configuration `heading/1000/100` (30 chunks
 
 Dense cosine over FAISS, top 3, no filter - `VectorStore.search`, the exact code that produced sections 1-8.
 
-**Baseline hit-rate@3 = 11/12 = 91.7%.** p50 retrieval latency = 7.9 ms.
+**Baseline hit-rate@3 = 11/12 = 91.7%.** p50 retrieval latency = 8.4 ms.
 
 Hit-rate@3 does move on this corpus, which it did not before KB-007 (`airfiber_legacy_plans.md`) was added. That article introduces six further plan packs whose descriptions differ from the retail ones mainly in a numeric identifier, and it is what turns a top-3 window - 3 of 30 chunks, 10% of the corpus - into a real constraint rather than a formality. Even so, one miss out of 12 is a coarse signal: a single question is 8.3 percentage points, so @3 alone cannot rank two retrievers with any confidence.
 
@@ -263,7 +470,7 @@ It is the failure mode section 5 predicted. `engineer is coming tomorrow, what s
 | Class | Count | Evidence source |
 | --- | --- | --- |
 | R (retrieval) | 1 | rank of the labelled chunk in the full dense ranking |
-| G (generation) | 0 | live Groq call per question; 7 graded by exact gold-fact match, 5 escalated to an LLM judge |
+| G (generation) | 0 | live Groq call per question; 6 graded by exact gold-fact match, 6 escalated to an LLM judge |
 | Gate (refusal threshold) | 1 | answer equals the pre-LLM refusal string while the labelled chunk is already in the top 3 |
 | Not-In-Corpus | 0 | gold labels re-verified against the index at startup |
 | Passed | 10 | - |
@@ -295,10 +502,10 @@ Each arm differs from the baseline by exactly one retrieval variable. Embedding 
 
 | Arm | Retrieval | Change vs baseline | Hit@3 | Hit@1 | MRR | p50 latency |
 | --- | --- | --- | --- | --- | --- | --- |
-| A. Baseline (Week 3) | dense | none - dense cosine over FAISS | 91.7% | 66.7% | 0.788 | 7.9 ms |
-| B. BM25 + RRF | dense + BM25/RRF | **one change:** adds a lexical retriever, fused by reciprocal rank fusion | 91.7% | 75.0% | 0.819 | 8.2 ms |
-| C. Cross-encoder rerank | dense + cross-encoder | **one change:** rescores the dense candidate pool with a cross-encoder | 91.7% | 66.7% | 0.785 | 162.0 ms |
-| A+B+C. Stacked (current `week4` mode) | dense + BM25/RRF + cross-encoder | _two_ changes - not eligible as the single improvement | 91.7% | 66.7% | 0.785 | 168.2 ms |
+| A. Baseline (Week 3) | dense | none - dense cosine over FAISS | 91.7% | 66.7% | 0.788 | 8.4 ms |
+| B. BM25 + RRF | dense + BM25/RRF | **one change:** adds a lexical retriever, fused by reciprocal rank fusion | 91.7% | 75.0% | 0.819 | 8.9 ms |
+| C. Cross-encoder rerank | dense + cross-encoder | **one change:** rescores the dense candidate pool with a cross-encoder | 91.7% | 66.7% | 0.785 | 165.3 ms |
+| A+B+C. Stacked (current `week4` mode) | dense + BM25/RRF + cross-encoder | _two_ changes - not eligible as the single improvement | 91.7% | 66.7% | 0.785 | 158.8 ms |
 
 The stacked row is the mode the app currently ships as `week4`. It combines two changes, so it is **not eligible** as the single improvement - it is listed only to show what the full stack does.
 
@@ -309,7 +516,7 @@ Baseline (A) versus the chosen single change (B. BM25 + RRF), same golden set, s
 - **Hit-rate@3: 91.7% -> 91.7%** (0 questions)
 - **Hit-rate@1: 66.7% -> 75.0%** (+1 question)
 - **MRR: 0.788 -> 0.819** (+0.031)
-- **p50 retrieval latency: 7.9 ms -> 8.2 ms** (+0.2 ms)
+- **p50 retrieval latency: 8.4 ms -> 8.9 ms** (+0.5 ms)
 
 Both p50 figures are dominated by the MiniLM query encode, which both arms pay. The BM25 scoring pass over 30 chunks is not measurable against it, which is why the two medians can land either side of each other from run to run.
 
@@ -347,10 +554,10 @@ Net at rank 1: **+1 question** out of 12. That is a positive result and it is al
 | Hit-rate@3 | 91.7% | 91.7% | +0.0 pp |
 | Hit-rate@1 | 66.7% | 75.0% | +8.3 pp |
 | MRR | 0.788 | 0.819 | +0.031 |
-| p50 retrieval latency | 7.9 ms | 8.2 ms | +0.2 ms |
+| p50 retrieval latency | 8.4 ms | 8.9 ms | +0.5 ms |
 | Regressions (rank 1) | - | - | 2 |
 
-Ship, on a narrow but consistent margin. At rank 1 the change fixes 3 questions and breaks 2 questions, a net +1 question; MRR moves +0.031. Latency is not a factor at +0.2 ms - both arms are dominated by the query encode, and both are noise against a Groq completion measured in hundreds of milliseconds.
+Ship, on a narrow but consistent margin. At rank 1 the change fixes 3 questions and breaks 2 questions, a net +1 question; MRR moves +0.031. Latency is not a factor at +0.5 ms - both arms are dominated by the query encode, and both are noise against a Groq completion measured in hundreds of milliseconds.
 
 Two things this decision is **not**:
 
@@ -387,8 +594,43 @@ The change is confined to retrieval. Chunking, embedding, prompt and LLM call ar
 ### Reproduce
 
 ```bash
-cd backend && python scripts/evaluate_week4.py    # rewrites sections 9-14 of ../results.md
+cd backend && python scripts/evaluate_week4.py    # rewrites sections 9-15 of ../results.md
 ```
+
+## 15. Bonus: MMR over the fused candidate list
+
+The bonus asks what Maximal Marginal Relevance does when the top-3 is three near-copies of one section. That condition is real on this corpus rather than hypothetical: KB-007 holds six plan packs that differ from the retail ones mainly in a numeric identifier, and the baseline top-3 for W01 is three consecutive chunks of that one article.
+
+MMR is applied last, to the fused BM25 + RRF candidate list - the arm section 14 ships - so this is one further change measured on top of it, not a fourth retriever. It repeatedly picks the candidate maximising `lambda * relevance - (1 - lambda) * max similarity to anything already picked`, with relevance min-max normalised per query so `lambda` means the same thing at every value. `lambda = 1.0` is the identity and reproduces the shipped ordering exactly, which is the control row below.
+
+Diversity is measured two ways over the top-3. **Distinct articles** is how many of the three come from different source files, averaged over the 12 questions. **Mean pairwise cosine** is the average similarity between the three retrieved chunks: lower is more varied. The first is what a reader notices; the second is what MMR actually optimises.
+
+| lambda | Hit@3 | Hit@1 | MRR | Distinct articles in top-3 | Mean pairwise cosine | p50 latency |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1.00 (MMR off) | 91.7% | 75.0% | 0.819 | 2.67 / 3 | 0.470 | 8.5 ms |
+| 0.90 | 91.7% | 75.0% | 0.819 | 2.67 / 3 | 0.457 | 8.4 ms |
+| 0.80 | 91.7% | 75.0% | 0.833 | 2.67 / 3 | 0.453 | 8.4 ms |
+| 0.70 | 91.7% | 75.0% | 0.833 | 2.67 / 3 | 0.438 | 8.3 ms |
+| 0.50 | 75.0% | 75.0% | 0.794 | 2.83 / 3 | 0.288 | 9.6 ms |
+| 0.30 | 75.0% | 75.0% | 0.783 | 2.83 / 3 | 0.221 | 8.6 ms |
+
+**Tuned once, at lambda = 0.70** - the value that keeps the most questions at hit@3 and, among ties, diversifies most.
+
+- Hit-rate@3: 91.7% -> 91.7% (+0 questions)
+- Distinct articles in the top-3: 2.67 -> 2.67 of 3
+- Mean pairwise cosine in the top-3: 0.470 -> 0.438 (-0.032; lower is more varied)
+- p50 latency: 8.5 ms -> 8.3 ms
+
+At lambda = 0.70 no question is pushed out of the top-3.
+
+That is not true further down the sweep, and this is the failure the bonus warns about, observed rather than assumed. At lambda = 0.30, 2 questions lose the labelled chunk from the top-3 entirely: W01 (rank 3 -> 15), W12 (rank 3 -> 6). In each case retrieval had already found the answer and MMR demoted it for resembling something it had just selected.
+
+Across the sweep, hit-rate@3 is highest with MMR off and falls to 75.0% at lambda = 0.50. The trend has one direction on this corpus, and the reason is structural: the labelled chunk and its near-duplicates come from the *same* article often enough that penalising similarity penalises the answer.
+
+**Would I ship it? No.** The tuned lambda buys nothing worth having. Hit-rate@3 does not move, and neither does the diversity number a person would notice: the top-3 still carries 2.67 distinct articles, exactly what it carried with MMR off. The only thing that shifted is mean pairwise cosine (0.470 -> 0.438), which is MMR reordering chunks of the *same* document - invisible to the reader and worth nothing to the answer.
+
+Every lambda that moves the visible number costs questions instead. The reason is the shape of the task rather than a tuning failure: each golden question has exactly one correct chunk, so a more varied top-3 is neutral at best and at worst evicts the answer. Diversity earns its place when a query has several valid answers spread across articles. A support question with one correct troubleshooting row is the opposite case, and the near-duplicate packs in KB-007 that made MMR look necessary are better handled by the cross-encoder, which reads the query and the chunk together instead of inferring redundancy from vector distance.
+
 
 <!-- week4:end -->
 

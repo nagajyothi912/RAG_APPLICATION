@@ -89,7 +89,7 @@ pytest tests/test_metadata_and_chunking.py -q   # one file
 
 ```bash
 python scripts/evaluate_retrieval.py            # ../results.md sections 1-8  (chunking)
-python scripts/evaluate_week4.py                # ../results.md sections 9-14 (Week 4)
+python scripts/evaluate_week4.py                # ../results.md sections 9-15 (Week 4)
 python scripts/chunk_size_experiment.py         # the notebook's original 150/500/1200 sweep
 ```
 

@@ -46,6 +46,13 @@ export type GoldenQuestion = {
   kind: string;
   /** "week3-miss-week4-hit" for the pair kept to demonstrate the mode toggle; "" otherwise. */
   contrast: string;
+  /**
+   * Whether the split is real against the corpus currently indexed. The backend
+   * re-measures it per request: the near-duplicate article that makes dense
+   * retrieval miss can be deleted or never uploaded, and then both modes answer.
+   * Never label a question "week 4 only" without this.
+   */
+  contrast_holds: boolean;
   available: boolean;
 };
 

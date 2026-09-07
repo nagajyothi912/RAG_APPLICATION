@@ -217,3 +217,61 @@ def availability() -> dict:
         "reranker_loaded": reranker.loaded,
         "reranker_model": RERANK_MODEL_NAME,
     }
+
+
+def mmr_select(
+    order: Sequence[int],
+    relevance: dict[int, float],
+    similarity: "Any",
+    top_k: int,
+    lam: float,
+) -> list[int]:
+    """
+    Maximal Marginal Relevance over an already-ranked candidate list.
+
+    MMR repeatedly picks the candidate maximising
+
+        lam * relevance - (1 - lam) * max similarity to anything already picked
+
+    so a chunk that merely repeats what is already selected is passed over. On
+    this corpus that is a real condition rather than a hypothetical: KB-007
+    holds six plan packs that differ from the retail ones mainly in a numeric
+    identifier, so an error-code or plan query can fill its whole top-3 with
+    near-copies of one section.
+
+    `relevance` must already be min-max normalised into 0..1. The raw ordering
+    scores are not usable here: an RRF score sits around 0.016-0.03 and a
+    cross-encoder logit runs -11..+11, while `similarity` is a cosine in 0..1.
+    Subtracting one from the other unnormalised would make `lam` mean a
+    different thing in every arm. Normalising per query keeps `lam` comparable
+    and is why a single tuned value can be reported.
+
+    `similarity(a, b)` returns the cosine between two candidate chunks.
+    lam = 1.0 reproduces the input order exactly, which is what makes MMR
+    switchable off by value rather than by branch.
+    """
+    remaining = list(order)
+    selected: list[int] = []
+    while remaining and len(selected) < top_k:
+        best_idx = None
+        best_score = None
+        for idx in remaining:
+            penalty = max((similarity(idx, chosen) for chosen in selected), default=0.0)
+            score = lam * relevance.get(idx, 0.0) - (1.0 - lam) * penalty
+            if best_score is None or score > best_score:
+                best_score = score
+                best_idx = idx
+        selected.append(best_idx)
+        remaining.remove(best_idx)
+    return selected
+
+
+def minmax(values: dict[int, float]) -> dict[int, float]:
+    """Scale a score map into 0..1. A flat map becomes all-1.0, not a divide by zero."""
+    if not values:
+        return {}
+    lo = min(values.values())
+    hi = max(values.values())
+    if hi - lo < 1e-12:
+        return {k: 1.0 for k in values}
+    return {k: (v - lo) / (hi - lo) for k, v in values.items()}

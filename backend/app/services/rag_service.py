@@ -49,7 +49,14 @@ from sentence_transformers import SentenceTransformer
 
 from app.config import settings
 from app.services.chunking import DEFAULT_STRATEGY, STRATEGIES, chunk_document, chunk_fixed_text
-from app.services.retrieval import BM25Index, Scored, get_reranker, reciprocal_rank_fusion
+from app.services.retrieval import (
+    BM25Index,
+    Scored,
+    get_reranker,
+    minmax,
+    mmr_select,
+    reciprocal_rank_fusion,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -65,11 +72,19 @@ WEEK4 = "week4"
 RETRIEVAL_MODES = (WEEK3, WEEK4)
 
 # The reranker reads every candidate against the query, so the pool is kept
-# small. Four times top_k with a floor of 20 gives the cross-encoder enough
+# small. Four times top_k with a floor of 25 gives the cross-encoder enough
 # room to promote a chunk the dense top-k missed without making the call
-# noticeably slower on a six-article corpus.
+# noticeably slower on a seven-article corpus. The floor is 25 because the
+# assignment specifies a cross-encoder rerank "over the top 25"; at the shipped
+# top_k of 5 the multiplier already exceeds it.
 CANDIDATE_MULTIPLIER = 4
-MIN_CANDIDATES = 20
+MIN_CANDIDATES = 25
+
+# MMR is off by default. It is the bonus experiment, not the shipped retriever:
+# section 15 of results.md measures what it costs at every lambda and the
+# answer is that it can only push the labelled chunk down. lam = 1.0 is the
+# identity, so leaving this None and passing 1.0 are the same ranking.
+MMR_LAMBDA_DEFAULT = None
 
 # Curated questions the chat UI offers. Deliberately a separate file from
 # eval/gold_questions.json, which drives results.md - editing the UI list must
@@ -313,6 +328,7 @@ class VectorStore:
         candidate_k: Optional[int] = None,
         rerank: bool = True,
         use_keyword: bool = True,
+        mmr_lambda: Optional[float] = MMR_LAMBDA_DEFAULT,
     ) -> list[tuple["Chunk", Scored]]:
         """
         Week 4 retrieval: BM25 + dense, fused by RRF, then cross-encoder reranked.
@@ -325,6 +341,11 @@ class VectorStore:
         Filtering stays exact here for the same reason it is exact there: both
         retrievers rank the whole corpus and the filter is applied to the ranked
         lists, so a matching chunk is never lost to a candidate window.
+
+        `mmr_lambda` diversifies the final selection (see `mmr_select`). It is
+        applied last, after whichever stage decided the order, so it is a
+        re-selection of the candidate pool rather than a fourth scoring signal.
+        None or 1.0 leaves the order exactly as it was.
 
         `rerank` and `use_keyword` exist so each Week 4 stage can be switched on
         alone. The assignment requires exactly one retrieval variable to differ
@@ -397,7 +418,33 @@ class VectorStore:
         else:
             scored.sort(key=lambda s: s.fused_score, reverse=True)
 
+        if mmr_lambda is not None and mmr_lambda < 1.0:
+            scored = self._apply_mmr(scored, top_k, mmr_lambda)
+
         return [(self.chunks[s.index], s) for s in scored[:top_k]]
+
+    def _apply_mmr(self, scored: list[Scored], top_k: int, lam: float) -> list[Scored]:
+        """
+        Re-select the head of an ordered candidate list for diversity.
+
+        Vectors come back out of the FAISS index rather than being cached on the
+        store: they are normalised at index time, so an inner product between
+        two reconstructed rows is already the cosine, and reconstructing a
+        candidate pool of 25 costs nothing next to the query encode.
+        """
+        by_index = {s.index: s for s in scored}
+        order = [s.index for s in scored]
+        relevance = minmax(
+            {s.index: (s.rerank_score if s.rerank_score is not None else s.fused_score) for s in scored}
+        )
+        vectors = {i: self.faiss_index.reconstruct(int(i)) for i in order}
+
+        def similarity(a: int, b: int) -> float:
+            return float(np.dot(vectors[a], vectors[b]))
+
+        chosen = mmr_select(order, relevance, similarity, top_k, lam)
+        rest = [i for i in order if i not in set(chosen)]
+        return [by_index[i] for i in chosen + rest]
 
 
 def format_citation(chunk: Chunk) -> str:
@@ -605,12 +652,37 @@ class RagService:
         matches = [n for n in names if n.rsplit("/", 1)[-1].lower() == base]
         return matches[0] if len(matches) == 1 else None
 
+    def _week3_finds_answer(self, question: str, answer_contains: Sequence[str]) -> bool:
+        """
+        True when dense-only retrieval already surfaces the answer for a question.
+
+        This is the same grading rule the Week 3 evaluation uses: a chunk counts
+        only if it contains every gold answer string, because a chunk from the
+        right article that was cut before the answer still cannot be answered
+        from.
+        """
+        if not answer_contains or not self.store.chunks:
+            return False
+        for chunk, _score in self.store.search(question, top_k=self.top_k):
+            haystack = " ".join(chunk.text.split()).lower()
+            if all(" ".join(n.split()).lower() in haystack for n in answer_contains):
+                return True
+        return False
+
     def golden_questions(self) -> list[dict]:
         """
         The curated question set the chat UI offers, with each entry's document
         resolved against what is actually indexed. `available` is False when the
         backing document has been deleted, so the UI can grey the question out
         instead of offering a question that can only be refused.
+
+        `contrast_holds` is measured against the live index rather than read off
+        the fixture. A contrast question only demonstrates the Week 3 / Week 4
+        split while the near-duplicate competitors that make dense retrieval
+        fail are actually indexed - delete KB-007, or serve a corpus that never
+        had it, and dense finds the answer at rank 1 in both modes. The badge
+        has to follow the corpus, because a label that says "Week 4 only" over a
+        question both modes answer teaches the reader the opposite of the truth.
         """
         if not GOLDEN_SET_PATH.exists():
             return []
@@ -623,6 +695,12 @@ class RagService:
         rows = []
         for item in payload.get("questions", []):
             resolved = self.resolve_document(item.get("source_file", ""))
+            contrast = item.get("contrast", "")
+            # Only the two contrast questions pay for this extra search, and
+            # only on the page load that fetches the panel.
+            holds = bool(contrast) and not self._week3_finds_answer(
+                item.get("question", ""), item.get("answer_contains", [])
+            )
             rows.append(
                 {
                     "id": item.get("id", ""),
@@ -635,7 +713,8 @@ class RagService:
                     # and only does so against the whole corpus - the UI must not
                     # scope it to its own document, which would remove the very
                     # competitors that make Week 3 fail.
-                    "contrast": item.get("contrast", ""),
+                    "contrast": contrast,
+                    "contrast_holds": holds,
                     "available": resolved is not None,
                 }
             )

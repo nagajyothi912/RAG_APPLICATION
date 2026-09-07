@@ -73,6 +73,11 @@ class GoldenQuestion(BaseModel):
     # Non-empty ("week3-miss-week4-hit") marks a question kept to demonstrate the
     # retrieval-mode split. The UI leaves these unscoped; see ChatInput.pickGolden.
     contrast: str = ""
+    # Measured against the live index, not read off the fixture: True only while
+    # dense-only retrieval really does miss this question. The corpus that makes
+    # it miss can be deleted or never uploaded, and then the split is not there
+    # to demonstrate. See RagService.golden_questions.
+    contrast_holds: bool = False
     available: bool = True
 
 

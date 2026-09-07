@@ -51,16 +51,19 @@ Three strategies live in [backend/app/services/chunking.py](backend/app/services
 
 ```bash
 cd backend && python scripts/evaluate_retrieval.py    # results.md sections 1-8  (chunking)
-cd backend && python scripts/evaluate_week4.py        # results.md sections 9-14 (Week 4)
+cd backend && python scripts/evaluate_retrieval.py --no-generate   # ...skipping the Groq transcripts
+cd backend && python scripts/evaluate_week4.py        # results.md sections 9-15 (Week 4)
 ```
 
-`results.md` is generated, never hand-edited, and the two scripts own separate halves of it — run them in either order. Sections 1–8 build one index per configuration and score 8 known-answer questions (3 answered only by a table), 2 ambiguous, and 3 out-of-scope. Sections 9–14 run the Week 4 experiment: 12 labelled questions, a baseline, one retrieval change, and a shipping decision. Headlines:
+`results.md` is generated, never hand-edited, and the two scripts own separate halves of it — run them in either order. Sections 1–8 build one index per configuration and score 8 known-answer questions (3 answered only by a table), 2 ambiguous, and 3 out-of-scope. Sections 9–15 run the Week 4 experiment: 12 labelled questions, a baseline, one retrieval change, a shipping decision, and the MMR bonus. Headlines:
 
 - `heading/1000/100` wins at Answer Hit@5 100%, citation accuracy 100%, MRR 1.000.
 - Article-level hit rate saturates at 100% on a corpus this small and cannot separate strategies; the chunk-level metric can.
 - Threshold tuning depends entirely on how varied the question set is. On the 8 well-formed questions the answerable and out-of-scope populations look cleanly separable at 0.37; adding 3 vaguer in-corpus questions drops the answerable floor to 0.187, below the out-of-scope ceiling of 0.310, and the separation disappears. `SCORE_THRESHOLD` is set to 0.15 — the highest value that refuses nothing answerable.
 - Chunk size matters more than overlap. `chunk_size` must exceed the largest table, or the answer row gets separated from its header.
 - **Week 4: the one retrieval change is shipped, and the verdict flipped once during the experiment.** On the original 6 articles BM25 + RRF measured net *negative* (Hit@1 83.3% → 75.0%) and the decision was do-not-ship. Adding an article of near-duplicate plan identifiers reversed it (Hit@1 66.7% → 75.0%). Same code, opposite verdicts — never quote a retrieval number without the corpus it was measured on.
+- Section 5 pastes real transcripts: three cited answers and all three refusals, verbatim at temperature 0. Two different refusal strings appear, and the difference is the point. "How do I reset my Netflix password?" scores 0.310, clears the threshold, reaches Groq, and is refused by the system prompt alone.
+- **MMR was measured and not shipped.** At the tuned lambda hit-rate@3 does not move and neither does the diversity number a person would notice; only mean pairwise cosine shifts, which is MMR reordering chunks of the same document. Push lambda far enough to change what the reader sees and it evicts the answer from the top-3 on two questions. Each golden question has exactly one correct chunk, so variety is neutral at best.
 - Grading a generated answer by substring match reported 7 false generation failures out of 12 — `₹2,500` against `2500`, a Unicode hyphen in `5‑day`. Every one of those answers was correct.
 
 ## Environment

@@ -95,7 +95,9 @@ export default function GoldenQuestions({
                         title={
                           question.available
                             ? question.contrast
-                              ? 'Searches the whole corpus. Week 4 answers this; Week 3 refuses it.'
+                              ? question.contrast_holds
+                                ? 'Searches the whole corpus. Week 4 answers this; Week 3 refuses it.'
+                                : 'Both modes answer this right now. The near-duplicate article that makes dense retrieval miss it is not indexed, so there is no split to show.'
                               : isActive
                                 ? 'Click again to unselect this document'
                                 : undefined
@@ -105,7 +107,13 @@ export default function GoldenQuestions({
                         <span className="golden-id">{question.id}</span>
                         <span className="golden-question">{question.question}</span>
                         {question.kind === 'table' ? <Badge>table</Badge> : null}
-                        {question.contrast ? <Badge tone="accent">week 4 only</Badge> : null}
+                        {question.contrast ? (
+                          question.contrast_holds ? (
+                            <Badge tone="accent">week 4 only</Badge>
+                          ) : (
+                            <Badge>both modes</Badge>
+                          )
+                        ) : null}
                       </button>
                     </li>
                   );

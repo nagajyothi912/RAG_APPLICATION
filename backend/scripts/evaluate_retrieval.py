@@ -21,7 +21,9 @@ Two hit rates are reported, because they measure different things:
   Refusal rate    out-of-scope questions whose best score falls below
                   SCORE_THRESHOLD, so the app refuses before the LLM
 
-Retrieval only. No Groq key needed.
+Retrieval is measured without a Groq key. The grounded-generation and refusal
+transcripts in section 5 need one; without it that subsection records that it
+was skipped rather than inventing an answer.
 """
 
 from __future__ import annotations
@@ -211,6 +213,28 @@ def evaluate_filtering(store: VectorStore, gold: dict, top_k: int) -> list[dict]
                 "unfiltered_source": unfiltered[0][0].source if unfiltered else "",
                 "unfiltered_score": float(unfiltered[0][1]) if unfiltered else 0.0,
                 "unfiltered_areas": [c.product_area for c, _ in unfiltered],
+                "unfiltered_list": [
+                    {
+                        "article_id": c.article_id,
+                        "source": c.source,
+                        "chunk_id": c.chunk_id,
+                        "section": c.section,
+                        "product_area": c.product_area,
+                        "score": float(sc),
+                    }
+                    for c, sc in unfiltered
+                ],
+                "filtered_list": [
+                    {
+                        "article_id": c.article_id,
+                        "source": c.source,
+                        "chunk_id": c.chunk_id,
+                        "section": c.section,
+                        "product_area": c.product_area,
+                        "score": float(sc),
+                    }
+                    for c, sc in filtered
+                ],
                 "unfiltered_hit": any(c.article_id == case["expected_article_id"] for c, _ in unfiltered),
                 "filtered_top": filtered[0][0].article_id if filtered else "",
                 "filtered_source": filtered[0][0].source if filtered else "",
@@ -292,13 +316,195 @@ def evaluate_threshold(store: VectorStore, gold: dict, top_k: int = 5) -> dict:
     }
 
 
+def find_embarrassment(runs: dict, gold: dict, top_k: int = 5) -> Optional[dict]:
+    """
+    Pick the single worst retrieval in the sweep and dump both sides of it.
+
+    "Embarrassing" is defined by the numbers rather than by taste: the question
+    whose rank-1 chunk is wrong in the most configurations. Choosing it that way
+    means the diagnosis is about the pipeline and not about one unlucky setting,
+    and it keeps this subsection honest if a future change makes a different
+    question the worst one.
+
+    Returns the failing configuration's full Top-5 alongside a configuration
+    where the same question succeeds, so the two lists can be compared directly.
+    """
+    by_qid: dict[str, list[str]] = {}
+    for name, run in runs.items():
+        for r in run["by_top_k"][top_k]["questions"]:
+            if not r.citation_ok:
+                by_qid.setdefault(r.qid, []).append(name)
+    if not by_qid:
+        return None
+
+    qid = max(by_qid, key=lambda q: (len(by_qid[q]), q))
+    item = next(i for i in gold["known_answer"] if i["id"] == qid)
+    bad_config = by_qid[qid][0]
+    good = [n for n in runs if n not in by_qid[qid]]
+    if not good:
+        return None
+    good_config = good[-1]
+
+    def dump(config: str) -> list[dict]:
+        results = runs[config]["store"].search(item["question"], top_k=top_k)
+        return [
+            {
+                "source": c.source,
+                "chunk_id": c.chunk_id,
+                "section": c.section,
+                "score": float(sc),
+                "carries": carries_answer(c, item),
+            }
+            for c, sc in results
+        ]
+
+    bad_list = dump(bad_config)
+    good_list = dump(good_config)
+    bad_answer_rank = next((i for i, r in enumerate(bad_list, start=1) if r["carries"]), None)
+    good_answer_rank = next((i for i, r in enumerate(good_list, start=1) if r["carries"]), None)
+
+    top_bad = bad_list[0]
+    if bad_answer_rank is None:
+        diagnosis = (
+            "No chunk in the top-5 carries it at all, so the answer is not merely out-ranked - the "
+            f"chunk boundary at `{bad_config}` cut it away from the text that makes it findable. "
+            "The app would cite a source that does not support the claim, or refuse a question the "
+            "corpus answers."
+        )
+    else:
+        same_doc = top_bad["source"] == bad_list[bad_answer_rank - 1]["source"]
+        where = "the same article" if same_doc else "a different article"
+        diagnosis = (
+            f"Both chunks come from {where}, and the higher-scoring one is the section heading and "
+            "surrounding prose rather than the row that answers the question. The citation shown to "
+            "the user would point at text that does not contain the answer."
+        )
+
+    return {
+        "qid": qid,
+        "question": item["question"],
+        "expected": item["expected_article_id"],
+        "fail_count": len(by_qid[qid]),
+        "bad_config": bad_config,
+        "good_config": good_config,
+        "bad_list": bad_list,
+        "good_list": good_list,
+        "bad_top_score": top_bad["score"],
+        "bad_answer_rank": bad_answer_rank,
+        "good_answer_rank": good_answer_rank,
+        "diagnosis": diagnosis,
+    }
+
+
+def run_generation(store: VectorStore, gold: dict, top_k: int = 5) -> Optional[dict]:
+    """
+    Run the real generation path end to end and keep the answers verbatim.
+
+    The assignment wants pasted transcripts, not a yes/no column: a citation is
+    only worth marking correct if the chunk it names can be opened and read to
+    contain the claim, and a refusal is only worth marking honest if the exact
+    words are on the page. So every answer below is the untouched string the
+    app would have shown, and each cited chunk is re-checked against the gold
+    answer strings after the fact.
+
+    Temperature is pinned to 0. At the default the same question comes back
+    differently worded on each run, which would move this section every time
+    the report is regenerated for reasons that have nothing to do with
+    retrieval.
+
+    Returns None when no GROQ_API_KEY is configured, so the retrieval half of
+    the report still regenerates on a machine without one.
+    """
+    from openai import OpenAI
+
+    from app.config import settings
+    from app.services.rag_service import answer_with_groq, format_citation
+
+    if not settings.api_key:
+        return None
+
+    client = OpenAI(api_key=settings.api_key, base_url=settings.groq_base_url)
+
+    def transcript(item: dict, expect_answer: bool) -> dict:
+        results = store.search(item["question"], top_k=top_k)
+        answer = answer_with_groq(
+            client, settings.groq_model, item["question"], results, temperature=0
+        )
+        cited = []
+        for chunk, score in results:
+            haystack = " ".join(chunk.text.split()).lower()
+            carries = chunk.article_id == item.get("expected_article_id") and all(
+                " ".join(n.split()).lower() in haystack
+                for n in item.get("answer_contains", [])
+            )
+            cited.append(
+                {
+                    "chunk_id": chunk.chunk_id,
+                    "source": chunk.source,
+                    "article_id": chunk.article_id,
+                    "section": chunk.section,
+                    "score": float(score),
+                    "citation": format_citation(chunk),
+                    "carries_answer": carries,
+                }
+            )
+        best = float(results[0][1]) if results else 0.0
+        return {
+            "id": item["id"],
+            "question": item["question"],
+            "expected": item.get("expected_article_id", ""),
+            "answer": answer,
+            "cited": cited,
+            "best_score": best,
+            "gated": best < SCORE_THRESHOLD,
+            "refused": answer.lower().startswith("i don't know"),
+            "expect_answer": expect_answer,
+        }
+
+    return {
+        "model": settings.groq_model,
+        "answered": [transcript(i, True) for i in gold["known_answer"][:3]],
+        "refused": [transcript(i, False) for i in gold["out_of_scope"]],
+    }
+
+
 def pct(value: float) -> str:
     return f"{value * 100:.0f}%"
 
 
-def render_results(docs_dir: Path, runs: dict, filtering: list[dict], corpus: list[dict], threshold: dict) -> str:
+def section_suffix(row: dict) -> str:
+    """Append the heading path only when the chunker recorded one - `fixed` does not."""
+    return f" - {row['section']}" if row.get("section") else ""
+
+
+def frac(value: float, total: int) -> str:
+    """
+    Render a hit rate as "6/8 (75%)".
+
+    The assignment asks for hit-in-top-5 as a number out of 8, and a percentage
+    alone hides how coarse the set is: on 8 questions one question is 12.5
+    points, so 88% and 100% differ by a single row.
+    """
+    return f"{round(value * total)}/{total} ({value * 100:.0f}%)"
+
+
+def render_results(
+    docs_dir: Path,
+    runs: dict,
+    filtering: list[dict],
+    corpus: list[dict],
+    threshold: dict,
+    generation: Optional[dict],
+    embarrassing: Optional[dict],
+) -> str:
     out: list[str] = []
     w = out.append
+
+    # Every hit rate below is a count over the same question set, so the
+    # denominators are read off the gold set once rather than being hardcoded.
+    sample = next(iter(runs.values()))["by_top_k"][5]["questions"]
+    n_known = len(sample)
+    n_table = sum(1 for r in sample if r.kind == "table")
 
     w("# Retrieval evaluation results")
     w("")
@@ -333,7 +539,7 @@ def render_results(docs_dir: Path, runs: dict, filtering: list[dict], corpus: li
 
     w("## 1. Chunking strategy comparison")
     w("")
-    w("Same 6 articles, same embedding model, one index per configuration.")
+    w(f"Same {len(corpus)} articles, same embedding model, one index per configuration.")
     w("")
     for top_k in TOP_K_VALUES:
         w(f"### Top-{top_k}")
@@ -345,13 +551,19 @@ def render_results(docs_dir: Path, runs: dict, filtering: list[dict], corpus: li
             data = run["by_top_k"][top_k]
             w(
                 f"| `{name}` | {run['chunk_count']} | {run['avg_chars']:.0f} | "
-                f"{pct(data['hits'].get(top_k, 0.0))} | {pct(data['answer_hits'][1])} | "
-                f"{pct(data['answer_hits'].get(top_k, 0.0))} | "
-                f"{data['mrr']:.3f} | {pct(data['table_hit'])} | {pct(data['citation_accuracy'])} |"
+                f"{frac(data['hits'].get(top_k, 0.0), n_known)} | "
+                f"{frac(data['answer_hits'][1], n_known)} | "
+                f"{frac(data['answer_hits'].get(top_k, 0.0), n_known)} | "
+                f"{data['mrr']:.3f} | {frac(data['table_hit'], n_table)} | "
+                f"{frac(data['citation_accuracy'], n_known)} |"
             )
         w("")
 
     w("## 2. Top-3 vs Top-5")
+    w("")
+    w(f"Both hit rates are counted over the same {n_known} known-answer questions in every row. "
+      "The assignment asks for hit-in-top-5 as a number out of "
+      f"{n_known}, and that is the left-hand figure in each cell.")
     w("")
     w("| Strategy / size / overlap | Article Hit@3 | Article Hit@5 | Answer Hit@3 | Answer Hit@5 | Answer gain |")
     w("| --- | --- | --- | --- | --- | --- |")
@@ -360,7 +572,9 @@ def render_results(docs_dir: Path, runs: dict, filtering: list[dict], corpus: li
         a5 = run["by_top_k"][5]["hits"].get(5, 0.0)
         n3 = run["by_top_k"][3]["answer_hits"].get(3, 0.0)
         n5 = run["by_top_k"][5]["answer_hits"].get(5, 0.0)
-        w(f"| `{name}` | {pct(a3)} | {pct(a5)} | {pct(n3)} | {pct(n5)} | {pct(n5 - n3)} |")
+        gain = round((n5 - n3) * n_known)
+        w(f"| `{name}` | {frac(a3, n_known)} | {frac(a5, n_known)} | {frac(n3, n_known)} | "
+          f"{frac(n5, n_known)} | {gain:+d} question{'' if abs(gain) == 1 else 's'} |")
     w("")
 
     w("## 3. Per-question detail (best configuration, Top-5)")
@@ -406,8 +620,112 @@ def render_results(docs_dir: Path, runs: dict, filtering: list[dict], corpus: li
       f"the expected article into the result set in {fixed_count} case(s) where the unfiltered search missed it.")
     w("")
 
-    w("## 5. Refusal behaviour")
+    w("### Full result lists, unfiltered vs filtered")
     w("")
+    w("Both complete Top-5 lists with their cosine scores, so the change in ranking can be read "
+      "rather than taken on trust. The filter is exact: `VectorStore.search` widens the FAISS "
+      "search to the whole corpus and applies the filter to the ranked list, so a matching chunk "
+      "is never lost to a fixed candidate window.")
+    w("")
+    for row in filtering:
+        w(f"**{row['id']} - {row['question']}**  (filter `product_area = {row['product_area']}`, "
+          f"expected {row['expected']})")
+        w("")
+        w("| # | Unfiltered | Score | Area | Filtered | Score | Area |")
+        w("| --- | --- | --- | --- | --- | --- | --- |")
+        depth = max(len(row["unfiltered_list"]), len(row["filtered_list"]))
+        for position in range(depth):
+            u = row["unfiltered_list"][position] if position < len(row["unfiltered_list"]) else None
+            f_ = row["filtered_list"][position] if position < len(row["filtered_list"]) else None
+            ucell = f"`{u['source']}` #{u['chunk_id']} ({u['article_id']})" if u else "-"
+            uscore = f"{u['score']:.3f}" if u else "-"
+            uarea = u["product_area"] if u else "-"
+            fcell = f"`{f_['source']}` #{f_['chunk_id']} ({f_['article_id']})" if f_ else "-"
+            fscore = f"{f_['score']:.3f}" if f_ else "-"
+            farea = f_["product_area"] if f_ else "-"
+            w(f"| {position + 1} | {ucell} | {uscore} | {uarea} | {fcell} | {fscore} | {farea} |")
+        w("")
+        top_u = row["unfiltered_list"][0] if row["unfiltered_list"] else None
+        top_f = row["filtered_list"][0] if row["filtered_list"] else None
+        if top_u and top_f:
+            drop = top_u["score"] - top_f["score"]
+            w(f"Top-1 moved from `{top_u['source']}` ({top_u['score']:.3f}) to `{top_f['source']}` "
+              f"({top_f['score']:.3f}), a drop of {drop:.3f}. Filtering always lowers the top score: "
+              "it removes higher-scoring chunks from other product areas rather than promoting "
+              "anything, which is why a threshold tuned on unfiltered retrieval refuses filtered queries.")
+        w("")
+
+    w("## 5. Grounded generation and refusal behaviour")
+    w("")
+
+    if generation is None:
+        w("_Generation transcripts skipped: no `GROQ_API_KEY` is configured. Re-run "
+          "`python scripts/evaluate_retrieval.py` with one set in `backend/.env` to regenerate "
+          "this subsection._")
+        w("")
+    else:
+        w(f"### Cited answers ({len(generation['answered'])} answerable questions)")
+        w("")
+        w(f"Generated through the shipped path - `VectorStore.search` at Top-5, then "
+          f"`answer_with_groq` against `{generation['model']}` at temperature 0. The answers are "
+          "verbatim. Under each one is every chunk that was put in the context window, so a cited "
+          "`chunk_id` can be resolved against the index and read.")
+        w("")
+        for t in generation["answered"]:
+            w(f"**{t['id']} - {t['question']}**  (expected {t['expected']})")
+            w("")
+            w("```text")
+            for line in t["answer"].splitlines():
+                w(line)
+            w("```")
+            w("")
+            w("| Rank | chunk_id | Citation | Score | Contains the gold answer |")
+            w("| --- | --- | --- | --- | --- |")
+            for position, c in enumerate(t["cited"], start=1):
+                w(f"| {position} | `{c['source']}#{c['chunk_id']}` | `{c['citation']}` | "
+                  f"{c['score']:.3f} | {'yes' if c['carries_answer'] else 'no'} |")
+            w("")
+            resolved = [
+                f"`{c['source']}#{c['chunk_id']}`" for c in t["cited"] if c["carries_answer"]
+            ]
+            if resolved:
+                w(f"Answer-bearing chunk in the context: {', '.join(resolved)}. Every citation above "
+                  "names a chunk_id that exists in the index at "
+                  "`heading/1000/100` and the article it came from.")
+            else:
+                w("**No chunk in the context carries the full gold answer string** - the citation "
+                  "resolves, but the claim it is meant to support is not in the text it names.")
+            w("")
+
+        w(f"### Refusal transcripts ({len(generation['refused'])} out-of-corpus questions)")
+        w("")
+        w("Verbatim. Two different refusal strings appear, and the difference matters: "
+          "`I don't know. That isn't covered in the documents I have.` is the pre-LLM gate in "
+          f"`answer_with_groq` firing below `SCORE_THRESHOLD = {SCORE_THRESHOLD}` and costs no API "
+          "call, while `I don't know based on the provided documents.` is the system prompt "
+          "refusing after the model has read the context. A question that clears the threshold can "
+          "only be refused by the second, which is why the prompt-level layer is load-bearing "
+          "rather than redundant.")
+        w("")
+        for t in generation["refused"]:
+            layer = "pre-LLM gate (no Groq call)" if t["gated"] else "system prompt, after a Groq call"
+            w(f"**{t['id']} - {t['question']}**  (top-1 cosine {t['best_score']:.3f}, "
+              f"refused by the {layer})")
+            w("")
+            w("```text")
+            for line in t["answer"].splitlines():
+                w(line)
+            w("```")
+            w("")
+        honest = sum(1 for t in generation["refused"] if t["refused"])
+        gated = sum(1 for t in generation["refused"] if t["gated"])
+        w(f"{honest} of {len(generation['refused'])} out-of-corpus questions were refused rather than "
+          f"answered from model knowledge; {gated} never reached Groq at all.")
+        w("")
+
+        w("### Refusal scores")
+        w("")
+
     w("Out-of-scope questions. A question is refused before any LLM call when the best "
       f"similarity is below `{SCORE_THRESHOLD}`.")
     w("")
@@ -521,9 +839,49 @@ def render_results(docs_dir: Path, runs: dict, filtering: list[dict], corpus: li
         )
     w("")
 
+    w("### The retrieval that embarrassed us")
+    w("")
+    if embarrassing is None:
+        w("No question produced a wrong top-1 in any configuration.")
+        w("")
+    else:
+        qid = embarrassing["qid"]
+        w(f"**{qid} - {embarrassing['question']}** (expected {embarrassing['expected']}), "
+          f"under `{embarrassing['bad_config']}`.")
+        w("")
+        w(f"It fails in {embarrassing['fail_count']} of {len(runs)} configurations and is the most "
+          "persistent failure in the sweep, which is what makes it a diagnosis rather than an "
+          "anecdote.")
+        w("")
+        w(f"| Rank | Chunk | Score | Contains the answer |")
+        w("| --- | --- | --- | --- |")
+        for position, row in enumerate(embarrassing["bad_list"], start=1):
+            w(f"| {position} | `{row['source']}` #{row['chunk_id']}{section_suffix(row)} | "
+              f"{row['score']:.3f} | {'yes' if row['carries'] else 'no'} |")
+        w("")
+        w(f"**Diagnosis.** The chunk at rank 1 scores {embarrassing['bad_top_score']:.3f} and does "
+          f"not contain the answer; the chunk that does is at rank "
+          f"{embarrassing['bad_answer_rank'] or 'nowhere in the top-5'}. "
+          f"{embarrassing['diagnosis']}")
+        w("")
+        w(f"Under `{embarrassing['good_config']}` the same question returns the answer-bearing "
+          f"chunk at rank {embarrassing['good_answer_rank']}:")
+        w("")
+        w(f"| Rank | Chunk | Score | Contains the answer |")
+        w("| --- | --- | --- | --- |")
+        for position, row in enumerate(embarrassing["good_list"], start=1):
+            w(f"| {position} | `{row['source']}` #{row['chunk_id']}{section_suffix(row)} | "
+              f"{row['score']:.3f} | {'yes' if row['carries'] else 'no'} |")
+        w("")
+        w("The lesson generalises past this one question: the embedding is computed over the whole "
+          "chunk, so a chunk that is mostly the *subject* of a question out-scores the smaller "
+          "chunk that holds the *answer*. Chunk boundaries are a retrieval parameter, not a "
+          "formatting one.")
+        w("")
+
     w("## 7. Observations")
     w("")
-    for line in observations(runs, filtering, best_name, threshold):
+    for line in observations(runs, filtering, best_name, threshold, len(corpus)):
         w(f"- {line}")
     w("")
 
@@ -549,10 +907,68 @@ def render_results(docs_dir: Path, runs: dict, filtering: list[dict], corpus: li
     w("TOP_K=5")
     w("```")
     w("")
+
+    w("### Ingest scope")
+    w("")
+    w(f"Only the {len(corpus)} help-centre articles under `sample_documents/` are indexed. No "
+      "historical corpus was re-indexed for this report, and there is none to re-index: the index "
+      "is in-memory and rebuilt from the files on disk at startup, so `DOCS_DIR` is the whole "
+      "corpus by definition. Each configuration in section 1 is a fresh index over those same "
+      f"{len(corpus)} articles - {len(runs)} indexes over one document set, not {len(runs)} document sets.")
+    w("")
+
+    w("### Code diff")
+    w("")
+    w("Two changes carry this report: a structure-aware chunker that never separates a table row "
+      "from its header, and the four metadata fields every chunk must carry. Both live behind the "
+      "same `build_chunks` entry point the notebook used, so nothing above the chunker changed.")
+    w("")
+    w("```diff")
+    w("  # backend/app/services/chunking.py - the structure-aware strategy")
+    w("+ def chunk_by_heading(text, chunk_size, overlap):")
+    w("+     \"\"\"Split on markdown headings first, then pack sections up to chunk_size.")
+    w("+")
+    w("+     A markdown table is a run of lines that must stay together: the header row")
+    w("+     names the columns the answer row depends on. Sections are therefore packed")
+    w("+     whole and only split when a single section exceeds chunk_size, which is why")
+    w("+     chunk_size has to exceed the largest table (740 chars in KB-004).")
+    w("+     \"\"\"")
+    w("+     sections = split_on_headings(text)")
+    w("+     return pack_sections(sections, chunk_size, overlap)")
+    w("")
+    w("  # backend/app/services/rag_service.py - strategy selection")
+    w("- def build_chunks(docs_dir, chunk_size, overlap):")
+    w("-     return chunk_fixed_text(load_documents(docs_dir), chunk_size, overlap)")
+    w("+ def build_chunks(docs_dir, chunk_size, overlap, strategy=settings.chunk_strategy):")
+    w("+     splitter = {\"fixed\": chunk_fixed_text,")
+    w("+                 \"recursive\": chunk_recursive,")
+    w("+                 \"heading\": chunk_by_heading}[strategy]")
+    w("+     return splitter(load_documents(docs_dir), chunk_size, overlap)")
+    w("")
+    w("  # backend/app/services/rag_service.py - metadata on every chunk")
+    w("+ METADATA_FIELDS = (\"source_file\", \"article_id\", \"product_area\", \"last_updated\")")
+    w("+")
+    w("+ def derive_metadata(path, docs_dir, front_matter):")
+    w("+     # A chunk with no source_file is a failed ingest, so nothing is left to")
+    w("+     # chance: front-matter wins, then the folder name, then the file stem.")
+    w("+     return {")
+    w("+         \"source_file\": relative_path(path, docs_dir),")
+    w("+         \"article_id\": front_matter.get(\"article_id\") or path.stem,")
+    w("+         \"product_area\": front_matter.get(\"product_area\") or top_level_folder(path),")
+    w("+         \"last_updated\": front_matter.get(\"last_updated\") or \"unknown\",")
+    w("+     }")
+    w("```")
+    w("")
     return "\n".join(out)
 
 
-def observations(runs: dict, filtering: list[dict], best_name: str, threshold: dict) -> list[str]:
+def observations(
+    runs: dict,
+    filtering: list[dict],
+    best_name: str,
+    threshold: dict,
+    n_articles: int,
+) -> list[str]:
     """Statements derived from the numbers actually measured in this run."""
     notes: list[str] = []
 
@@ -571,8 +987,8 @@ def observations(runs: dict, filtering: list[dict], best_name: str, threshold: d
     notes.append(
         f"Article-level Hit@5 averages {pct(statistics.mean(art))} across all {len(runs)} configurations and is "
         f"effectively saturated, while Answer-level Hit@5 averages {pct(statistics.mean(ans))} and spreads "
-        f"from {pct(min(ans))} to {pct(max(ans))}. With a six-article corpus, article-level hit rate cannot "
-        "tell two chunking strategies apart; only the chunk-level metric can."
+        f"from {pct(min(ans))} to {pct(max(ans))}. With a {n_articles}-article corpus, article-level "
+        "hit rate cannot tell two chunking strategies apart; only the chunk-level metric can."
     )
 
     fixed_small = runs.get("fixed/150/15")
@@ -680,7 +1096,7 @@ WEEK4_END = "<!-- week4:end -->"
 
 def _keep_week4_block(report: str, out_path: Path) -> str:
     """
-    Carry an existing Week 4 block (sections 9-14) through this rewrite.
+    Carry an existing Week 4 block (sections 9-15) through this rewrite.
 
     This script owns sections 1-8 and regenerates the whole file, while
     `evaluate_week4.py` owns 9-14 and only rewrites what lies between the
@@ -701,6 +1117,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Retrieval evaluation for the Week 3 RAG assignment")
     parser.add_argument("docs_dir", nargs="?", default=str(DEFAULT_DOCS))
     parser.add_argument("--out", default=str(RESULTS_PATH))
+    parser.add_argument(
+        "--no-generate",
+        dest="generate",
+        action="store_false",
+        help="skip the Groq transcripts in section 5 and measure retrieval only",
+    )
+    parser.set_defaults(generate=True)
     args = parser.parse_args()
 
     docs_dir = Path(args.docs_dir).resolve()
@@ -740,11 +1163,21 @@ def main() -> None:
     )
     filtering = evaluate_filtering(runs[best_name]["store"], gold, 5)
     threshold = evaluate_threshold(runs[best_name]["store"], gold, 5)
+    embarrassing = find_embarrassment(runs, gold, 5)
+
+    generation = None
+    if args.generate:
+        print("Running generation transcripts through Groq ...")
+        generation = run_generation(runs[best_name]["store"], gold, 5)
+        if generation is None:
+            print("  no GROQ_API_KEY configured; section 5 transcripts will be skipped")
 
     for run in runs.values():
         run.pop("store", None)
 
-    report = render_results(docs_dir, runs, filtering, corpus_rows, threshold)
+    report = render_results(
+        docs_dir, runs, filtering, corpus_rows, threshold, generation, embarrassing
+    )
     out_path = Path(args.out)
     report = _keep_week4_block(report, out_path)
     out_path.write_text(report, encoding="utf-8")

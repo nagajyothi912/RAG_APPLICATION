@@ -74,6 +74,10 @@ export default function ChatInput({
     });
     setValue('');
     setActiveGoldenId(null);
+    // Collapse the golden panel on send. It is a tall list and the answer lands
+    // above it, so leaving it open pushes the thing the user just asked for off
+    // screen. Same state the toggle writes, so reopening is one click.
+    setGoldenOpen(false);
   };
 
   /**

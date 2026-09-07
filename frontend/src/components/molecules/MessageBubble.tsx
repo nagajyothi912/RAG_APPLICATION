@@ -64,8 +64,14 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
         </div>
       ) : null}
 
+      {/*
+        The citation list is closed by default. It is the evidence for the
+        answer, not the answer, and five expanded chunks bury the text they
+        support. The summary still reports how many there are, so the reader
+        knows evidence exists before deciding to open it.
+      */}
       {!isUser && sources.length > 0 ? (
-        <details className="citation-list" open>
+        <details className="citation-list">
           <summary>
             {sources.length} source{sources.length > 1 ? 's' : ''}
           </summary>

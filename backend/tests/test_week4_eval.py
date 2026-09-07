@@ -119,7 +119,7 @@ def test_use_keyword_false_actually_disables_bm25(store):
 def test_dense_only_ablation_reproduces_the_week3_ranking(store):
     """
     With both stages off, search_hybrid must rank exactly as VectorStore.search
-    does. That equivalence is what makes the baseline column in sections 9-14 the
+    does. That equivalence is what makes the baseline column in sections 9-15 the
     same retriever as the one behind sections 1-8.
     """
     for query in ("what is the late fee?", "AirFiber_1199_1M benefits", "mesh extender placement"):
@@ -286,3 +286,49 @@ def test_the_api_exposes_the_contrast_flag_the_ui_depends_on(golden):
     flagged = {row["id"] for row in rows if row["contrast"]}
     assert flagged == {"G13", "G14"}
     assert all(row["contrast"] == "week3-miss-week4-hit" for row in rows if row["contrast"])
+    # KB-007 is indexed here, so the split is real and the badge should claim it.
+    assert all(row["contrast_holds"] for row in rows if row["contrast"])
+
+
+def test_the_week_4_only_badge_follows_the_corpus_not_the_fixture():
+    """
+    The "week 4 only" label is a claim about the corpus, not about the question.
+
+    KB-007's near-duplicate plan packs are the entire reason dense retrieval
+    misses G13/G14; serve the six original articles without it and both modes
+    answer at rank 1. The fixture cannot know that, so `contrast_holds` is
+    measured against the live index on every request and the UI reads it. A
+    static badge here is worse than no badge: it teaches the reader that Week 3
+    failed on a question Week 3 just answered correctly in front of them.
+    """
+    from app.services.rag_service import get_rag_service
+
+    service = get_rag_service()
+
+    def load(include_distractor: bool) -> dict[str, bool]:
+        service.reset_store()
+        for path in sorted(SAMPLE_ROOT.rglob("*")):
+            if path.suffix.lower() not in {".md", ".txt"}:
+                continue
+            if not include_distractor and path.name == "airfiber_legacy_plans.md":
+                continue
+            dest = service.docs_dir / path.relative_to(SAMPLE_ROOT)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(path.read_bytes())
+        service.reindex()
+        return {
+            row["id"]: row["contrast_holds"]
+            for row in service.golden_questions()
+            if row["contrast"]
+        }
+
+    with_distractor = load(True)
+    assert with_distractor == {"G13": True, "G14": True}, (
+        "with KB-007 indexed the split is real and the badge must say so"
+    )
+
+    service.reset_store()
+    without = load(False)
+    assert without == {"G13": False, "G14": False}, (
+        "without KB-007 both modes answer G13/G14 - the badge must stop claiming a split"
+    )

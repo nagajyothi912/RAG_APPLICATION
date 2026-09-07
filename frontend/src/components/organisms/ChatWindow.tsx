@@ -56,7 +56,7 @@ export default function ChatWindow({
       <div className="message-list" aria-live="polite" ref={listRef}>
         {messages.length === 0 && !loading ? (
           <div className="empty-chat">
-            Pick one of the twelve golden questions below, or ask your own. Narrow the search with the
+            Pick one of the golden questions below, or ask your own. Narrow the search with the
             document, product-area, and top-k controls.
           </div>
         ) : null}

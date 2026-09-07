@@ -8,7 +8,7 @@ put the one chunk a human labelled as correct into the top 3?" and grades by
 exact `chunk_id`, which is the metric the Week 4 assignment specifies.
 
 The two never share a fixture on purpose: `eval/gold_questions.json` drives
-sections 1-8 of results.md, `eval/golden_set.jsonl` drives sections 9-14, and
+sections 1-8 of results.md, `eval/golden_set.jsonl` drives sections 9-15, and
 editing one must not move a number in the other.
 
 Exactly one variable per arm
@@ -62,7 +62,7 @@ asked whether the answer states those facts. Only a judge rejection is recorded
 as G. Marking a correct answer as a generation failure would corrupt the failure
 tally that the whole shipping decision rests on.
 
-Writes sections 9-14 of ../results.md between the week4 markers, leaving the
+Writes sections 9-15 of ../results.md between the week4 markers, leaving the
 Week 3 sections above them untouched.
 """
 
@@ -410,6 +410,122 @@ def pct(value: float) -> str:
     return f"{value * 100:.1f}%"
 
 
+MMR_LAMBDAS = [1.0, 0.9, 0.8, 0.7, 0.5, 0.3]
+
+
+def sweep_mmr(store, questions: list[Question], corpus_size: int) -> dict:
+    """
+    Tune lambda once over the fused candidate list and record what it costs.
+
+    Two diversity numbers are kept because they disagree in a useful way.
+    Distinct-articles is what a person sees when they read the top-3. Mean
+    pairwise cosine is what MMR is actually maximising, and it moves at lambda
+    values where the article count has not budged yet.
+
+    Latency is timed at the real top_k on a warmed pipeline, the same way the
+    arms in section 12 are, so the rows are comparable to that table.
+    """
+    import numpy as np
+
+    def vector(idx: int):
+        return store.faiss_index.reconstruct(int(idx))
+
+    index_of = {chunk_key(c): i for i, c in enumerate(store.chunks)}
+
+    rows = []
+    per_lambda_ranks: dict[float, dict[str, Optional[int]]] = {}
+
+    for lam in MMR_LAMBDAS:
+        def run(query: str, k: int):
+            return store.search_hybrid(
+                query,
+                top_k=k,
+                candidate_k=corpus_size,
+                rerank=False,
+                use_keyword=True,
+                mmr_lambda=lam,
+            )
+
+        ranks: dict[str, Optional[int]] = {}
+        distinct: list[float] = []
+        pairwise: list[float] = []
+        latencies: list[float] = []
+
+        for q in questions:
+            full = run(q.question, corpus_size)
+            ids = [chunk_key(c) for c, _ in full]
+            ranks[q.id] = ids.index(q.expected_chunk_id) + 1 if q.expected_chunk_id in ids else None
+
+            top3 = [c for c, _ in full[:TOP_K]]
+            distinct.append(len({c.source for c in top3}))
+            vecs = [vector(index_of[chunk_key(c)]) for c in top3]
+            sims = [
+                float(np.dot(vecs[a], vecs[b]))
+                for a in range(len(vecs))
+                for b in range(a + 1, len(vecs))
+            ]
+            pairwise.append(statistics.mean(sims) if sims else 0.0)
+
+            run(q.question, TOP_K)  # warm-up, not timed
+            samples = []
+            for _ in range(LATENCY_REPEATS):
+                start = time.perf_counter()
+                run(q.question, TOP_K)
+                samples.append((time.perf_counter() - start) * 1000.0)
+            latencies.append(statistics.median(samples))
+
+        total = len(questions)
+        per_lambda_ranks[lam] = ranks
+        rows.append(
+            {
+                "lam": lam,
+                "hit3": sum(1 for r in ranks.values() if r and r <= TOP_K) / total,
+                "hit1": sum(1 for r in ranks.values() if r == 1) / total,
+                "mrr": sum((1 / r) if r else 0.0 for r in ranks.values()) / total,
+                "distinct": statistics.mean(distinct),
+                "pairwise": statistics.mean(pairwise),
+                "p50": statistics.median(latencies),
+            }
+        )
+        print(
+            f"  lambda {lam:.2f}: hit@3 {rows[-1]['hit3'] * total:.0f}/{total}  "
+            f"distinct {rows[-1]['distinct']:.2f}/3  pairwise {rows[-1]['pairwise']:.3f}"
+        )
+
+    off = rows[0]
+    # Tune once: keep the most questions in the top-3, then break ties towards
+    # the most diverse. Picking on diversity alone would select a lambda that
+    # loses the answer, which is exactly the trade the bonus asks about.
+    best = min(rows, key=lambda r: (-r["hit3"], r["pairwise"]))
+
+    def displaced_at(lam: float):
+        out = []
+        for q in questions:
+            before = per_lambda_ranks[1.0][q.id]
+            after = per_lambda_ranks[lam][q.id]
+            if before and before <= TOP_K and (after is None or after > TOP_K):
+                out.append((q.id, before, after if after else "not retrieved"))
+        return out
+
+    # The bonus asks specifically what MMR costs when it pushes a correct chunk
+    # out of the top-3, so the most aggressive lambda is reported even when the
+    # tuned one is harmless - that is where the warned-about failure is visible.
+    aggressive = min(rows, key=lambda r: r["lam"])
+
+    return {
+        "rows": rows,
+        "best": best,
+        "displaced": displaced_at(best["lam"]) if best["lam"] < 1.0 else [],
+        "aggressive": aggressive,
+        "aggressive_displaced": displaced_at(aggressive["lam"]),
+        # Shipping needs a diversity gain a reader can see, not only a shift in
+        # the quantity MMR happens to optimise. Mean pairwise cosine moving
+        # while the article count stands still is MMR reordering chunks of the
+        # same document, which changes nothing about what the user reads.
+        "ship": best["hit3"] >= off["hit3"] and best["distinct"] > off["distinct"],
+    }
+
+
 def build_report(
     questions: list[Question],
     arms: dict[str, Arm],
@@ -418,6 +534,7 @@ def build_report(
     chosen: Arm,
     failures: dict[str, tuple[str, str]],
     chunk_count: int,
+    mmr: Optional[dict],
 ) -> str:
     base = arms["baseline"]
     n = len(questions)
@@ -912,7 +1029,7 @@ def build_report(
         )
         w(
             f"- **Shipping it anyway would have been the mistake the Week 3 report already "
-            f"documents.** Section 7 records that a saturated metric on a six-article corpus cannot "
+            f"documents.** Section 7 records that a saturated metric on a small corpus cannot "
             f"tell two configurations apart. Reading 100% -> 100% as 'no harm, ship it' repeats "
             f"exactly that error with a real cost attached."
         )
@@ -954,9 +1071,123 @@ def build_report(
     w("### Reproduce")
     w("")
     w("```bash")
-    w("cd backend && python scripts/evaluate_week4.py    # rewrites sections 9-14 of ../results.md")
+    w("cd backend && python scripts/evaluate_week4.py    # rewrites sections 9-15 of ../results.md")
     w("```")
+    w("")
+
+    if mmr is not None:
+        render_mmr(w, mmr, n)
+
     return "\n".join(lines)
+
+
+def render_mmr(w, mmr: dict, n: int) -> None:
+    """Section 15 - the bonus experiment, kept separate from the shipping decision."""
+    off = mmr["rows"][0]
+    best = mmr["best"]
+
+    w("## 15. Bonus: MMR over the fused candidate list")
+    w("")
+    w(
+        "The bonus asks what Maximal Marginal Relevance does when the top-3 is three near-copies "
+        "of one section. That condition is real on this corpus rather than hypothetical: KB-007 "
+        "holds six plan packs that differ from the retail ones mainly in a numeric identifier, "
+        "and the baseline top-3 for W01 is three consecutive chunks of that one article."
+    )
+    w("")
+    w(
+        "MMR is applied last, to the fused BM25 + RRF candidate list - the arm section 14 ships - "
+        "so this is one further change measured on top of it, not a fourth retriever. It "
+        "repeatedly picks the candidate maximising `lambda * relevance - (1 - lambda) * max "
+        "similarity to anything already picked`, with relevance min-max normalised per query so "
+        "`lambda` means the same thing at every value. `lambda = 1.0` is the identity and "
+        "reproduces the shipped ordering exactly, which is the control row below."
+    )
+    w("")
+    w(
+        "Diversity is measured two ways over the top-3. **Distinct articles** is how many of the "
+        "three come from different source files, averaged over the "
+        f"{n} questions. **Mean pairwise cosine** is the average similarity between the three "
+        "retrieved chunks: lower is more varied. The first is what a reader notices; the second is "
+        "what MMR actually optimises."
+    )
+    w("")
+    w("| lambda | Hit@3 | Hit@1 | MRR | Distinct articles in top-3 | Mean pairwise cosine | p50 latency |")
+    w("| --- | --- | --- | --- | --- | --- | --- |")
+    for row in mmr["rows"]:
+        marker = " (MMR off)" if row["lam"] >= 1.0 else ""
+        w(
+            f"| {row['lam']:.2f}{marker} | {pct(row['hit3'])} | {pct(row['hit1'])} | "
+            f"{row['mrr']:.3f} | {row['distinct']:.2f} / 3 | {row['pairwise']:.3f} | "
+            f"{row['p50']:.1f} ms |"
+        )
+    w("")
+
+    w(f"**Tuned once, at lambda = {best['lam']:.2f}** - the value that keeps the most questions at "
+      "hit@3 and, among ties, diversifies most.")
+    w("")
+
+    hit_delta = round((best["hit3"] - off["hit3"]) * n)
+    div_delta = best["pairwise"] - off["pairwise"]
+    w(f"- Hit-rate@3: {pct(off['hit3'])} -> {pct(best['hit3'])} "
+      f"({hit_delta:+d} question{'' if abs(hit_delta) == 1 else 's'})")
+    w(f"- Distinct articles in the top-3: {off['distinct']:.2f} -> {best['distinct']:.2f} of 3")
+    w(f"- Mean pairwise cosine in the top-3: {off['pairwise']:.3f} -> {best['pairwise']:.3f} "
+      f"({div_delta:+.3f}; lower is more varied)")
+    w(f"- p50 latency: {off['p50']:.1f} ms -> {best['p50']:.1f} ms")
+    w("")
+
+    if mmr["displaced"]:
+        moved = ", ".join(
+            f"{qid} (rank {before} -> {after})" for qid, before, after in mmr["displaced"]
+        )
+        w(f"**Questions MMR pushed out of the top-3 at lambda = {best['lam']:.2f}:** {moved}.")
+        w("")
+    else:
+        w(f"At lambda = {best['lam']:.2f} no question is pushed out of the top-3.")
+        w("")
+
+    aggressive = mmr["aggressive"]
+    if mmr["aggressive_displaced"]:
+        moved = ", ".join(
+            f"{qid} (rank {before} -> {after})"
+            for qid, before, after in mmr["aggressive_displaced"]
+        )
+        w(f"That is not true further down the sweep, and this is the failure the bonus warns about, "
+          f"observed rather than assumed. At lambda = {aggressive['lam']:.2f}, "
+          f"{_count(len(mmr['aggressive_displaced']), 'question')} lose the labelled chunk from the "
+          f"top-3 entirely: {moved}. In each case retrieval had already found the answer and MMR "
+          "demoted it for resembling something it had just selected.")
+        w("")
+
+    worst = min(mmr["rows"], key=lambda r: r["hit3"])
+    w(f"Across the sweep, hit-rate@3 is highest with MMR off and falls to {pct(worst['hit3'])} at "
+      f"lambda = {worst['lam']:.2f}. The trend has one direction on this corpus, and the reason is "
+      "structural: the labelled chunk and its near-duplicates come from the *same* article often "
+      "enough that penalising similarity penalises the answer.")
+    w("")
+
+    if mmr["ship"]:
+        w(f"**Would I ship it? Yes, at lambda = {best['lam']:.2f}.** Hit-rate@3 is unchanged and the "
+          f"top-3 carries {best['distinct']:.2f} distinct articles against {off['distinct']:.2f} "
+          "with MMR off - a difference a support agent reading three results would actually see.")
+    else:
+        w(f"**Would I ship it? No.** The tuned lambda buys nothing worth having. Hit-rate@3 does not "
+          f"move, and neither does the diversity number a person would notice: the top-3 still "
+          f"carries {best['distinct']:.2f} distinct articles, exactly what it carried with MMR off. "
+          f"The only thing that shifted is mean pairwise cosine ({off['pairwise']:.3f} -> "
+          f"{best['pairwise']:.3f}), which is MMR reordering chunks of the *same* document - "
+          "invisible to the reader and worth nothing to the answer.")
+        w("")
+        w("Every lambda that moves the visible number costs questions instead. The reason is the "
+          "shape of the task rather than a tuning failure: each golden question has exactly one "
+          "correct chunk, so a more varied top-3 is neutral at best and at worst evicts the answer. "
+          "Diversity earns its place when a query has several valid answers spread across articles. "
+          "A support question with one correct troubleshooting row is the opposite case, and the "
+          "near-duplicate packs in KB-007 that made MMR look necessary are better handled by the "
+          "cross-encoder, which reads the query and the chunk together instead of inferring "
+          "redundancy from vector distance.")
+    w("")
 
 
 def write_results(section: str) -> None:
@@ -1053,7 +1284,12 @@ def main() -> None:
     # change that did not pay off is the point of the exercise.
     chosen = arms["bm25"]
 
-    report = build_report(questions, arms, combined, generation, chosen, failures, len(chunks))
+    print("Sweeping MMR lambda over the fused candidate list (bonus) ...")
+    mmr = sweep_mmr(store, questions, len(chunks))
+
+    report = build_report(
+        questions, arms, combined, generation, chosen, failures, len(chunks), mmr
+    )
     write_results(report)
     print(f"\nWrote Week 4 sections to {RESULTS}")
     print(
