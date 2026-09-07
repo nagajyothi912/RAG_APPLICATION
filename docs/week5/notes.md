@@ -203,3 +203,50 @@ Three things, stated with their consequence rather than glossed:
    app has no conversation history to record. That is a property of the app, not
    of the trace format, and it is why those traces can only be coded on what the
    app saw.
+
+---
+
+## 3. Open coding — 20 sentences, one per trace
+
+One sentence per trace, describing what was seen in that trace. Not what
+category it belongs to, not what caused it, and not what to change. Written
+against the trace records only, in the order the seeded draw produced.
+
+1. `TR-0012` — The document filter was pinned to the account-management policy while the question asked about two plans, so only account-management chunks came back, and the answer was "I don't know based on the provided documents." followed by "(Source: policies/account_management.md)".
+2. `TR-0023` — Three plan chunks came back scoring between 0.31 and 0.34 against a 0.15 threshold, none of them mentions tax anywhere, and the answer was "I don't know based on the provided documents."
+3. `TR-0026` — The question arrived as "AF401 eror" with no hyphen and a misspelling, and the answer returned the AF-401 meaning, its resolution step and its escalation count from the error-code table.
+4. `TR-0035` — The ticket asked three things and the answer covered installation time and cost for two plans, then stopped in the middle of the word "AirFiber" inside a source line, never reaching whether the customer must be at home.
+5. `TR-0037` — The ticket asked three things and the answer addressed all three including the postpaid case, and the sentence about postpaid accounts not being pausable does appear in the chunk it cited.
+6. `TR-0045` — The answer said the 1299 pack is sold only in Hyderabad and so is unavailable in Chennai, and it rendered the citation as 【help_centre/airfiber_legacy_plans.md】 rather than the source line every other answer in the sample used.
+7. `TR-0055` — The follow-up "how much is that?" arrived with no prior turn to resolve it, the top-ranked chunk was the installation-timelines section that names the ₹500 charge, and the request was refused at a score of 0.1414 without the model being called at all.
+8. `TR-0060` — Five legacy-plan chunks came back, none of the legacy plan sections states a price anywhere in the article, and the answer was "I don't know based on the provided documents."
+9. `TR-0071` — The question arrived as "changng account holdr documents", the closing-the-account chunk was ranked first and the account-holder chunk second, and the answer listed the transfer form, the photo ID, the nil-balance condition and the three-working-day timeline.
+10. `TR-0072` — A long complaint ended in "which plan I am actually on and what it costs", the migration-rules chunk was ranked first, and the answer was "I don't know based on the provided documents." with no mention of the migration rules that were sitting in front of it.
+11. `TR-0073` — "orange light that is not flashing" returned the LED status table first under week3 at top_k 10, and the answer gave the solid-orange row's meaning and its power-cycle step.
+12. `TR-0077` — The answer said the 999 pack has been closed to new customers since 1 January 2026, and it again rendered the citation as 【help_centre/airfiber_legacy_plans.md】.
+13. `TR-0084` — The single token "500" returned both chunks that name a ₹500 charge at ranks one and two, and the request was refused at a score of 0.1289 without the model being called.
+14. `TR-0089` — A question about a Gmail password scored 0.188, cleared the 0.15 threshold, reached the model, and came back "I don't know based on the provided documents."
+15. `TR-0090` — The follow-up "what if I don't?" arrived with no prior turn, the five chunks returned scored between 0.01 and 0.10, and the request was refused without the model being called.
+16. `TR-0098` — The mesh-extender placement chunk came back first at 0.6353 and the answer gave the "at least 1 metre above the floor" figure and named its source file.
+17. `TR-0111` — The document filter was pinned to the refund policy while the question asked about a mid-cycle upgrade, exactly one chunk came back, and the answer was "I don't know based on the provided documents." followed by "(Source: policies/refund_policy.txt)".
+18. `TR-0112` — The customer said they had been on the 999 pack since 2024, the three chunks returned were legacy plan descriptions that do not carry the article's opening sentence about existing subscribers keeping their packs, and the answer was "I don't know based on the provided documents. (Source: help_centre/airfiber_legacy_plans.md)".
+19. `TR-0114` — A question about a landline bundle returned five plan chunks scoring between 0.31 and 0.35, none of which mentions landlines, and the answer was "I don't know based on the provided documents."
+20. `TR-0115` — "second wifi box" returned the official-speed-test chunk first and the mesh-placement chunk second, and the answer gave the halfway placement, the one-metre height and the microwave warning.
+
+### 3.1 Zero code changes during this step
+
+This section was written and committed on its own. The commit touches exactly one
+file and that file is markdown:
+
+```
+$ git diff --stat e9c2c55..HEAD -- '*.py' '*.ts' '*.tsx'
+(no output)
+
+$ git show --stat --oneline HEAD
+week5: open coding, 20 traces, one sentence each - no code changes
+ docs/week5/notes.md | 41 +++++++++++++++++++++++++++++++++++++++++
+```
+
+`test_no_source_file_changed_during_the_open_coding_commit` re-derives the second
+command from `git log` and asserts the file list is exactly
+`["docs/week5/notes.md"]`, so the claim cannot go stale.
