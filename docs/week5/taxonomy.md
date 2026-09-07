@@ -24,7 +24,7 @@ a small count. It also means the ranking is fragile: one trace is 5 points, so m
 and 5 are separated by less than the noise of a single draw.
 
 **Next.** Mode 1 is the prediction target: [`prediction.md`](prediction.md), committed
-`b1d5b09` on 2026-09-07, before any fix. It was chosen over mode 2 because it has the most
+`4f78158` on 2026-09-07, before any fix. It was chosen over mode 2 because it has the most
 traces and because mode 2 is a one-clause prompt edit with nothing to learn from it.
 
 Verbatim open coding, the seeded draw, the replay evidence, the demo-set comparison and

@@ -310,3 +310,59 @@ are worth noting individually because they show the two refusal layers working
 as designed. `TR-0089` scored 0.188, cleared the 0.15 gate, reached the model,
 and was refused by the system prompt alone — the layer `results.md` section 5
 argues is load-bearing. `TR-0090` scored 0.1022 and never left the process.
+
+---
+
+## 5. The prediction, committed before any fix
+
+Full text: [`prediction.md`](prediction.md).
+
+### 5.1 What it says
+
+Target **mode 1**, "refuses while the chunk that answers it is ranked first",
+3/20 (15%). One change: skip the numeric gate for queries under four tokens and
+let the system prompt decide instead. Expected: mode 1 drops to **≤ 1/20 (5%)**,
+a **−10 point** delta, while a new "answers something the corpus does not cover"
+mode stays at **0/20**, "no defect seen" holds at **≥ 10/20**, and hit-rate@3 on
+the Week 4 golden set stays at **11/12**.
+
+Three of the four conditions are guardrails that must *not* move. Letting short
+queries past the gate could buy back three refusals by starting to invent
+answers, and that trade would be worse than the problem it fixes. Naming the
+guardrail in advance is what stops next week's result from being unfalsifiable
+in the direction that flatters me.
+
+### 5.2 The commit
+
+
+
+Hash **`4f78158`**, tagged `week5-prediction`. Author date and commit date agree;
+neither was back-dated.
+
+### 5.3 Proof it predates any fix
+
+
+
+The first shows the commit contained the prediction and nothing else, which is
+why it lives in its own file: a section of `notes.md` cannot be committed alone,
+and its hash would change every time the rest of the file did. The second is the
+actual "before any fix" evidence, and
+`test_nothing_was_fixed_after_the_prediction_was_committed` re-runs it.
+
+---
+
+## 6. Why a public benchmark would not have surfaced the top three
+
+MMLU and HumanEval measure a model against knowledge and code it already carries,
+whereas the top three modes are all failures of this corpus and this pipeline: the
+₹500 collision between an installation charge and a relocation charge, and the six
+legacy plan packs that shadow the retail ones, exist in seven files that no public
+benchmark has ever seen. Mode 1 is not a knowledge failure at all, because the
+answer was retrieved and ranked first and then discarded by a numeric gate before
+the model was ever called, so any benchmark scoring the final answer string alone
+would record a refusal and could not distinguish it from a question the corpus
+genuinely does not cover. A benchmark also reports one number over a fixed
+distribution chosen by someone else, while every mode here came out of twenty
+traces drawn from our own traffic mix, and mode 1's frequency is a direct function
+of a threshold that results.md section 5 already proves cannot separate answerable
+from out-of-scope on this corpus, which is a property no external score can observe.
