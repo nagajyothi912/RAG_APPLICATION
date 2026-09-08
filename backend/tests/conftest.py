@@ -27,6 +27,10 @@ os.environ["SCORE_THRESHOLD"] = "0.15"
 # TRACE_ENABLED=true in backend/.env must not be able to make the test run
 # append to the real trace file.
 os.environ["TRACE_ENABLED"] = "false"
+# Langfuse must be off for the suite too: a developer with real keys in
+# backend/.env would otherwise ship a trace to their live project on every
+# test run that exercises the chat route.
+os.environ["LANGFUSE_ENABLED"] = "false"
 os.environ["TRACE_PATH"] = str(Path(TMP_DOCS).parent / "rag-traces" / "test.jsonl")
 
 

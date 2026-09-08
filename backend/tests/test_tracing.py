@@ -303,3 +303,79 @@ def test_the_corpus_fingerprint_changes_when_the_corpus_does():
     b = [chunk("a.md", 0, "hello"), chunk("a.md", 1, "world!")]
     assert tracing.corpus_fingerprint(a) == tracing.corpus_fingerprint(list(reversed(a)))
     assert tracing.corpus_fingerprint(a) != tracing.corpus_fingerprint(b)
+
+
+# --------------------------------------------------------------- Langfuse sink
+
+def test_langfuse_is_off_by_default_and_nothing_is_emitted(client, indexed, monkeypatch):
+    """
+    A developer with real Langfuse keys in backend/.env must not ship a trace to
+    their live project on every test run. conftest pins LANGFUSE_ENABLED=false
+    for the same reason it pins DOCS_DIR.
+    """
+    from app.services import langfuse_sink
+
+    langfuse_sink.reset_client()
+    assert langfuse_sink.enabled() is False
+    calls = []
+    monkeypatch.setattr(langfuse_sink, "emit", lambda *a, **k: calls.append(a))
+    response = client.post("/api/chat", json={"message": "What does AirFiber_1199_1M include?"})
+    assert response.status_code == 200
+    assert calls == []
+
+
+def test_the_langfuse_sink_consumes_the_same_record_the_jsonl_writer_does(client, indexed, traces, monkeypatch):
+    """
+    One record shape, two sinks. This is what makes the backfill script
+    trustworthy: pushing the committed JSONL into Langfuse must produce exactly
+    what a live request would have produced, not a second serialisation that
+    drifts from the first.
+    """
+    from app.services import langfuse_sink
+    from app.services import rag_service as rag_module
+
+    captured = {}
+    monkeypatch.setattr(langfuse_sink, "enabled", lambda: True)
+    monkeypatch.setattr(langfuse_sink, "emit", lambda record, **k: captured.update(record))
+    client.post("/api/chat", json={"message": "What does AirFiber_1199_1M include?"})
+
+    written = traces()[0]
+    assert captured["trace_id"] == written["trace_id"]
+    assert captured["retrieval"]["chunks"] == written["retrieval"]["chunks"]
+    assert captured["generation"]["user_prompt"] == written["generation"]["user_prompt"]
+
+
+def test_a_langfuse_failure_does_not_fail_the_request(client, indexed, monkeypatch):
+    """Telemetry degrades; the answer does not."""
+    from app.services import langfuse_sink
+
+    monkeypatch.setattr(langfuse_sink, "enabled", lambda: True)
+    monkeypatch.setattr(langfuse_sink, "get_client", lambda: object())
+    monkeypatch.setattr(
+        langfuse_sink, "_emit", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("langfuse down"))
+    )
+    langfuse_sink._broken = False
+    response = client.post("/api/chat", json={"message": "What does AirFiber_1199_1M include?"})
+    assert response.status_code == 200, response.text
+    assert "200 Mbps" in response.json()["answer"]
+    langfuse_sink._broken = False
+
+
+def test_langfuse_trace_ids_are_derived_from_the_local_trace_id(monkeypatch):
+    """
+    Deterministic ids are what make the backfill re-runnable: a second push
+    updates the same traces instead of duplicating 148 of them, and TR-0037 in
+    the write-up resolves to one stable URL.
+    """
+    from app.services import langfuse_sink
+
+    class FakeClient:
+        def create_trace_id(self, *, seed):
+            return "derived-" + seed
+
+    monkeypatch.setattr(langfuse_sink, "get_client", lambda: FakeClient())
+    first = langfuse_sink.trace_url("TR-0037")
+    second = langfuse_sink.trace_url("TR-0037")
+    assert first == second
+    assert first.endswith("/trace/derived-TR-0037")
+    assert langfuse_sink.trace_url("TR-0038") != first

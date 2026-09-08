@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.chat import router as chat_router
 from app.api.documents import router as documents_router
 from app.config import settings
+from app.services import langfuse_sink
 from app.services.rag_service import get_rag_service
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -22,7 +23,12 @@ async def lifespan(_app: FastAPI):
         len(service.store.chunks),
         service.llm_configured,
     )
+    if langfuse_sink.enabled():
+        logger.info("Langfuse tracing on -> %s", settings.langfuse_base_url)
     yield
+    # The SDK batches spans and flushes on an interval, so a server stopped
+    # shortly after a request would otherwise drop that request's trace.
+    langfuse_sink.flush()
 
 
 app = FastAPI(

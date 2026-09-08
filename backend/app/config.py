@@ -38,6 +38,16 @@ class Settings(BaseSettings):
     trace_path: Path = BACKEND_ROOT / "data" / "traces" / "chat_traces.jsonl"
     trace_include_prompts: bool = True
 
+    # Langfuse is a second sink for the same trace record, not a replacement.
+    # The JSONL is what the committed error analysis is pinned to; this is where
+    # the traces are read. Independent of TRACE_ENABLED on purpose, so a server
+    # can ship traces to Langfuse without also writing a local file, or both.
+    langfuse_enabled: bool = False
+    langfuse_public_key: str = ""
+    langfuse_secret_key: str = ""
+    langfuse_base_url: str = "https://us.cloud.langfuse.com"
+    langfuse_environment: str = "development"
+
     @property
     def api_key(self) -> str:
         return self.groq_api_key.strip()

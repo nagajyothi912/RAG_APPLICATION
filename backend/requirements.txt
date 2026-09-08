@@ -13,3 +13,5 @@ numpy>=1.26.0
 httpx>=0.27.0
 pytest>=8.3.0
 rank-bm25>=0.2.2
+# Optional: only imported when LANGFUSE_ENABLED is set (see app/services/langfuse_sink.py)
+langfuse>=3.0.0

@@ -60,7 +60,7 @@ from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
 
 from app.config import settings
-from app.services import tracing
+from app.services import langfuse_sink, tracing
 from app.services.chunking import DEFAULT_STRATEGY, STRATEGIES, chunk_document, chunk_fixed_text
 from app.services.retrieval import (
     BM25Index,
@@ -909,8 +909,9 @@ class RagService:
         t_start = time.perf_counter()
         writer = tracing.get_trace_writer()
         # Read once into a local: a mid-request toggle must not be able to
-        # produce a half-built record.
-        tracing_on = writer.enabled
+        # produce a half-built record. Either sink turns record-building on.
+        langfuse_on = langfuse_sink.enabled()
+        tracing_on = writer.enabled or langfuse_on
         capture: dict | None = {} if tracing_on else None
 
         results: list = []
@@ -956,39 +957,40 @@ class RagService:
                             refusal, "llm"
                         )
                     )
-                    writer.write(
-                        tracing.build_chat_record(
-                            trace_id=trace_id,
-                            started_at=started_at,
-                            finished_at=tracing.utc_now_iso(),
-                            question=question,
-                            mode_requested=mode,
-                            mode_effective=mode_effective,
-                            top_k_requested=top_k,
-                            top_k_effective=top_k or self.top_k,
-                            filters=filters,
-                            config=self.trace_config(),
-                            results=results,
-                            gate_score=gate_score,
-                            score_threshold=SCORE_THRESHOLD,
-                            hybrid=mode_effective == WEEK4
-                            and bool(self.store.bm25 and self.store.bm25.available),
-                            reranked=reranked,
-                            answer_text=answer,
-                            answer_source=answer_source,
-                            capture=capture,
-                            error=failure,
-                            latency_ms={
-                                "retrieval": t_retrieval_ms,
-                                "generation": t_generation_ms,
-                                "llm_api": (capture or {}).get("api_latency_ms"),
-                                "total": (time.perf_counter() - t_start) * 1000,
-                            },
-                            include_prompts=writer.include_prompts,
-                            pool=(trace_extra or {}).get("pool"),
-                            source_id=(trace_extra or {}).get("source_id"),
-                        )
+                    record = tracing.build_chat_record(
+                        trace_id=trace_id,
+                        started_at=started_at,
+                        finished_at=tracing.utc_now_iso(),
+                        question=question,
+                        mode_requested=mode,
+                        mode_effective=mode_effective,
+                        top_k_requested=top_k,
+                        top_k_effective=top_k or self.top_k,
+                        filters=filters,
+                        config=self.trace_config(),
+                        results=results,
+                        gate_score=gate_score,
+                        score_threshold=SCORE_THRESHOLD,
+                        hybrid=mode_effective == WEEK4
+                        and bool(self.store.bm25 and self.store.bm25.available),
+                        reranked=reranked,
+                        answer_text=answer,
+                        answer_source=answer_source,
+                        capture=capture,
+                        error=failure,
+                        latency_ms={
+                            "retrieval": t_retrieval_ms,
+                            "generation": t_generation_ms,
+                            "llm_api": (capture or {}).get("api_latency_ms"),
+                            "total": (time.perf_counter() - t_start) * 1000,
+                        },
+                        include_prompts=writer.include_prompts,
+                        pool=(trace_extra or {}).get("pool"),
+                        source_id=(trace_extra or {}).get("source_id"),
                     )
+                    writer.write(record)
+                    if langfuse_on:
+                        langfuse_sink.emit(record)
                 except Exception as exc:  # noqa: BLE001
                     logger.warning("Failed to record trace %s: %s", trace_id, exc)
 
