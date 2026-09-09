@@ -215,3 +215,118 @@ export function deleteDocument(name: string) {
 export function getHealth() {
   return request<HealthResponse>('/api/health');
 }
+
+/* ---------------------------------------------------------------- Week 5 */
+
+export type TaxonomyMode = {
+  rank: number;
+  name: string;
+  count: number;
+  percent: number;
+  severity: string;
+  example_trace_id: string;
+};
+
+export type AnalysisSummary = {
+  available: boolean;
+  source: string;
+  traces: number;
+  pools: Record<string, number>;
+  statuses: Record<string, number>;
+  modes: TaxonomyMode[];
+  residual: { name: string; count: number; percent: number } | null;
+  sample_size: number;
+  sample_seed: number | null;
+  sampled_random: string[];
+  sampled_demo: string[];
+  traces_sha256: string;
+  corpus_fingerprint: string;
+  prompt_id: string;
+  coded: number;
+};
+
+export type TraceRow = {
+  trace_id: string;
+  pool: string | null;
+  source_id: string | null;
+  started_at: string | null;
+  question: string;
+  mode: string;
+  top_k: number | null;
+  filter: string | null;
+  status: string;
+  answer_source: string;
+  refused: boolean;
+  gate_score: number | null;
+  score_threshold: number | null;
+  generation_called: boolean;
+  finish_reason: string | null;
+  chunks: number;
+  top_chunk: string | null;
+  answer_preview: string;
+  latency_ms: number | null;
+  sampled: string | null;
+  open_coding: string | null;
+  failure_mode: string | null;
+};
+
+export type TraceListResponse = {
+  total: number;
+  offset: number;
+  limit: number;
+  rows: TraceRow[];
+};
+
+/** The full trace record. Loosely typed on purpose: the schema is versioned by
+ *  the backend and the detail panel renders whatever fields are present. */
+export type TraceDetail = {
+  trace: Record<string, any>;
+  sampled: string | null;
+  open_coding: string | null;
+  failure_mode: string | null;
+};
+
+export type TraceFilters = {
+  source?: string;
+  q?: string;
+  pool?: string;
+  mode?: string;
+  status?: string;
+  sampled?: string;
+  failureMode?: string;
+  refused?: boolean;
+  offset?: number;
+  limit?: number;
+};
+
+export function getAnalysisSummary(source = 'analysis') {
+  return request<AnalysisSummary>(`/api/analysis/summary?source=${encodeURIComponent(source)}`);
+}
+
+export function listTraces(filters: TraceFilters = {}) {
+  const params = new URLSearchParams();
+  const map: Record<string, unknown> = {
+    source: filters.source,
+    q: filters.q,
+    pool: filters.pool,
+    mode: filters.mode,
+    status: filters.status,
+    sampled: filters.sampled,
+    failure_mode: filters.failureMode,
+    refused: filters.refused,
+    offset: filters.offset,
+    limit: filters.limit,
+  };
+  Object.entries(map).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      params.set(key, String(value));
+    }
+  });
+  return request<TraceListResponse>(`/api/analysis/traces?${params.toString()}`);
+}
+
+export function getTrace(traceId: string, source = 'analysis') {
+  return request<TraceDetail>(
+    `/api/analysis/traces/${encodeURIComponent(traceId)}?source=${encodeURIComponent(source)}`,
+  );
+}

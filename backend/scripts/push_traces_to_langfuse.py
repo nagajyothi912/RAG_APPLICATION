@@ -38,6 +38,7 @@ import json
 import os
 import re
 import sys
+import time
 from pathlib import Path
 
 BACKEND = Path(__file__).resolve().parents[1]
@@ -100,6 +101,11 @@ def main() -> None:
     ap.add_argument("--sampled-only", action="store_true")
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument(
+        "--replace",
+        action="store_true",
+        help="delete these traces before pushing, so stale tags and scores go away",
+    )
     args = ap.parse_args()
 
     if not args.dry_run and not langfuse_sink.enabled():
@@ -135,6 +141,38 @@ def main() -> None:
             print(f"  {r['trace_id']}  tags={tags}  coded={r['trace_id'] in coding}")
         print("dry run, nothing sent")
         return
+
+    if args.replace:
+        # Langfuse MERGES tags and scores when a trace is updated, so a rename
+        # leaves the old name behind: re-pushing after changing `mode:week4` to
+        # `retrieval:week4` yields a trace carrying both. Deleting first is the
+        # only way to actually retire a tag. Safe here because every trace is
+        # reproducible from the committed, sha256-pinned traces.jsonl, and the
+        # ids are derived, so they come back at the same URLs.
+        client = langfuse_sink.get_client()
+        ids = [client.create_trace_id(seed=r["trace_id"]) for r in records]
+        print(f"deleting {len(ids)} traces before re-push ...")
+        for i in range(0, len(ids), 50):
+            client.api.trace.delete_multiple(trace_ids=ids[i : i + 50])
+
+        # Deletion is asynchronous. Pushing straight away races it: the delete
+        # job catches up mid-push and removes traces that were just written,
+        # which leaves the project short and half-tagged. Wait for the tag to
+        # drain to zero before writing anything back.
+        deadline = time.time() + 300
+        while time.time() < deadline:
+            time.sleep(10)
+            try:
+                left = client.api.trace.list(tags=["week5"], limit=1).meta.total_items
+            except Exception:
+                continue
+            print(f"  {left} still present ...")
+            if left == 0:
+                break
+        else:
+            sys.exit("Deletion did not finish within 5 minutes; re-run --replace.")
+        time.sleep(10)
+        print("  deletion complete")
 
     sent = 0
     for n, record in enumerate(records, start=1):
@@ -177,6 +215,12 @@ def _attach_open_coding(trace_id: str, record: dict, sentence: str, modes: dict)
 
     A numeric score is what makes it filterable and chartable in the UI; the
     sentence rides along as the comment, which is the part a human reads.
+
+    1.0 means a failure mode was assigned, 0.0 means the trace was read and found
+    clean, so the score's mean over a set of traces is its defect rate directly.
+    The name has to agree with the polarity: an earlier version called this
+    `week5_defect` and scored a defect as 0.0, which made every chart built on it
+    read backwards.
     """
     client = langfuse_sink.get_client()
     if client is None:
@@ -184,8 +228,8 @@ def _attach_open_coding(trace_id: str, record: dict, sentence: str, modes: dict)
     try:
         client.create_score(
             trace_id=trace_id,
-            name="week5_defect",
-            value=0.0 if modes.get(record["trace_id"], "").startswith("mode:") else 1.0,
+            name="week5_has_defect",
+            value=1.0 if modes.get(record["trace_id"], "").startswith("mode:") else 0.0,
             data_type="NUMERIC",
             comment=sentence,
         )

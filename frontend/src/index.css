@@ -63,6 +63,52 @@ p {
   border: 0;
 }
 
+.app-shell {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* The tab panes are the only scroll containers; body overflow stays hidden. */
+.app-shell > div:not(.app-tabs) {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.app-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 10px 18px 0;
+  background: var(--sidebar);
+  border-bottom: 1px solid rgba(255, 250, 243, 0.12);
+}
+
+.app-tabs button {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 10px 18px;
+  border-radius: 12px 12px 0 0;
+  color: rgba(244, 239, 228, 0.62);
+  background: transparent;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.app-tabs button:hover {
+  color: var(--paper);
+  background: rgba(255, 250, 243, 0.06);
+}
+
+.app-tabs button.is-active {
+  color: var(--ink);
+  background: var(--paper);
+}
+
 .rag-layout {
   display: grid;
   grid-template-columns: minmax(280px, 360px) 1fr;
@@ -836,5 +882,565 @@ p {
 
   .filter-select select {
     max-width: none;
+  }
+}
+
+/* ------------------------------------------------------------- Week 5 UI */
+
+.analysis-page {
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.analysis-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.analysis-header h2 {
+  font-size: 1.55rem;
+}
+
+.analysis-sub {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.analysis-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  margin: 0;
+}
+
+.analysis-stats dt {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-soft);
+}
+
+.analysis-stats dd {
+  margin: 2px 0 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: var(--serif);
+}
+
+.analysis-stats code {
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.analysis-empty {
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  padding: 18px 4px;
+}
+
+/* --- taxonomy */
+
+.taxonomy {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 6px 18px 14px;
+}
+
+.taxonomy-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.taxonomy-table th {
+  text-align: left;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-soft);
+  padding: 12px 10px 8px;
+  border-bottom: 1px solid var(--paper-2);
+}
+
+.taxonomy-table th.num,
+.taxonomy-table td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.taxonomy-table td {
+  padding: 10px;
+  border-bottom: 1px solid var(--paper-2);
+  vertical-align: middle;
+}
+
+.taxonomy-table tbody tr {
+  cursor: pointer;
+}
+
+.taxonomy-table tbody tr:hover {
+  background: var(--paper);
+}
+
+.taxonomy-table tbody tr.is-active {
+  background: rgba(196, 92, 38, 0.1);
+  box-shadow: inset 3px 0 0 var(--copper);
+}
+
+.taxonomy-table tr.residual td {
+  color: var(--ink-soft);
+}
+
+.mode-name {
+  display: block;
+  font-weight: 600;
+}
+
+.mode-bar {
+  display: block;
+  margin-top: 5px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--paper-2);
+  overflow: hidden;
+  max-width: 320px;
+}
+
+.mode-bar span {
+  display: block;
+  height: 100%;
+  background: var(--copper);
+}
+
+.severity {
+  font-size: 0.78rem;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  /* Both severities are warm, so weight carries the ranking too. Hue alone
+     would not separate them for a colour-blind reader. */
+  font-weight: 500;
+}
+
+.severity-high {
+  background: rgba(155, 44, 44, 0.14);
+  color: var(--danger);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px rgba(155, 44, 44, 0.35);
+}
+
+/* Amber, not green. Both severities are defects - this one is merely cheaper.
+   Green reads as "this row is fine", which is the opposite of what a row in a
+   failure taxonomy means. Green is reserved for the no-defect residual. */
+.severity-low {
+  background: rgba(196, 92, 38, 0.14);
+  color: var(--copper-dark);
+}
+
+.taxonomy-note {
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  padding: 10px 10px 0;
+}
+
+/* --- filters */
+
+.trace-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.filter-search {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 220px;
+  flex: 1 1 240px;
+}
+
+.filter-search span,
+.trace-filters .filter-select span {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-soft);
+}
+
+.filter-search input {
+  border: 1px solid var(--paper-2);
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: var(--white);
+  font-size: 0.9rem;
+}
+
+.filter-search input:focus-visible {
+  outline: 2px solid var(--copper);
+}
+
+/* --- list and detail */
+
+.analysis-body {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(360px, 1.15fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.trace-list.is-loading {
+  opacity: 0.55;
+}
+
+.trace-list-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  padding: 0 4px 8px;
+}
+
+.trace-pager button {
+  appearance: none;
+  border: 1px solid var(--paper-2);
+  background: var(--white);
+  border-radius: 8px;
+  padding: 4px 10px;
+  margin-left: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.trace-pager button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.trace-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trace-row {
+  width: 100%;
+  text-align: left;
+  appearance: none;
+  border: 1px solid transparent;
+  background: var(--white);
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.trace-row:hover {
+  border-color: var(--paper-2);
+  transform: translateX(2px);
+}
+
+.trace-row.is-selected {
+  border-color: var(--copper);
+  box-shadow: inset 3px 0 0 var(--copper);
+}
+
+.trace-row-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.trace-id {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.trace-question {
+  font-size: 0.92rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.trace-row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.pill {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* Neutral, not green: "answered" means the model produced text, not that the
+   text was right. Colour here would be a correctness claim the trace cannot make. */
+.pill-neutral {
+  background: rgba(61, 74, 67, 0.1);
+  color: var(--ink-soft);
+}
+
+.pill-warn {
+  background: rgba(196, 92, 38, 0.14);
+  color: var(--copper-dark);
+}
+
+.pill-error {
+  background: rgba(155, 44, 44, 0.13);
+  color: var(--danger);
+}
+
+.trace-detail {
+  position: sticky;
+  top: 0;
+  max-height: calc(100vh - 190px);
+  overflow-y: auto;
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trace-detail-empty {
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+}
+
+.trace-detail-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.trace-detail-head > div {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.icon-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--ink-soft);
+  padding: 0 4px;
+}
+
+.trace-detail-question {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+
+.open-coding {
+  margin: 0;
+  padding: 12px 14px;
+  background: var(--paper);
+  border-left: 3px solid var(--copper);
+  border-radius: 0 10px 10px 0;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.open-coding-label,
+.open-coding-mode {
+  display: block;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-soft);
+  margin-bottom: 5px;
+}
+
+.open-coding-mode {
+  margin: 8px 0 0;
+  color: var(--copper-dark);
+  font-weight: 700;
+}
+
+.kv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px 16px;
+  margin: 0;
+}
+
+.kv dt {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-soft);
+}
+
+.kv dd {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  word-break: break-word;
+}
+
+.trace-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--paper-2);
+}
+
+.trace-tabs button {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+  color: var(--ink-soft);
+  border-bottom: 2px solid transparent;
+}
+
+.trace-tabs button.is-active {
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom-color: var(--copper);
+}
+
+.trace-chunks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chunk {
+  border: 1px solid var(--paper-2);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.chunk.is-top {
+  border-color: var(--copper);
+  background: rgba(196, 92, 38, 0.045);
+}
+
+.chunk header {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+}
+
+.chunk-rank {
+  font-weight: 700;
+  color: var(--copper-dark);
+}
+
+.chunk-article {
+  color: var(--ink-soft);
+}
+
+.chunk-section {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin-top: 3px;
+}
+
+.chunk-scores {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.74rem;
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A dense score under SCORE_THRESHOLD is the number that decides a refusal. */
+.chunk-scores .below {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.chunk-retriever {
+  color: var(--ink-soft);
+}
+
+.chunk-preview {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  margin-top: 7px;
+  white-space: pre-wrap;
+}
+
+.trace-prompt h4,
+.trace-answer h4 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-soft);
+  margin: 12px 0 5px;
+}
+
+.trace-prompt pre,
+.trace-answer pre,
+.trace-raw {
+  background: var(--sidebar);
+  color: var(--paper);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 320px;
+  overflow-y: auto;
+  margin: 0;
+}
+
+.muted {
+  color: var(--ink-soft);
+  font-weight: 400;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 1100px) {
+  .analysis-body {
+    grid-template-columns: 1fr;
+  }
+
+  .trace-detail {
+    position: static;
+    max-height: none;
   }
 }

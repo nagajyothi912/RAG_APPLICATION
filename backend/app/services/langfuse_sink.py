@@ -152,8 +152,12 @@ def _emit(client: Any, record: dict, extra_tags: list[str]) -> str:
     start = _parse_ts(record.get("started_at"))
     end = _parse_ts(record.get("finished_at"))
 
+    # `retrieval:`, not `mode:`. The Week 5 backfill tags traces with the failure
+    # mode assigned in taxonomy.md as `mode:1` ... `mode:5`, and those are a
+    # different axis entirely from which retriever ran. Sharing the prefix put
+    # "week4" in the same filter list as "3", which reads as a sixth failure mode.
     tags = [
-        f"mode:{request['mode_effective']}",
+        f"retrieval:{request['mode_effective']}",
         f"status:{outcome['status']}",
         f"answer:{record['answer']['source']}",
     ]

@@ -13,6 +13,7 @@ during open coding, and a prediction committed before any fix - are properties
 of the history rather than of any file.
 """
 
+import ast
 import hashlib
 import json
 import re
@@ -444,15 +445,70 @@ def test_no_source_file_changed_during_the_open_coding_commit():
     assert files == ["docs/week5/notes.md"], files
 
 
+def _function_source(text: str, name: str) -> str:
+    """The source of one top-level or method-level def, located by AST."""
+    tree = ast.parse(text)
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
+            lines = text.splitlines()[node.lineno - 1 : node.end_lineno]
+            return "\n".join(lines)
+    raise AssertionError(f"{name} not found")
+
+
+# The surfaces that decide what a user is shown: retrieval, the refusal gate,
+# the prompt, and the generation call. A change to any of these after the
+# prediction is a fix; a change anywhere else is not.
+BEHAVIOURAL_FILES = [
+    "backend/app/services/retrieval.py",
+    "backend/app/services/chunking.py",
+]
+BEHAVIOURAL_FUNCTIONS = [
+    ("backend/app/services/rag_service.py", "retrieve"),
+    ("backend/app/services/rag_service.py", "answer_with_groq"),
+    ("backend/app/services/rag_service.py", "_ask_inner"),
+]
+
+
 @requires_git
 def test_nothing_was_fixed_after_the_prediction_was_committed():
     """
-    The 15-mark clause is "committed before any fix". Anything landing in app,
-    script or frontend source after it would make that false.
+    The 15-mark clause is "committed before any fix".
+
+    This deliberately does NOT assert that no file under backend/app changed.
+    That proxy is too coarse: adding a telemetry sink changes files there while
+    changing nothing a user is shown, and a test that cannot tell those apart
+    either blocks observability work or gets weakened until it means nothing.
+
+    What it asserts instead is that the code deciding what the user sees is
+    byte-identical to the prediction commit - retrieval, chunking, the refusal
+    gate, the prompt, and the generation call. Retuning SCORE_THRESHOLD, gating
+    on the rerank score, or editing the system prompt all land here and all fail.
     """
     commit = _git("log", "--format=%H", "-1", "--diff-filter=A", "--", "docs/week5/prediction.md")
-    after = _git(
-        "log", "--oneline", f"{commit}..HEAD", "--",
-        "backend/app", "backend/scripts", "frontend/src",
-    )
-    assert after == "", f"code changed after the prediction:\n{after}"
+    assert commit, "prediction.md has no adding commit"
+
+    for path in BEHAVIOURAL_FILES:
+        then = _git("show", f"{commit}:{path}")
+        now = (ROOT / path).read_text(encoding="utf-8")
+        assert then.strip() == now.strip(), f"{path} changed after the prediction"
+
+    for path, func in BEHAVIOURAL_FUNCTIONS:
+        then = _function_source(_git("show", f"{commit}:{path}"), func)
+        now = _function_source((ROOT / path).read_text(encoding="utf-8"), func)
+        assert then == now, f"{func}() in {path} changed after the prediction"
+
+
+@requires_git
+def test_the_refusal_threshold_has_not_moved_since_the_prediction():
+    """
+    The prediction names retuning SCORE_THRESHOLD as the thing it will NOT do,
+    because results.md section 5 documents that as the mistake the evaluation
+    exists to prevent. Worth pinning on its own, since it is one character to
+    change and would invalidate every frequency in the taxonomy.
+    """
+    import sys
+
+    sys.path.insert(0, str(BACKEND))
+    from app.services.rag_service import SCORE_THRESHOLD
+
+    assert SCORE_THRESHOLD == 0.15

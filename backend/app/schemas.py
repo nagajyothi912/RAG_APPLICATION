@@ -129,3 +129,79 @@ class HealthResponse(BaseModel):
     reranker_available: bool = False
     reranker_loaded: bool = False
     reranker_model: str = ""
+
+
+class TaxonomyMode(BaseModel):
+    rank: int
+    name: str
+    count: int
+    percent: float
+    severity: str
+    example_trace_id: str
+
+
+class TaxonomyResidual(BaseModel):
+    name: str
+    count: int
+    percent: float
+
+
+class AnalysisSummary(BaseModel):
+    """Everything the Error Analysis header needs, in one call."""
+
+    available: bool
+    source: str = "analysis"
+    traces: int = 0
+    pools: dict[str, int] = {}
+    statuses: dict[str, int] = {}
+    modes: list[TaxonomyMode] = []
+    residual: TaxonomyResidual | None = None
+    sample_size: int = 0
+    sample_seed: int | None = None
+    sampled_random: list[str] = []
+    sampled_demo: list[str] = []
+    traces_sha256: str = ""
+    corpus_fingerprint: str = ""
+    prompt_id: str = ""
+    coded: int = 0
+
+
+class TraceRow(BaseModel):
+    trace_id: str
+    pool: str | None = None
+    source_id: str | None = None
+    started_at: str | None = None
+    question: str
+    mode: str = ""
+    top_k: int | None = None
+    filter: str | None = None
+    status: str = ""
+    answer_source: str = ""
+    refused: bool = False
+    gate_score: float | None = None
+    score_threshold: float | None = None
+    generation_called: bool = False
+    finish_reason: str | None = None
+    chunks: int = 0
+    top_chunk: str | None = None
+    answer_preview: str = ""
+    latency_ms: float | None = None
+    sampled: str | None = None
+    open_coding: str | None = None
+    failure_mode: str | None = None
+
+
+class TraceListResponse(BaseModel):
+    total: int
+    offset: int
+    limit: int
+    rows: list[TraceRow] = []
+
+
+class TraceDetail(BaseModel):
+    """The whole record, plus whatever a human wrote about it."""
+
+    trace: dict
+    sampled: str | None = None
+    open_coding: str | None = None
+    failure_mode: str | None = None

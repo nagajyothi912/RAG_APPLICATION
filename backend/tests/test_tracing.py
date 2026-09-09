@@ -379,3 +379,81 @@ def test_langfuse_trace_ids_are_derived_from_the_local_trace_id(monkeypatch):
     assert first == second
     assert first.endswith("/trace/derived-TR-0037")
     assert langfuse_sink.trace_url("TR-0038") != first
+
+
+def test_the_sink_never_tags_a_retrieval_mode_with_the_failure_mode_prefix(monkeypatch):
+    """
+    The Week 5 backfill tags each trace with the failure mode from taxonomy.md as
+    `mode:1` ... `mode:5`. Which retriever ran is a different axis, and an earlier
+    version emitted it as `mode:week4`, which put "week4" in the same filter list
+    as "3" and read as a sixth failure mode. The prefixes must stay disjoint.
+    """
+    from app.services import langfuse_sink
+
+    captured = {}
+
+    class FakeSpan:
+        def set_trace_io(self, **kwargs):
+            return self
+
+        def start_observation(self, **kwargs):
+            return FakeSpan()
+
+        def create_event(self, **kwargs):
+            return self
+
+        def update(self, **kwargs):
+            return self
+
+        def end(self, **kwargs):
+            return self
+
+    class FakeClient:
+        def create_trace_id(self, *, seed):
+            return "t-" + seed
+
+        def start_observation(self, **kwargs):
+            return FakeSpan()
+
+    def fake_propagate(**kwargs):
+        captured.update(kwargs)
+
+        class Ctx:
+            def __enter__(self):
+                return None
+
+            def __exit__(self, *a):
+                return False
+
+        return Ctx()
+
+    import langfuse
+
+    monkeypatch.setattr(langfuse, "propagate_attributes", fake_propagate)
+    record = {
+        "trace_id": "TR-0001",
+        "schema_version": "1",
+        "started_at": None,
+        "finished_at": None,
+        "pool": "random",
+        "outcome": {"status": "answered", "error_message": None},
+        "request": {
+            "question": "q",
+            "mode_effective": "week4",
+            "top_k_effective": 5,
+            "filters": {},
+        },
+        "config": {"corpus": {"fingerprint": "abc"}},
+        "retrieval": {"chunks": [], "refused": False},
+        "generation": {"called": False},
+        "answer": {"text": "a", "source": "llm"},
+        "latency_ms": {},
+    }
+    langfuse_sink._emit(FakeClient(), record, ["week5", "mode:3"])
+
+    tags = captured["tags"]
+    assert "retrieval:week4" in tags
+    mode_tags = [t for t in tags if t.startswith("mode:")]
+    assert mode_tags == ["mode:3"], mode_tags
+    for tag in mode_tags:
+        assert tag.split(":", 1)[1].isdigit(), f"{tag} is not a failure mode number"
