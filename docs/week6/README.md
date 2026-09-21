@@ -169,14 +169,27 @@ adding more examples is the cheaper test of which change did the damage.
 ## 8. Langfuse
 
 The full run (`--judge both`) writes all 26 cases to the
-[Langfuse project](https://us.cloud.langfuse.com/project/cmts8l4k00513ad0g86x36tlp): one trace per
-ticket (tags `week6`, `mode:*`, `tier:*`, `regression`), the dataset `week6_ticket_replies`, and the
-scores `human_ground_truth`, `assertions_passed`, `judge_v1_score`, `judge_v2_score`,
-`judge_v1_agreement` and `judge_v2_agreement`.
+[Langfuse project](https://us.cloud.langfuse.com/project/cmts8l4k00513ad0g86x36tlp). Each run is one
+**session** (`week6-<UTC timestamp>`) with one trace per ticket, named `week6 eval: <ticket>` and tagged
+`week6`, `mode:*`, `tier:*` and `regression`. Each trace holds:
+
+- a span `eval_ticket_<id>` with the question, context, drafted reply and assertion results
+- two **generations**, `judge_v1` and `judge_v2`: the prompt sent, the raw judge output, the model
+  (`openai/gpt-oss-120b`, served by Groq) and token usage. With `--repeats`, this is the call whose
+  verdict matched the majority, and the metadata carries all the votes.
+- scores `human_ground_truth`, `assertions_passed`, `judge_v1_score`, `judge_v2_score`,
+  `judge_v1_agreement` and `judge_v2_agreement`
+
+Cases are also upserted into the dataset `week6_ticket_replies`. Langfuse has no built-in price for
+`openai/gpt-oss-120b`, so cost shows empty until a model definition with Groq's price is added under
+Settings → Models.
 
 Traces land in the `development` environment (the default of `LANGFUSE_ENVIRONMENT`). The Home
 dashboard defaults to `default` and to the past day, so set **Env → development** and widen the time
-range to see them. Trace ids are seeded from the ticket id, so re-runs update the same traces.
+range to see them.
+
+The runs committed in `e9e53a2` were synced before this logging existed. Those traces have no
+generations or tags, and each holds several stacked spans.
 
 ---
 

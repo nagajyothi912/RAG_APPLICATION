@@ -142,12 +142,24 @@ Drafted Ticket Reply:
                 parsed = json.loads(match.group(0))
                 score = int(parsed.get("score", 0))
                 explanation = parsed.get("explanation", "")
-                return {"score": 1 if score > 0 else 0, "explanation": explanation, "raw": content, "error": False}
+                usage = getattr(response, "usage", None)
+                return {
+                    "score": 1 if score > 0 else 0, "explanation": explanation, "raw": content, "error": False,
+                    "model": getattr(response, "model", None) or model,
+                    "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
+                    "usage": {
+                        k: v for k, v in {
+                            "input": getattr(usage, "prompt_tokens", None),
+                            "output": getattr(usage, "completion_tokens", None),
+                            "total": getattr(usage, "total_tokens", None),
+                        }.items() if isinstance(v, int)
+                    },
+                }
             last_error = f"no JSON object in judge output: {content[:120]!r}"
         except Exception as exc:
             last_error = str(exc)
     print(f"    [Judge Error on {case.get('ticket_id')}]: {last_error}")
-    return {"score": 0, "explanation": f"JUDGE ERROR: {last_error}", "raw": "", "error": True}
+    return {"score": 0, "explanation": f"JUDGE ERROR: {last_error}", "raw": "", "error": True, "model": model}
 
 
 def git_commit_of(path: Path) -> str:
@@ -231,10 +243,15 @@ def log_to_langfuse(
             print(f"Could not get/create dataset: {e}")
             dataset = None
 
+    from langfuse import propagate_attributes
+
+    # One trace per ticket per run, grouped into a session per run. A seed of the
+    # ticket id alone made every re-run stack another root span on the same trace.
+    run_id = f"week6-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
+
     for i, case in enumerate(cases):
         tid = case["ticket_id"]
-        trace_seed = f"week6_{tid}"
-        trace_id = langfuse_client.create_trace_id(seed=trace_seed)
+        trace_id = langfuse_client.create_trace_id(seed=f"{run_id}_{tid}")
         human_label = labels.get(tid, {}).get("label", 0)
         v1 = v1_results[i]
         v2 = v2_results[i]
@@ -255,31 +272,57 @@ def log_to_langfuse(
             except Exception:
                 pass
 
-        # Create evaluation trace
         tags = ["week6", f"mode:{case.get('week5_mode')}", f"tier:{case.get('tier')}"]
         if case.get("is_regression"):
             tags.append("regression")
 
-        span = langfuse_client.start_observation(
-            trace_context={"trace_id": trace_id},
-            name=f"eval_ticket_{tid}",
-            as_type="span",
-            input={"question": case["question"], "context": case["context"]},
-            output=case["drafted_reply"],
-            metadata={
-                "ticket_id": tid,
-                "trace_id_w5": case.get("trace_id"),
-                "week5_mode": case.get("week5_mode"),
-                "assertions": asserts,
-                "human_label": human_label,
-                "judge_v1_score": v1["score"],
-                "judge_v1_explanation": v1["explanation"],
-                "judge_v2_score": v2["score"],
-                "judge_v2_explanation": v2["explanation"],
-            },
-        )
-        span.set_trace_io(input=case["question"], output=case["drafted_reply"])
-        span.end()
+        # Tags and trace name only reach the trace through propagate_attributes in
+        # the v4 SDK; building the list alone left every week 6 trace untagged.
+        with propagate_attributes(
+            trace_name=f"week6 eval: {tid}",
+            tags=tags,
+            session_id=run_id,
+            metadata={"ticket_id": tid, "week5_mode": case.get("week5_mode")},
+        ):
+            span = langfuse_client.start_observation(
+                trace_context={"trace_id": trace_id},
+                name=f"eval_ticket_{tid}",
+                as_type="span",
+                input={"question": case["question"], "context": case["context"]},
+                output=case["drafted_reply"],
+                metadata={
+                    "ticket_id": tid,
+                    "trace_id_w5": case.get("trace_id"),
+                    "week5_mode": case.get("week5_mode"),
+                    "assertions": asserts,
+                    "human_label": human_label,
+                    "judge_v1_score": v1["score"],
+                    "judge_v2_score": v2["score"],
+                },
+            )
+            span.set_trace_io(input=case["question"], output=case["drafted_reply"])
+
+            # Each judge call as a generation, so the model, tokens and cost show up.
+            # With --repeats this is the call whose verdict matched the majority.
+            for name, res in (("judge_v1", v1), ("judge_v2", v2)):
+                gen = span.start_observation(
+                    name=name,
+                    as_type="generation",
+                    model=res.get("model"),
+                    input=res.get("messages"),
+                    output=res.get("raw") or res["explanation"],
+                    usage_details=res.get("usage") or None,
+                    model_parameters={"temperature": 0.0},
+                    metadata={
+                        "score": res["score"],
+                        "votes": res.get("votes"),
+                        "human_label": human_label,
+                        "agrees": res["score"] == human_label,
+                    },
+                    level="ERROR" if res.get("error") else None,
+                )
+                gen.end()
+            span.end()
 
         # Attach scores
         try:
