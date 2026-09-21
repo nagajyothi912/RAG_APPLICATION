@@ -1,0 +1,244 @@
+{
+  "judge": "v1",
+  "prompt_file": "judge_v1.txt",
+  "prompt_sha256": "f2f86eabd50af0c59e60d2d2ab7d902380b8aec7a7bbd817d4975cf0ce54712b",
+  "model": "openai/gpt-oss-120b",
+  "run_at": "2026-09-21T06:57:27+00:00",
+  "labels_commit": "d5dacc3 2026-09-21T12:25:26+05:30",
+  "results": [
+    {
+      "ticket_id": "T001",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply correctly confirms the existence of a business plan with a 99.9% SLA and provides the appropriate contact, fully answering the customer's question."
+    },
+    {
+      "ticket_id": "T003",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply directly and accurately states the official speed test requirements as given in the context, fully answering the customer's question."
+    },
+    {
+      "ticket_id": "T007",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply correctly states that an authorized adult must be present, confirms there is no charge, and gives the 3‑5 day timeframe, matching the provided context."
+    },
+    {
+      "ticket_id": "T010",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply correctly states the standard timeline, confirms eligibility for ₹100/day credits for the excess delay, and offers further assistance, fully addressing the customer's query."
+    },
+    {
+      "ticket_id": "T012",
+      "week5_mode": "mode_2",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply says it doesn't know, but the context provides the exact differences and OTT inclusion, so it fails to resolve the customer's question."
+    },
+    {
+      "ticket_id": "T016",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply correctly restates the refund conditions from the context, fully answering the customer's question."
+    },
+    {
+      "ticket_id": "T017",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 0,
+      "agree": false,
+      "error": false,
+      "explanation": "The reply incorrectly states the refund will be finalized within 24 hours, contradicting the policy that refunds are processed within 5-7 business days, thus providing inaccurate information."
+    },
+    {
+      "ticket_id": "T022",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 0,
+      "agree": false,
+      "error": false,
+      "explanation": "The reply misstates the deposit refund condition, adding an inspection step not in the policy, making the information factually inaccurate."
+    },
+    {
+      "ticket_id": "T026",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply correctly explains the AF-401 error, gives the proper reboot step, and advises re‑provisioning if the red LED remains, matching the provided context."
+    },
+    {
+      "ticket_id": "T035",
+      "week5_mode": "mode_5",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply is truncated and does not fully answer the question about needing to be at home, thus failing to resolve the inquiry."
+    },
+    {
+      "ticket_id": "T037",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply correctly states the 30‑day limit, that no charges apply and validity extends for prepaid, and that postpaid cannot be paused, fully addressing the customer's query."
+    },
+    {
+      "ticket_id": "T045",
+      "week5_mode": "mode_3",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply correctly states that the plan is restricted to Hyderabad and unavailable in Chennai, directly answering the customer's question with accurate information."
+    },
+    {
+      "ticket_id": "T055",
+      "week5_mode": "mode_1",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply says it doesn't know, but the context provides the installation cost, so it fails to resolve the inquiry."
+    },
+    {
+      "ticket_id": "T060",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply correctly explains that legacy plan pricing varies and may be cheaper or not depending on speed tier, matching the provided context."
+    },
+    {
+      "ticket_id": "T071",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply correctly lists the required documents and processing time for changing the account holder as stated in the context, fully addressing the customer's request."
+    },
+    {
+      "ticket_id": "T072",
+      "week5_mode": "mode_1",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply says 'I don't know' and provides no useful information, despite the context containing the answer about legacy plan retention, so it fails to resolve the customer's inquiry."
+    },
+    {
+      "ticket_id": "T073",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply correctly explains that a solid orange light means a firmware update or low signal, and follows the prescribed steps to wait and power‑cycle, fully addressing the customer's question."
+    },
+    {
+      "ticket_id": "T077",
+      "week5_mode": "mode_3",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply correctly states that AirFiber_999_1M is unavailable for new customers, matching the provided context."
+    },
+    {
+      "ticket_id": "T084",
+      "week5_mode": "mode_1",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply says it doesn't know, but the context clearly states the ₹500 installation and relocation charge, so it fails to resolve the inquiry."
+    },
+    {
+      "ticket_id": "T098",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply correctly states the required height of at least 1 metre (≈3.3 ft) as given in the context, fully answering the customer's question."
+    },
+    {
+      "ticket_id": "T111",
+      "week5_mode": "mode_2",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply says 'I don't know' despite the context providing a clear answer that the customer will receive a pro‑rata credit, so it fails to resolve the inquiry."
+    },
+    {
+      "ticket_id": "T112",
+      "week5_mode": "mode_4",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply says it doesn't know, but the context clearly states the legacy plan remains valid, so it fails to answer the customer's question."
+    },
+    {
+      "ticket_id": "T115",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply correctly tells the customer to place the secondary mesh node halfway between the primary ONT and the weak area and elevate it 1 m, matching the provided context."
+    },
+    {
+      "ticket_id": "T118",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply correctly applies the policy, denying a full refund after 30 days and granting the appropriate ₹200 credit for the 2‑day outage."
+    },
+    {
+      "ticket_id": "T119",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply correctly states the customer's eligibility for a full refund under the policy and the required 48‑hour resolution condition, accurately addressing the request."
+    },
+    {
+      "ticket_id": "T120",
+      "week5_mode": "mode_4",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "error": false,
+      "explanation": "The reply incorrectly states uncertainty about recharging the legacy plan, whereas the context clearly confirms UPI recharges are allowed, so it fails to resolve the customer's question."
+    }
+  ]
+}

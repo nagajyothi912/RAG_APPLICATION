@@ -1,0 +1,87 @@
+================================================================================
+WEEK 6 EVALUATION: VALIDATE THE TICKET-REPLY JUDGE BEFORE YOU TRUST ITS NUMBER
+================================================================================
+Loaded 26 test cases from eval_set_25.jsonl (3 verbatim regression replays: T012, T055, T112)
+Loaded 26 blind human labels from labels_25.json (last commit: d5dacc3 2026-09-21T12:25:26+05:30)
+LLM model for judge: openai/gpt-oss-120b
+
+--------------------------------------------------------------------------------
+STEP 1: DETERMINISTIC ASSERTIONS
+--------------------------------------------------------------------------------
+Assertion criteria count : 4 (rule-based, no LLM)
+Judged criteria count    : 1 (binary resolution quality)
+
+Assertion breakdown:
+  - ticket_id_echoed             : 26/26 passed (100.0%)
+  - refund_amount_numeric        : 25/26 passed ( 96.2%)
+  - priority_escalation          : 26/26 passed (100.0%)
+  - no_refund_outside_30_days    : 26/26 passed (100.0%)
+    T016 fails: refund_amount_numeric
+
+--------------------------------------------------------------------------------
+STEP 2: LLM JUDGE V1 (judge_v1.txt)
+--------------------------------------------------------------------------------
+     T001: judge=1 human=1 | The reply correctly confirms the existence of a business plan with a 9
+     T003: judge=1 human=1 | The reply directly and accurately states the official speed test requi
+     T007: judge=1 human=1 | The reply correctly states that an authorized adult must be present, c
+     T010: judge=1 human=1 | The reply correctly states the standard timeline, confirms eligibility
+     T012: judge=0 human=0 | The reply says it doesn't know, but the context provides the exact dif
+     T016: judge=1 human=1 | The reply correctly restates the refund conditions from the context, f
+  XX T017: judge=0 human=1 | The reply incorrectly states the refund will be finalized within 24 ho
+  XX T022: judge=0 human=1 | The reply misstates the deposit refund condition, adding an inspection
+     T026: judge=1 human=1 | The reply correctly explains the AF-401 error, gives the proper reboot
+     T035: judge=0 human=0 | The reply is truncated and does not fully answer the question about ne
+     T037: judge=1 human=1 | The reply correctly states the 30‑day limit, that no charges apply and
+     T045: judge=1 human=1 | The reply correctly states that the plan is restricted to Hyderabad an
+     T055: judge=0 human=0 | The reply says it doesn't know, but the context provides the installat
+     T060: judge=1 human=1 | The reply correctly explains that legacy plan pricing varies and may b
+     T071: judge=1 human=1 | The reply correctly lists the required documents and processing time f
+     T072: judge=0 human=0 | The reply says 'I don't know' and provides no useful information, desp
+     T073: judge=1 human=1 | The reply correctly explains that a solid orange light means a firmwar
+     T077: judge=1 human=1 | The reply correctly states that AirFiber_999_1M is unavailable for new
+     T084: judge=0 human=0 | The reply says it doesn't know, but the context clearly states the ₹50
+     T098: judge=1 human=1 | The reply correctly states the required height of at least 1 metre (≈3
+     T111: judge=0 human=0 | The reply says 'I don't know' despite the context providing a clear an
+     T112: judge=0 human=0 | The reply says it doesn't know, but the context clearly states the leg
+     T115: judge=1 human=1 | The reply correctly tells the customer to place the secondary mesh nod
+     T118: judge=1 human=1 | The reply correctly applies the policy, denying a full refund after 30
+     T119: judge=1 human=1 | The reply correctly states the customer's eligibility for a full refun
+     T120: judge=0 human=0 | The reply incorrectly states uncertainty about recharging the legacy p
+  -> saved backend/eval/week6/runs/judge_v1_results.json
+
+================================================================================
+PASS RATE BY WEEK 5 TAXONOMY MODE
+================================================================================
+Week 5 Mode      | Cases | Assertions |  Human |  Judge v1
+--------------------------------------------------------------------------------
+mode_1           |     3 |       100% |     0% |        0%
+mode_2           |     2 |       100% |     0% |        0%
+mode_3           |     2 |       100% |   100% |      100%
+mode_4           |     2 |       100% |     0% |        0%
+mode_5           |     1 |       100% |     0% |        0%
+no_defect_seen   |    16 |        94% |   100% |       88%
+--------------------------------------------------------------------------------
+OVERALL          |    26 |        96% |    69% |       62%
+================================================================================
+
+JUDGE AGREEMENT WITH BLIND HUMAN LABELS
+--------------------------------------------------------------------------------
+  agreement_before  (judge v1 vs human) :  92.3% (24/26)
+  assertions vs judged criteria        : 4 vs 1
+
+--------------------------------------------------------------------------------
+DISAGREEMENTS: judge v1 vs human (2)
+--------------------------------------------------------------------------------
+  T017 [no_defect_seen] human=PASS judge=FAIL
+    Q: Third time I am writing about this. Nobody called back. I paid 1999 on the 2nd, the engineer never turned up. 
+    human reason: Accurately confirms 100% refund of ₹1999 due to missed technician appointment within activation SLA.
+    judge reason: The reply incorrectly states the refund will be finalized within 24 hours, contradicting the policy that refunds are processed within 5-7 business days, thus providing inaccurate information.
+  T022 [no_defect_seen] human=PASS judge=FAIL
+    Q: I am closing my account, what equipment do I return, what does it cost if I do not, and when do I get my depos
+    human reason: Comprehensively answers all 4 parts: 14-day window, ₹2500 ONT fee, ₹1500 extender fee, and 7-day deposit refund.
+    judge reason: The reply misstates the deposit refund condition, adding an inspection step not in the policy, making the information factually inaccurate.
+
+--------------------------------------------------------------------------------
+PREDICTION (prediction.txt, last commit: uncommitted):
+  Adding few-shot examples of nuanced legacy plan validity and partial multi-part answers will eliminate judge false positives on legacy subscriber inquiries and resolve edge cases on compound queries.
+  Scored against the outcome in docs/week6/README.md.
