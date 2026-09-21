@@ -163,7 +163,7 @@ def git_commit_of(path: Path) -> str:
 
 
 def save_judge_run(judge: str, prompt_path: Path, model: str, cases: List[dict],
-                   labels: Dict[str, dict], results: List[dict]) -> Path:
+                   labels: Dict[str, dict], results: List[dict], per_run: List[int]) -> Path:
     """
     Writes one judge run to eval/week6/runs/. Committing this file after
     labels_25.json is what proves the labels came first.
@@ -177,6 +177,8 @@ def save_judge_run(judge: str, prompt_path: Path, model: str, cases: List[dict],
         "model": model,
         "run_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "labels_commit": git_commit_of(LABELS_FILE),
+        "runs": len(per_run),
+        "agreement_per_run": per_run,
         "results": [
             {
                 "ticket_id": c["ticket_id"],
@@ -184,13 +186,15 @@ def save_judge_run(judge: str, prompt_path: Path, model: str, cases: List[dict],
                 "human": labels.get(c["ticket_id"], {}).get("label"),
                 "judge": r["score"],
                 "agree": r["score"] == labels.get(c["ticket_id"], {}).get("label"),
+                "votes": r.get("votes", [r["score"]]),
                 "error": r.get("error", False),
                 "explanation": r["explanation"],
             }
             for c, r in zip(cases, results)
         ],
     }
-    out = RUNS_DIR / f"judge_{judge}_results.json"
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    out = RUNS_DIR / f"judge_{judge}_{stamp}.json"
     out.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return out
 
@@ -345,6 +349,10 @@ def main():
         "--judge", choices=["v1", "v2", "both"], default="both",
         help="Which judge prompt(s) to run. 'v1' alone is the pre-iteration run.",
     )
+    parser.add_argument(
+        "--repeats", type=int, default=3,
+        help="Runs per judge. The judge is not deterministic at temperature 0, so the verdict is a majority vote.",
+    )
     parser.add_argument("--no-langfuse", action="store_true", help="Skip Langfuse telemetry sync")
     args = parser.parse_args()
 
@@ -391,19 +399,29 @@ def main():
     # 3. LLM judge(s)
     groq_client = OpenAI(base_url=settings.groq_base_url, api_key=settings.groq_api_key)
     results: Dict[str, List[dict]] = {}
+    per_run_agreement: Dict[str, List[int]] = {}
     for step, j in enumerate(judges, start=2):
         print("\n" + "-" * 80)
-        print(f"STEP {step}: LLM JUDGE {j.upper()} ({prompt_paths[j].name})")
+        print(f"STEP {step}: LLM JUDGE {j.upper()} ({prompt_paths[j].name}, {args.repeats} run(s))")
         print("-" * 80)
         prompt = prompt_paths[j].read_text(encoding="utf-8")
+        runs = [[call_llm_judge(groq_client, prompt, case, args.model) for case in cases] for _ in range(args.repeats)]
+        per_run_agreement[j] = [
+            sum(1 for c, r in zip(cases, run) if r["score"] == labels[c["ticket_id"]]["label"]) for run in runs
+        ]
+        # The verdict used below is the majority over runs; with --repeats 1 it is the single run.
         results[j] = []
-        for case in cases:
-            res = call_llm_judge(groq_client, prompt, case, args.model)
+        for i, case in enumerate(cases):
+            votes = [run[i]["score"] for run in runs]
+            majority = 1 if sum(votes) * 2 > len(votes) else 0
+            res = dict(next(run[i] for run in runs if run[i]["score"] == majority))
+            res["votes"] = votes
             results[j].append(res)
             human = labels[case["ticket_id"]]["label"]
-            mark = "  " if res["score"] == human else "XX"
-            print(f"  {mark} {case['ticket_id']}: judge={res['score']} human={human} | {res['explanation'][:70]}")
-        saved = save_judge_run(j, prompt_paths[j], args.model, cases, labels, results[j])
+            mark = "  " if majority == human else "XX"
+            flip = " (unstable)" if len(set(votes)) > 1 else ""
+            print(f"  {mark} {case['ticket_id']}: judge={majority} votes={votes} human={human}{flip} | {res['explanation'][:55]}")
+        saved = save_judge_run(j, prompt_paths[j], args.model, cases, labels, results[j], per_run_agreement[j])
         print(f"  -> saved {saved.relative_to(ROOT)}")
 
     # 4. Pass rate by Week 5 taxonomy mode
@@ -441,9 +459,19 @@ def main():
     names = {"v1": "agreement_before", "v2": "agreement_after"}
     for j in judges:
         m, a = agreement[j]
-        print(f"  {names[j]:<17} (judge {j} vs human) : {a:5.1f}% ({m}/{total_cases})")
+        spread = ", ".join(f"{x}/{total_cases}" for x in per_run_agreement[j])
+        print(f"  {names[j]:<17} (judge {j} vs human) : {a:5.1f}% ({m}/{total_cases} majority vote; per run: {spread})")
     if "v1" in agreement and "v2" in agreement:
         print(f"  delta                                : {agreement['v2'][1] - agreement['v1'][1]:+5.1f} pts")
+    # The v2 few-shot examples are eval cases, so v2 has seen their answers. Agreement
+    # on the cases it has not seen is the number that says whether the judge improved.
+    shot_ids = set(re.findall(r"Ticket #(T\d+)", JUDGE_V2_PROMPT.read_text(encoding="utf-8")))
+    held_out = [i for i, c in enumerate(cases) if c["ticket_id"] not in shot_ids]
+    if shot_ids and held_out:
+        print(f"  held-out ({len(held_out)} cases, excluding v2 few-shot {', '.join(sorted(shot_ids))}):")
+        for j in judges:
+            m = sum(1 for i in held_out if results[j][i]["score"] == labels[cases[i]["ticket_id"]]["label"])
+            print(f"    judge {j}                            : {m / len(held_out) * 100:5.1f}% ({m}/{len(held_out)})")
     print(f"  assertions vs judged criteria        : {len(ASSERTIONS)} vs {JUDGED_CRITERIA}")
     errors = {j: sum(r.get("error", False) for r in results[j]) for j in judges}
     if any(errors.values()):

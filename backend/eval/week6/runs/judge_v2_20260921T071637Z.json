@@ -1,0 +1,380 @@
+{
+  "judge": "v2",
+  "prompt_file": "judge_v2.txt",
+  "prompt_sha256": "d95ebfa0cb63ab2655ca6c191b62f3d88181bc00839a5f5722376ef90ef60a49",
+  "model": "openai/gpt-oss-120b",
+  "run_at": "2026-09-21T07:16:36+00:00",
+  "labels_commit": "d5dacc3 2026-09-21T12:25:26+05:30",
+  "runs": 3,
+  "agreement_per_run": [
+    25,
+    24,
+    24
+  ],
+  "results": [
+    {
+      "ticket_id": "T001",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply correctly confirms that a business plan with a 99.9% SLA exists and provides the appropriate contact, matching the provided context."
+    },
+    {
+      "ticket_id": "T003",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "PASS: The reply correctly restates the policy, clearly explaining that official speed tests are those run via the AirFiber Desktop App or speed.airfiber.in over a direct Ethernet connection to the ONT, with three consecutive tests spaced one hour apart, fully answering the customer's question."
+    },
+    {
+      "ticket_id": "T007",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply correctly confirms that the customer (or an authorized adult) must be present, states the relocation is free, and gives the 3-5 working day timeframe, fully matching the context."
+    },
+    {
+      "ticket_id": "T010",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 0,
+      "agree": false,
+      "votes": [
+        0,
+        0,
+        0
+      ],
+      "error": false,
+      "explanation": "The reply provides compensation details but does not give the customer a timeline for completing the relocation, leaving part of the question unanswered."
+    },
+    {
+      "ticket_id": "T012",
+      "week5_mode": "mode_2",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "votes": [
+        0,
+        0,
+        0
+      ],
+      "error": false,
+      "explanation": "The reply says it doesn't know the answer, but the provided context clearly states the differences and that the 1999 plan includes the OTT bundle, so the response fails to resolve the customer's question."
+    },
+    {
+      "ticket_id": "T016",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "PASS: The reply correctly lists the refund conditions matching the policy, covering the 30‑day window, speed drop below 50%, and unresolved within 48 hours."
+    },
+    {
+      "ticket_id": "T017",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply correctly confirms the customer is entitled to a 100% refund of ₹1999, directly answering the question; the differing timeline is a minor detail and does not affect the resolution."
+    },
+    {
+      "ticket_id": "T022",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply correctly lists the required equipment, the non‑return fees, and the deposit refund timing as per the policy, thus fully answering the customer's question."
+    },
+    {
+      "ticket_id": "T026",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply correctly identifies AF-401 as an authentication failure, advises the required 30‑second power‑cycle, and notes re‑provisioning if the red LED remains, fully addressing the customer's issue."
+    },
+    {
+      "ticket_id": "T035",
+      "week5_mode": "mode_5",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "votes": [
+        0,
+        0,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply answers the duration and cost correctly, but it truncates the sentence about needing an adult present, leaving the answer to the third question incomplete."
+    },
+    {
+      "ticket_id": "T037",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply correctly states that suspension is limited to 30 days (not two months), no charges apply during a prepaid pause, and plan validity is extended, fully addressing the customer's three questions."
+    },
+    {
+      "ticket_id": "T045",
+      "week5_mode": "mode_3",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply correctly states that the AirFiber_1299_1M plan is limited to Hyderabad and unavailable in Chennai, directly answering the customer's query."
+    },
+    {
+      "ticket_id": "T055",
+      "week5_mode": "mode_1",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "votes": [
+        0,
+        0,
+        0
+      ],
+      "error": false,
+      "explanation": "The reply says it doesn't know the cost, but the context clearly provides the installation fee information, so it fails to resolve the customer's question."
+    },
+    {
+      "ticket_id": "T060",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply correctly explains that legacy plan pricing varies and that whether they are cheaper depends on the specific speed tier, matching the context and answering the customer's question."
+    },
+    {
+      "ticket_id": "T071",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply correctly lists the required documents and processing time for changing the account holder, matching the provided policy, thus fully addressing the customer's request."
+    },
+    {
+      "ticket_id": "T072",
+      "week5_mode": "mode_1",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "votes": [
+        0,
+        0,
+        0
+      ],
+      "error": false,
+      "explanation": "The reply says 'I don't know' and provides no information, while the context contains the answer that legacy plan subscribers keep their existing plan and tariffs until they request an upgrade, so the customer's request for clarification is not resolved."
+    },
+    {
+      "ticket_id": "T073",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply correctly explains that a solid orange light means a firmware update or low signal, advises waiting 10 minutes and power cycling if it stays orange, fully addressing the customer's query."
+    },
+    {
+      "ticket_id": "T077",
+      "week5_mode": "mode_3",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply correctly states that AirFiber_999_1M is unavailable for new customers, matching the context, thus fully answering the question."
+    },
+    {
+      "ticket_id": "T084",
+      "week5_mode": "mode_1",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "votes": [
+        0,
+        0,
+        0
+      ],
+      "error": false,
+      "explanation": "The reply says it doesn't know the answer, but the provided context clearly states that ₹500 is the installation charge for the AirFiber 599 plan (and inter-city relocation), so the response fails to resolve the customer's query."
+    },
+    {
+      "ticket_id": "T098",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply correctly states the required height of at least 1 metre (≈3.3 feet) above the floor, matching the provided policy, thus fully answering the customer's question."
+    },
+    {
+      "ticket_id": "T111",
+      "week5_mode": "mode_2",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "votes": [
+        0,
+        0,
+        0
+      ],
+      "error": false,
+      "explanation": "The reply says 'I don't know' despite the context clearly stating that mid-cycle upgrades receive a pro‑rata credit, so the customer will not be charged the full amount; thus the answer fails to resolve the inquiry."
+    },
+    {
+      "ticket_id": "T112",
+      "week5_mode": "mode_4",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "votes": [
+        0,
+        0,
+        0
+      ],
+      "error": false,
+      "explanation": "The reply incorrectly states uncertainty, while the context clearly indicates the legacy plan remains valid indefinitely, so the answer fails to resolve the customer's question."
+    },
+    {
+      "ticket_id": "T115",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply correctly tells the customer to place the secondary mesh node halfway between the primary ONT and the weak coverage area and to elevate it about 1 m, which directly answers the location question using the provided context."
+    },
+    {
+      "ticket_id": "T118",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        1,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply correctly applies the policy: it denies a full refund beyond 30 days and provides the appropriate ₹200 credit for the 2‑day outage, fully answering the customer's request."
+    },
+    {
+      "ticket_id": "T119",
+      "week5_mode": "no_defect_seen",
+      "human": 1,
+      "judge": 1,
+      "agree": true,
+      "votes": [
+        1,
+        0,
+        1
+      ],
+      "error": false,
+      "explanation": "The reply correctly states the customer's eligibility for a full ₹1199 refund under the policy, noting the 48‑hour resolution condition, which directly answers the refund request."
+    },
+    {
+      "ticket_id": "T120",
+      "week5_mode": "mode_4",
+      "human": 0,
+      "judge": 0,
+      "agree": true,
+      "votes": [
+        0,
+        0,
+        0
+      ],
+      "error": false,
+      "explanation": "The reply says it cannot confirm the ability to recharge, but the context explicitly states that grandfathered 1249 pack subscribers can continue recharging via UPI, so the answer is incorrect and does not resolve the customer's question."
+    }
+  ]
+}

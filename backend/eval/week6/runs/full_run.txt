@@ -1,0 +1,136 @@
+/Users/softsuave/Desktop/Week3-RAG-Application/RAG_APPLICATION/backend/scripts/evaluate_week6.py:281: DeprecationWarning: Trace-level input/output is deprecated. For trace attributes (user_id, session_id, tags, etc.), use propagate_attributes() instead. This method will be removed in a future major version.
+  span.set_trace_io(input=case["question"], output=case["drafted_reply"])
+================================================================================
+WEEK 6 EVALUATION: VALIDATE THE TICKET-REPLY JUDGE BEFORE YOU TRUST ITS NUMBER
+================================================================================
+Loaded 26 test cases from eval_set_25.jsonl (3 verbatim regression replays: T012, T055, T112)
+Loaded 26 blind human labels from labels_25.json (last commit: d5dacc3 2026-09-21T12:25:26+05:30)
+LLM model for judge: openai/gpt-oss-120b
+
+--------------------------------------------------------------------------------
+STEP 1: DETERMINISTIC ASSERTIONS
+--------------------------------------------------------------------------------
+Assertion criteria count : 4 (rule-based, no LLM)
+Judged criteria count    : 1 (binary resolution quality)
+
+Assertion breakdown:
+  - ticket_id_echoed             : 26/26 passed (100.0%)
+  - refund_amount_numeric        : 25/26 passed ( 96.2%)
+  - priority_escalation          : 26/26 passed (100.0%)
+  - no_refund_outside_30_days    : 26/26 passed (100.0%)
+    T016 fails: refund_amount_numeric
+
+--------------------------------------------------------------------------------
+STEP 2: LLM JUDGE V1 (judge_v1.txt, 3 run(s))
+--------------------------------------------------------------------------------
+     T001: judge=1 votes=[1, 1, 1] human=1 | The reply correctly confirms the existence of a busines
+     T003: judge=1 votes=[1, 1, 1] human=1 | The reply directly and accurately restates the policy d
+     T007: judge=1 votes=[1, 1, 1] human=1 | The reply correctly states that an authorized adult mus
+     T010: judge=1 votes=[1, 1, 1] human=1 | The reply correctly states the standard relocation time
+     T012: judge=0 votes=[0, 0, 0] human=0 | The reply says it doesn't know the answer, but the cont
+     T016: judge=1 votes=[1, 1, 1] human=1 | The reply correctly restates the refund conditions from
+  XX T017: judge=0 votes=[0, 0, 0] human=1 | The reply incorrectly states the refund will be finaliz
+     T022: judge=1 votes=[1, 1, 1] human=1 | The reply correctly lists the required equipment, the n
+     T026: judge=1 votes=[1, 1, 1] human=1 | The reply correctly explains the AF-401 error, instruct
+     T035: judge=0 votes=[0, 0, 0] human=0 | The reply is truncated and does not fully answer the qu
+     T037: judge=1 votes=[1, 1, 1] human=1 | The reply correctly states the 30‑day limit, that no ch
+     T045: judge=1 votes=[1, 1, 1] human=1 | The reply correctly states that the plan is restricted 
+     T055: judge=0 votes=[0, 0, 0] human=0 | The reply fails to answer the question despite the cont
+     T060: judge=1 votes=[1, 1, 1] human=1 | The reply accurately reflects the context, explains tha
+     T071: judge=1 votes=[1, 1, 1] human=1 | The reply correctly lists the required documents and pr
+     T072: judge=0 votes=[0, 0, 0] human=0 | The reply fails to address the customer's confusion abo
+     T073: judge=1 votes=[1, 1, 1] human=1 | The reply correctly explains the solid orange light and
+     T077: judge=1 votes=[1, 1, 1] human=1 | The reply correctly states that AirFiber_999_1M is unav
+     T084: judge=0 votes=[0, 0, 0] human=0 | The reply fails to answer; it says 'I don't know' despi
+     T098: judge=1 votes=[1, 1, 1] human=1 | The reply directly answers the question with the correc
+     T111: judge=0 votes=[0, 0, 0] human=0 | The reply says 'I don't know' despite the context provi
+     T112: judge=0 votes=[0, 0, 0] human=0 | The reply says it doesn't know, but the context clearly
+     T115: judge=1 votes=[1, 1, 1] human=1 | The reply correctly tells the customer to place the sec
+     T118: judge=1 votes=[1, 1, 1] human=1 | The reply correctly applies the policy, denying a full 
+     T119: judge=1 votes=[1, 1, 1] human=1 | The reply correctly states the refund eligibility and c
+     T120: judge=0 votes=[0, 0, 0] human=0 | The reply incorrectly states uncertainty, whereas the c
+  -> saved backend/eval/week6/runs/judge_v1_20260921T070956Z.json
+
+--------------------------------------------------------------------------------
+STEP 3: LLM JUDGE V2 (judge_v2.txt, 3 run(s))
+--------------------------------------------------------------------------------
+     T001: judge=1 votes=[1, 1, 1] human=1 | The reply correctly confirms that a business plan with 
+     T003: judge=1 votes=[1, 1, 1] human=1 | PASS: The reply correctly restates the policy, clearly 
+     T007: judge=1 votes=[1, 1, 1] human=1 | The reply correctly confirms that the customer (or an a
+  XX T010: judge=0 votes=[0, 0, 0] human=1 | The reply provides compensation details but does not gi
+     T012: judge=0 votes=[0, 0, 0] human=0 | The reply says it doesn't know the answer, but the prov
+     T016: judge=1 votes=[1, 1, 1] human=1 | PASS: The reply correctly lists the refund conditions m
+     T017: judge=1 votes=[1, 1, 1] human=1 | The reply correctly confirms the customer is entitled t
+     T022: judge=1 votes=[1, 1, 1] human=1 | The reply correctly lists the required equipment, the n
+     T026: judge=1 votes=[1, 1, 1] human=1 | The reply correctly identifies AF-401 as an authenticat
+     T035: judge=0 votes=[0, 0, 1] human=0 (unstable) | The reply answers the duration and cost correctly, but 
+     T037: judge=1 votes=[1, 1, 1] human=1 | The reply correctly states that suspension is limited t
+     T045: judge=1 votes=[1, 1, 1] human=1 | The reply correctly states that the AirFiber_1299_1M pl
+     T055: judge=0 votes=[0, 0, 0] human=0 | The reply says it doesn't know the cost, but the contex
+     T060: judge=1 votes=[1, 1, 1] human=1 | The reply correctly explains that legacy plan pricing v
+     T071: judge=1 votes=[1, 1, 1] human=1 | The reply correctly lists the required documents and pr
+     T072: judge=0 votes=[0, 0, 0] human=0 | The reply says 'I don't know' and provides no informati
+     T073: judge=1 votes=[1, 1, 1] human=1 | The reply correctly explains that a solid orange light 
+     T077: judge=1 votes=[1, 1, 1] human=1 | The reply correctly states that AirFiber_999_1M is unav
+     T084: judge=0 votes=[0, 0, 0] human=0 | The reply says it doesn't know the answer, but the prov
+     T098: judge=1 votes=[1, 1, 1] human=1 | The reply correctly states the required height of at le
+     T111: judge=0 votes=[0, 0, 0] human=0 | The reply says 'I don't know' despite the context clear
+     T112: judge=0 votes=[0, 0, 0] human=0 | The reply incorrectly states uncertainty, while the con
+     T115: judge=1 votes=[1, 1, 1] human=1 | The reply correctly tells the customer to place the sec
+     T118: judge=1 votes=[1, 1, 1] human=1 | The reply correctly applies the policy: it denies a ful
+     T119: judge=1 votes=[1, 0, 1] human=1 (unstable) | The reply correctly states the customer's eligibility f
+     T120: judge=0 votes=[0, 0, 0] human=0 | The reply says it cannot confirm the ability to recharg
+  -> saved backend/eval/week6/runs/judge_v2_20260921T071637Z.json
+
+================================================================================
+PASS RATE BY WEEK 5 TAXONOMY MODE
+================================================================================
+Week 5 Mode      | Cases | Assertions |  Human |  Judge v1 |  Judge v2
+--------------------------------------------------------------------------------
+mode_1           |     3 |       100% |     0% |        0% |        0%
+mode_2           |     2 |       100% |     0% |        0% |        0%
+mode_3           |     2 |       100% |   100% |      100% |      100%
+mode_4           |     2 |       100% |     0% |        0% |        0%
+mode_5           |     1 |       100% |     0% |        0% |        0%
+no_defect_seen   |    16 |        94% |   100% |       94% |       94%
+--------------------------------------------------------------------------------
+OVERALL          |    26 |        96% |    69% |       65% |       65%
+================================================================================
+
+JUDGE AGREEMENT WITH BLIND HUMAN LABELS
+--------------------------------------------------------------------------------
+  agreement_before  (judge v1 vs human) :  96.2% (25/26 majority vote; per run: 25/26, 25/26, 25/26)
+  agreement_after   (judge v2 vs human) :  96.2% (25/26 majority vote; per run: 25/26, 24/26, 24/26)
+  delta                                :  +0.0 pts
+  held-out (24 cases, excluding v2 few-shot T017, T022):
+    judge v1                            : 100.0% (24/24)
+    judge v2                            :  95.8% (23/24)
+  assertions vs judged criteria        : 4 vs 1
+
+--------------------------------------------------------------------------------
+DISAGREEMENTS: judge v1 vs human (1)
+--------------------------------------------------------------------------------
+  T017 [no_defect_seen] human=PASS judge=FAIL
+    Q: Third time I am writing about this. Nobody called back. I paid 1999 on the 2nd, the engineer never turned up. 
+    human reason: Accurately confirms 100% refund of ₹1999 due to missed technician appointment within activation SLA.
+    judge reason: The reply incorrectly states the refund will be finalized within 24 hours, contradicting the policy that refunds are processed within 5-7 business days, thus providing inaccurate information.
+
+--------------------------------------------------------------------------------
+DISAGREEMENTS: judge v2 vs human (1)
+--------------------------------------------------------------------------------
+  T010 [no_defect_seen] human=PASS judge=FAIL
+    Q: We moved into this flat in July and asked for the connection to be shifted. It has been six weeks. Every week 
+    human reason: Accurately explains standard timeline, offers correct ₹100/day downtime credit instead of unauthorized refund, and escalates appropriately.
+    judge reason: The reply provides compensation details but does not give the customer a timeline for completing the relocation, leaving part of the question unanswered.
+
+  fixed by v2     : T017
+  broken by v2    : T010
+
+--------------------------------------------------------------------------------
+PREDICTION (prediction.txt, last commit: 13b7728 2026-09-21T12:31:05+05:30):
+  Showing the judge T017 and T022 as PASS examples will fix both disagreements without breaking any of the 24 cases v1 already agrees on, because the judge will learn to grade the core answer and ignore small wording drift in timelines.
+  Scored against the outcome in docs/week6/README.md.
+
+[Langfuse] Syncing evaluation runs and scores to Langfuse...
+[Langfuse] Synced 26 evaluation traces with assertion, label and judge scores.
+[Langfuse Dashboard] https://us.cloud.langfuse.com/project/cmts8l4k00513ad0g86x36tlp
