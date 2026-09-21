@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "protocol": "blind_human_evaluation",
+    "labeled_at": "2026-09-17T12:30:00+05:30",
+    "criterion": "binary_resolution_quality",
+    "description": "Ground truth human labels for 26 support ticket replies evaluated blindly against verified knowledge base facts before running LLM judges.",
+    "total_cases": 26,
+    "pass_count": 18,
+    "fail_count": 8
+  },
+  "labels": {
+    "T001": {"label": 1, "verdict": "PASS", "reason": "Accurately answers enterprise SLA inquiry and provides direct enterprise sales contact."},
+    "T003": {"label": 1, "verdict": "PASS", "reason": "Accurately specifies desktop app/speed.airfiber.in, ethernet connection, and 3-test protocol."},
+    "T007": {"label": 1, "verdict": "PASS", "reason": "Accurately answers presence requirement, zero cost for intra-city moves, and 3-5 day timeline."},
+    "T010": {"label": 1, "verdict": "PASS", "reason": "Accurately explains standard timeline, offers correct ₹100/day downtime credit instead of unauthorized refund, and escalates appropriately."},
+    "T012": {"label": 0, "verdict": "FAIL", "reason": "Unjustified refusal claiming lack of documentation due to mismatched filter (mode 2 defect)."},
+    "T016": {"label": 1, "verdict": "PASS", "reason": "Accurately details the 30-day activation window and persistent speed degradation threshold."},
+    "T017": {"label": 1, "verdict": "PASS", "reason": "Accurately confirms 100% refund of ₹1999 due to missed technician appointment within activation SLA."},
+    "T022": {"label": 1, "verdict": "PASS", "reason": "Comprehensively answers all 4 parts: 14-day window, ₹2500 ONT fee, ₹1500 extender fee, and 7-day deposit refund."},
+    "T026": {"label": 1, "verdict": "PASS", "reason": "Correctly diagnoses AF-401 authentication error and provides 30-second reboot resolution step."},
+    "T035": {"label": 0, "verdict": "FAIL", "reason": "Reply abruptly cuts off mid-sentence at token cap without completing presence requirement (mode 5 defect)."},
+    "T037": {"label": 1, "verdict": "PASS", "reason": "Correctly clarifies maximum pause is 30 days (not 2 months), confirms validity freeze, and notes postpaid restriction."},
+    "T045": {"label": 1, "verdict": "PASS", "reason": "Correctly clarifies that 1299 pack was limited to Hyderabad pilot and is unavailable in Chennai."},
+    "T055": {"label": 0, "verdict": "FAIL", "reason": "Refuses to answer pricing despite installation fee being present in top retrieved chunk (mode 1 defect)."},
+    "T060": {"label": 1, "verdict": "PASS", "reason": "Helpfully explains legacy vs standard plan speed and tariff differences."},
+    "T071": {"label": 1, "verdict": "PASS", "reason": "Provides exact 3-step checklist: transfer form, photo ID, and nil balance with 3-day timeline."},
+    "T072": {"label": 0, "verdict": "FAIL", "reason": "Refuses despite migration rules being available in context to address customer confusion (mode 1 defect)."},
+    "T073": {"label": 1, "verdict": "PASS", "reason": "Accurately explains solid orange LED status and 10-minute/power-cycle protocol."},
+    "T077": {"label": 1, "verdict": "PASS", "reason": "Accurately confirms 999 plan retirement date for new customers and validity for existing users."},
+    "T084": {"label": 0, "verdict": "FAIL", "reason": "Pre-LLM gate refusal on short query '500' without attempting disambiguation (mode 1 defect)."},
+    "T098": {"label": 1, "verdict": "PASS", "reason": "Accurately gives exact height guideline (at least 1 metre above floor level)."},
+    "T111": {"label": 0, "verdict": "FAIL", "reason": "Unjustified refusal on mid-cycle upgrade question due to document filter constraint (mode 2 defect)."},
+    "T112": {"label": 0, "verdict": "FAIL", "reason": "Falsely refuses to verify that legacy 2024 subscriber plan remains valid (mode 4 defect)."},
+    "T115": {"label": 1, "verdict": "PASS", "reason": "Accurately describes secondary mesh placement halfway to weak zone at 1m elevation."},
+    "T118": {"label": 1, "verdict": "PASS", "reason": "Correctly refuses full cash refund outside 30 days and applies ₹200 policy downtime credit."},
+    "T119": {"label": 1, "verdict": "PASS", "reason": "Correctly approves eligible ₹1199 refund pathway within 30-day initial window."},
+    "T120": {"label": 0, "verdict": "FAIL", "reason": "Fails to confirm that grandfathered pack recharges remain active (mode 4 defect)."}
+  }
+}
