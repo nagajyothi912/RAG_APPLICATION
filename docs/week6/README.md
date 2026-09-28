@@ -171,7 +171,9 @@ adding more examples is the cheaper test of which change did the damage.
 The full run (`--judge both`) writes all 26 cases to the
 [Langfuse project](https://us.cloud.langfuse.com/project/cmts8l4k00513ad0g86x36tlp). Each run is one
 **session** (`week6-<UTC timestamp>`) with one trace per ticket, named `week6 eval: <ticket>` and tagged
-`week6`, `mode:*`, `tier:*` and `regression`. Each trace holds:
+`week6`, the Week 5 mode (`mode:1` … `mode:5` or `no-defect-seen`, spelled exactly as the Week 5
+backfill spells them, so one filter finds both weeks), `tier:*`, `regression`, and `assertion-failed`
+when any of the four assertions fails. Each trace holds:
 
 - a span `eval_ticket_<id>` with the question, context, drafted reply and assertion results
 - two **generations**, `judge_v1` and `judge_v2`: the prompt sent, the raw judge output, the model
@@ -189,7 +191,17 @@ dashboard defaults to `default` and to the past day, so set **Env → developmen
 range to see them.
 
 The runs committed in `e9e53a2` were synced before this logging existed. Those traces have no
-generations or tags, and each holds several stacked spans.
+generations or tags, and each holds several stacked spans. To see the committed majority-of-3 runs in Langfuse
+without calling the judge again, replay them:
+
+```bash
+.venv/bin/python scripts/evaluate_week6.py --replay \
+  eval/week6/runs/judge_v1_20260921T070956Z.json eval/week6/runs/judge_v2_20260921T071637Z.json
+```
+
+This writes session `week6-replay-20260921T071637Z`, tagged `replay`. The replayed generations carry the
+rebuilt prompt and the saved explanation, but no raw output or token usage, because the run files
+don't store those.
 
 ---
 

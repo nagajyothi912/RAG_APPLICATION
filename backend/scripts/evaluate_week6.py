@@ -107,15 +107,8 @@ def run_assertions(case: dict, reply: str) -> Dict[str, bool]:
 # LLM Judge Execution
 # ==============================================================================
 
-def call_llm_judge(client: OpenAI, system_prompt: str, case: dict, model: str) -> Dict[str, Any]:
-    """
-    Invokes the LLM judge on a single case.
-
-    A reply the judge could not score comes back with `error` set rather than as a
-    silent FAIL: counting a parse failure as score 0 would quietly move agreement on
-    every case the human labelled FAIL.
-    """
-    user_prompt = f"""Context:
+def judge_user_prompt(case: dict) -> str:
+    return f"""Context:
 {case.get('context', '')}
 
 Customer Question:
@@ -124,6 +117,17 @@ Customer Question:
 Drafted Ticket Reply:
 {case.get('drafted_reply', '')}
 """
+
+
+def call_llm_judge(client: OpenAI, system_prompt: str, case: dict, model: str) -> Dict[str, Any]:
+    """
+    Invokes the LLM judge on a single case.
+
+    A reply the judge could not score comes back with `error` set rather than as a
+    silent FAIL: counting a parse failure as score 0 would quietly move agreement on
+    every case the human labelled FAIL.
+    """
+    user_prompt = judge_user_prompt(case)
     last_error = ""
     for _attempt in range(2):
         try:
@@ -215,6 +219,47 @@ def save_judge_run(judge: str, prompt_path: Path, model: str, cases: List[dict],
 # Langfuse Logging
 # ==============================================================================
 
+def week5_mode_tag(mode: str | None) -> str:
+    """
+    The Langfuse tag for a Week 5 mode, spelled the way the Week 5 backfill spells it.
+
+    The eval set stores `mode_1` and `no_defect_seen`; push_traces_to_langfuse.py tags
+    `mode:1` and `no-defect-seen`. Tagging the raw value gave `mode:mode_1`, so a
+    `mode:1` filter found the Week 5 traces and silently missed every Week 6 case.
+    """
+    if not mode or mode == "no_defect_seen":
+        return "no-defect-seen" if mode else "mode:unknown"
+    match = re.fullmatch(r"mode_(\d+)", mode)
+    return f"mode:{match.group(1)}" if match else f"mode:{mode}"
+
+
+def load_saved_run(path: Path, cases: List[dict]) -> Tuple[List[dict], str]:
+    """
+    A committed judge run, reshaped into what call_llm_judge returns.
+
+    Lets Langfuse show the verdicts the README reports instead of a fresh, different
+    set: the judge is not deterministic at temperature 0. The saved file keeps the
+    verdict, votes and explanation but not the raw output or token usage, so the
+    replayed generations carry the rebuilt prompt and the explanation, and no usage.
+    """
+    record = json.loads(path.read_text(encoding="utf-8"))
+    prompt = (EVAL_DIR / record["prompt_file"]).read_text(encoding="utf-8")
+    if hashlib.sha256(prompt.encode("utf-8")).hexdigest() != record["prompt_sha256"]:
+        sys.exit(f"{record['prompt_file']} changed since {path.name} was run; replay would misreport the prompt.")
+    by_id = {r["ticket_id"]: r for r in record["results"]}
+    missing = [c["ticket_id"] for c in cases if c["ticket_id"] not in by_id]
+    if missing:
+        sys.exit(f"{path.name} has no result for {missing}")
+    results = []
+    for c in cases:
+        r = by_id[c["ticket_id"]]
+        results.append({
+            "score": r["judge"], "explanation": r["explanation"], "raw": None, "error": r["error"],
+            "votes": r["votes"], "model": record["model"],
+            "messages": [{"role": "system", "content": prompt}, {"role": "user", "content": judge_user_prompt(c)}],
+        })
+    return results, record["run_at"]
+
 def log_to_langfuse(
     langfuse_client: Any,
     cases: List[dict],
@@ -222,6 +267,8 @@ def log_to_langfuse(
     v1_results: List[dict],
     v2_results: List[dict],
     assertion_results: List[dict],
+    run_id: str | None = None,
+    replay: bool = False,
 ) -> None:
     if langfuse_client is None:
         print("Langfuse client not active, skipping Langfuse sync.")
@@ -247,7 +294,8 @@ def log_to_langfuse(
 
     # One trace per ticket per run, grouped into a session per run. A seed of the
     # ticket id alone made every re-run stack another root span on the same trace.
-    run_id = f"week6-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
+    # A replay reuses the run's own timestamp, so pushing it twice updates the same traces.
+    run_id = run_id or f"week6-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
 
     for i, case in enumerate(cases):
         tid = case["ticket_id"]
@@ -272,9 +320,13 @@ def log_to_langfuse(
             except Exception:
                 pass
 
-        tags = ["week6", f"mode:{case.get('week5_mode')}", f"tier:{case.get('tier')}"]
+        tags = ["week6", week5_mode_tag(case.get("week5_mode")), f"tier:{case.get('tier')}"]
         if case.get("is_regression"):
             tags.append("regression")
+        if not all_asserts_passed:
+            tags.append("assertion-failed")
+        if replay:
+            tags.append("replay")
 
         # Tags and trace name only reach the trace through propagate_attributes in
         # the v4 SDK; building the list alone left every week 6 trace untagged.
@@ -397,7 +449,14 @@ def main():
         help="Runs per judge. The judge is not deterministic at temperature 0, so the verdict is a majority vote.",
     )
     parser.add_argument("--no-langfuse", action="store_true", help="Skip Langfuse telemetry sync")
+    parser.add_argument(
+        "--replay", nargs=2, type=Path, metavar=("V1_RUN", "V2_RUN"),
+        help="Push two committed runs from eval/week6/runs/ to Langfuse without calling the judge",
+    )
     args = parser.parse_args()
+    if args.replay:
+        replay_to_langfuse(args)
+        return
 
     print("=" * 80)
     print("WEEK 6 EVALUATION: VALIDATE THE TICKET-REPLY JUDGE BEFORE YOU TRUST ITS NUMBER")
@@ -552,6 +611,26 @@ def main():
     if args.judge == "both" and not args.no_langfuse and langfuse_sink.enabled():
         client = langfuse_sink.get_client()
         log_to_langfuse(client, cases, labels, results["v1"], results["v2"], assertion_results)
+
+
+def replay_to_langfuse(args: argparse.Namespace) -> None:
+    if not langfuse_sink.enabled():
+        sys.exit("Langfuse is not configured; set LANGFUSE_ENABLED and both keys in backend/.env")
+    cases = [json.loads(line) for line in args.eval_set.read_text(encoding="utf-8").splitlines() if line.strip()]
+    if args.limit:
+        cases = cases[:args.limit]
+    labels = json.loads(args.labels.read_text(encoding="utf-8")).get("labels", {})
+    v1, _ = load_saved_run(args.replay[0], cases)
+    v2, v2_at = load_saved_run(args.replay[1], cases)
+    assertion_results = [run_assertions(c, c["drafted_reply"]) for c in cases]
+    stamp = datetime.fromisoformat(v2_at).strftime("%Y%m%dT%H%M%SZ")
+    for name, res in (("v1", v1), ("v2", v2)):
+        agree = sum(r["score"] == labels[c["ticket_id"]]["label"] for c, r in zip(cases, res))
+        print(f"judge {name}: {agree}/{len(cases)} agree with the hand labels")
+    log_to_langfuse(
+        langfuse_sink.get_client(), cases, labels, v1, v2, assertion_results,
+        run_id=f"week6-replay-{stamp}", replay=True,
+    )
 
 
 if __name__ == "__main__":
