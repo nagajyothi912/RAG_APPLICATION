@@ -330,3 +330,70 @@ export function getTrace(traceId: string, source = 'analysis') {
     `/api/analysis/traces/${encodeURIComponent(traceId)}?source=${encodeURIComponent(source)}`,
   );
 }
+
+/* ---------------------------------------------------------------- Week 7 */
+
+export type Week7MetricSummary = {
+  pass_rate: number;
+  p50_latency_ms: number;
+  total_tokens: number;
+  cost_per_ticket_usd: number;
+};
+
+export type Week7PerTicket = {
+  ticket_id: string;
+  system: 'agent' | 'fixed_workflow';
+  pass: boolean;
+  latency_ms: number;
+  total_tokens: number;
+  total_cost_usd: number;
+  tools_called: string[];
+  iterations: number;
+  budget_hit: string | null;
+  assertions: Record<string, boolean>;
+  reply_preview: string;
+};
+
+export type Week7ComparisonTable = {
+  agent: Week7MetricSummary;
+  fixed_workflow: Week7MetricSummary;
+  per_ticket: Week7PerTicket[];
+};
+
+export type Week7ToolDiff = {
+  tool_name: string;
+  added_in: string;
+  description: string;
+  parameters: Record<string, any>;
+  non_overlap_note: string;
+};
+
+export type Week7BudgetLog = {
+  ticket_id?: string;
+  budget_hit?: string;
+  configured_limit?: number;
+  iterations_completed?: number;
+  clean_termination?: boolean;
+  verdict?: string;
+  [key: string]: any;
+};
+
+export type Week7Report = {
+  available: boolean;
+  comparison_table?: Week7ComparisonTable;
+  verdict?: string;
+  tool_diff?: Week7ToolDiff;
+  budget_log?: Week7BudgetLog;
+};
+
+export function getWeek7Report() {
+  return request<Week7Report>('/api/week7/report');
+}
+
+export function triggerWeek7Experiment() {
+  return request<{ status: string; message: string }>('/api/week7/run', { method: 'POST' });
+}
+
+export function triggerBudgetTest() {
+  return request<{ status: string; message: string }>('/api/week7/budget-test', { method: 'POST' });
+}

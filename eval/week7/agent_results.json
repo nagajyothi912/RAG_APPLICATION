@@ -1,0 +1,798 @@
+[
+  {
+    "system": "agent",
+    "ticket_id": "T010",
+    "reply": "[Agent error: LLM call failed — Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m0yawwr7ehx9bz16k2fsgcbr` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7801, Requested 1259. Please try again in 7.95s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}]",
+    "tools_called": [],
+    "tool_results": [],
+    "iterations": 1,
+    "total_tokens": 0,
+    "total_cost_usd": 0.0,
+    "latency_ms": 7284.61,
+    "budget_hit": null,
+    "budget_config": {
+      "max_iterations": 8,
+      "max_tokens": 15000,
+      "max_cost_usd": 0.1,
+      "max_wall_clock_s": 60.0
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an AirFiber customer support agent. Resolve each support ticket by\ncalling the available tools in the appropriate order:\n\n1. Call retrieve_kb_context to fetch relevant policy or help-centre content.\n2. If the ticket requires formal escalation (Priority tier unresolved, missed\n   orders, repeated contact, or technical faults after troubleshooting),\n   call escalate_ticket with the correct reason and severity.\n3. Call generate_ticket_reply with the retrieved context (and the escalation\n   note when applicable) to draft the final reply.\n\nRules:\n- Use tools; do NOT write the reply yourself without calling generate_ticket_reply.\n- Call escalate_ticket ONLY when the situation genuinely warrants it.\n- If a previous tool call returns an error or unexpected result, adapt your plan.\n- When all needed tool calls are done, call generate_ticket_reply and then stop.\n"
+      },
+      {
+        "role": "user",
+        "content": "Ticket ID: T010\nCustomer tier: Priority\nCustomer question: We moved into this flat in July and asked for the connection to be shifted. It has been six weeks. Every week someone promises a call back. I want to know the timeline and if we get compensation."
+      }
+    ]
+  },
+  {
+    "system": "agent",
+    "ticket_id": "T017",
+    "reply": "[Agent error: LLM call failed — Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m0yawwr7ehx9bz16k2fsgcbr` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 6957, Requested 1372. Please try again in 2.4675s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}]",
+    "tools_called": [
+      "retrieve_kb_context"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "refund when engineer no-show appointment missed",
+        "product_area": "installation",
+        "top_k": 3,
+        "passages": "Refund Policy: If installation appointment is missed by technician and service not activated within 7 days of payment, 100% refund of ₹1999 is processed within 5-7 business days.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      }
+    ],
+    "iterations": 2,
+    "total_tokens": 1134,
+    "total_cost_usd": 0.00010206,
+    "latency_ms": 29316.13,
+    "budget_hit": null,
+    "budget_config": {
+      "max_iterations": 8,
+      "max_tokens": 15000,
+      "max_cost_usd": 0.1,
+      "max_wall_clock_s": 60.0
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an AirFiber customer support agent. Resolve each support ticket by\ncalling the available tools in the appropriate order:\n\n1. Call retrieve_kb_context to fetch relevant policy or help-centre content.\n2. If the ticket requires formal escalation (Priority tier unresolved, missed\n   orders, repeated contact, or technical faults after troubleshooting),\n   call escalate_ticket with the correct reason and severity.\n3. Call generate_ticket_reply with the retrieved context (and the escalation\n   note when applicable) to draft the final reply.\n\nRules:\n- Use tools; do NOT write the reply yourself without calling generate_ticket_reply.\n- Call escalate_ticket ONLY when the situation genuinely warrants it.\n- If a previous tool call returns an error or unexpected result, adapt your plan.\n- When all needed tool calls are done, call generate_ticket_reply and then stop.\n"
+      },
+      {
+        "role": "user",
+        "content": "Ticket ID: T017\nCustomer tier: Priority\nCustomer question: Third time I am writing about this. Nobody called back. I paid 1999 on the 2nd, the engineer never turned up. Just tell me whether I get my money back."
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_5d9e3b3e-a42c-43c6-9df0-a3d3e4d9205c",
+            "type": "function",
+            "function": {
+              "name": "retrieve_kb_context",
+              "arguments": "{\"product_area\":\"installation\",\"query\":\"refund when engineer no-show appointment missed\",\"top_k\":3}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_5d9e3b3e-a42c-43c6-9df0-a3d3e4d9205c",
+        "name": "retrieve_kb_context",
+        "content": "{\"tool\": \"retrieve_kb_context\", \"query\": \"refund when engineer no-show appointment missed\", \"product_area\": \"installation\", \"top_k\": 3, \"passages\": \"Refund Policy: If installation appointment is missed by technician and service not activated within 7 days of payment, 100% refund of ₹1999 is processed within 5-7 business days.\", \"latency_ms\": 0.0, \"tokens_used\": 0}"
+      }
+    ]
+  },
+  {
+    "system": "agent",
+    "ticket_id": "T119",
+    "reply": "[Ticket #T119]  \n\nI’m sorry you’ve been experiencing slow speeds. Since the issue has persisted for more than 48 hours and you’re within the 30‑day window, you qualify for a full refund of the ₹1199 plan charge and cancellation of your service. I’ll initiate the refund process right away and you should see the amount returned to your original payment method within a few business days.  \n\n[Source: Refund Policy]",
+    "tools_called": [
+      "retrieve_kb_context",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "refund policy speed guarantee cancellation within first 30 days low speed",
+        "product_area": "any",
+        "top_k": 5,
+        "passages": "Refund Policy: Full refund of ₹1199 plan charges is provided within 30 days of activation if persistent performance issues cannot be resolved within 48 hours.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T119]  \nI’m sorry you’ve been experiencing slow speeds. Since the issue has persisted for more than 48 hours and you’re within the 30‑day window, you qualify for a full refund of the ₹1199 plan charge and cancellation of your service. I’ll initiate the refund process right away and you should see the amount returned to your original payment method within a few business days.  \n\n[Source: Refund Policy]",
+        "latency_ms": 6287.29,
+        "tokens_used": 508,
+        "prompt_tokens": 276,
+        "completion_tokens": 232
+      }
+    ],
+    "iterations": 3,
+    "total_tokens": 4088,
+    "total_cost_usd": 0.00036792,
+    "latency_ms": 39721.58,
+    "budget_hit": null,
+    "budget_config": {
+      "max_iterations": 8,
+      "max_tokens": 15000,
+      "max_cost_usd": 0.1,
+      "max_wall_clock_s": 60.0
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an AirFiber customer support agent. Resolve each support ticket by\ncalling the available tools in the appropriate order:\n\n1. Call retrieve_kb_context to fetch relevant policy or help-centre content.\n2. If the ticket requires formal escalation (Priority tier unresolved, missed\n   orders, repeated contact, or technical faults after troubleshooting),\n   call escalate_ticket with the correct reason and severity.\n3. Call generate_ticket_reply with the retrieved context (and the escalation\n   note when applicable) to draft the final reply.\n\nRules:\n- Use tools; do NOT write the reply yourself without calling generate_ticket_reply.\n- Call escalate_ticket ONLY when the situation genuinely warrants it.\n- If a previous tool call returns an error or unexpected result, adapt your plan.\n- When all needed tool calls are done, call generate_ticket_reply and then stop.\n"
+      },
+      {
+        "role": "user",
+        "content": "Ticket ID: T119\nCustomer tier: Standard\nCustomer question: I signed up 8 days ago and speed has been under 10 Mbps every day. I want to cancel and get my ₹1199 refunded."
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_53103706-6d7b-4fd2-8dc9-83823233030d",
+            "type": "function",
+            "function": {
+              "name": "retrieve_kb_context",
+              "arguments": "{\"product_area\":\"any\",\"query\":\"refund policy speed guarantee cancellation within first 30 days low speed\",\"top_k\":5}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_53103706-6d7b-4fd2-8dc9-83823233030d",
+        "name": "retrieve_kb_context",
+        "content": "{\"tool\": \"retrieve_kb_context\", \"query\": \"refund policy speed guarantee cancellation within first 30 days low speed\", \"product_area\": \"any\", \"top_k\": 5, \"passages\": \"Refund Policy: Full refund of ₹1199 plan charges is provided within 30 days of activation if persistent performance issues cannot be resolved within 48 hours.\", \"latency_ms\": 0.0, \"tokens_used\": 0}"
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_7a4b4046-29fe-42a4-9ead-2c0d860415e1",
+            "type": "function",
+            "function": {
+              "name": "generate_ticket_reply",
+              "arguments": "{\"context_passages\":\"Refund Policy: Full refund of ₹1199 plan charges is provided within 30 days of activation if persistent performance issues cannot be resolved within 48 hours.\",\"customer_question\":\"I signed up 8 days ago and speed has been under 10 Mbps every day. I want to cancel and get my ₹1199 refunded.\",\"customer_tier\":\"Standard\",\"escalation_note\":\"\",\"ticket_id\":\"T119\",\"tone\":\"empathetic\"}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_7a4b4046-29fe-42a4-9ead-2c0d860415e1",
+        "name": "generate_ticket_reply",
+        "content": "{\"tool\": \"generate_ticket_reply\", \"reply\": \"[Ticket #T119]  \\nI’m sorry you’ve been experiencing slow speeds. Since the issue has persisted for more than 48 hours and you’re within the 30‑day window, you qualify for a full refund of the ₹1199 plan charge and cancellation of your service. I’ll initiate the refund process right away and you should see the amount returned to your original payment method within a few business days.  \\n\\n[Source: Refund Policy]\", \"latency_ms\": 6287.29, \"tokens_used\": 508, \"prompt_tokens\": 276, \"completion_tokens\": 232}"
+      },
+      {
+        "role": "assistant",
+        "content": "[Ticket #T119]  \n\nI’m sorry you’ve been experiencing slow speeds. Since the issue has persisted for more than 48 hours and you’re within the 30‑day window, you qualify for a full refund of the ₹1199 plan charge and cancellation of your service. I’ll initiate the refund process right away and you should see the amount returned to your original payment method within a few business days.  \n\n[Source: Refund Policy]",
+        "tool_calls": []
+      }
+    ]
+  },
+  {
+    "system": "agent",
+    "ticket_id": "T001",
+    "reply": "[Agent error: LLM call failed — Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m0yawwr7ehx9bz16k2fsgcbr` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 6449, Requested 1559. Please try again in 60ms. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}]",
+    "tools_called": [
+      "retrieve_kb_context"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "business plan SLA",
+        "product_area": "plans",
+        "top_k": 3,
+        "passages": "AirFiber provides residential broadband plans (AirFiber 599, 1199, 1999). Dedicated business enterprise plans with formal 99.9% uptime SLAs are available under our Enterprise AirFiber tier by contacting enterprise-sales@airfiber.in.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      }
+    ],
+    "iterations": 2,
+    "total_tokens": 1075,
+    "total_cost_usd": 9.675000000000001e-05,
+    "latency_ms": 18031.28,
+    "budget_hit": null,
+    "budget_config": {
+      "max_iterations": 8,
+      "max_tokens": 15000,
+      "max_cost_usd": 0.1,
+      "max_wall_clock_s": 60.0
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an AirFiber customer support agent. Resolve each support ticket by\ncalling the available tools in the appropriate order:\n\n1. Call retrieve_kb_context to fetch relevant policy or help-centre content.\n2. If the ticket requires formal escalation (Priority tier unresolved, missed\n   orders, repeated contact, or technical faults after troubleshooting),\n   call escalate_ticket with the correct reason and severity.\n3. Call generate_ticket_reply with the retrieved context (and the escalation\n   note when applicable) to draft the final reply.\n\nRules:\n- Use tools; do NOT write the reply yourself without calling generate_ticket_reply.\n- Call escalate_ticket ONLY when the situation genuinely warrants it.\n- If a previous tool call returns an error or unexpected result, adapt your plan.\n- When all needed tool calls are done, call generate_ticket_reply and then stop.\n"
+      },
+      {
+        "role": "user",
+        "content": "Ticket ID: T001\nCustomer tier: Standard\nCustomer question: Do you have a business plan with an SLA?"
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_9d7c8f2f-9fdc-471b-bdb9-131493e69e09",
+            "type": "function",
+            "function": {
+              "name": "retrieve_kb_context",
+              "arguments": "{\"product_area\":\"plans\",\"query\":\"business plan SLA\",\"top_k\":3}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_9d7c8f2f-9fdc-471b-bdb9-131493e69e09",
+        "name": "retrieve_kb_context",
+        "content": "{\"tool\": \"retrieve_kb_context\", \"query\": \"business plan SLA\", \"product_area\": \"plans\", \"top_k\": 3, \"passages\": \"AirFiber provides residential broadband plans (AirFiber 599, 1199, 1999). Dedicated business enterprise plans with formal 99.9% uptime SLAs are available under our Enterprise AirFiber tier by contacting enterprise-sales@airfiber.in.\", \"latency_ms\": 0.0, \"tokens_used\": 0}"
+      }
+    ]
+  },
+  {
+    "system": "agent",
+    "ticket_id": "T003",
+    "reply": "[Agent error: LLM call failed — Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m0yawwr7ehx9bz16k2fsgcbr` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7551, Requested 1616. Please try again in 8.7525s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}]",
+    "tools_called": [
+      "retrieve_kb_context",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "official speed test for refund claim",
+        "product_area": "troubleshooting",
+        "top_k": 3,
+        "passages": "Refund Policy: Official speed tests must be conducted via the official AirFiber Desktop App or speed.airfiber.in connected via ethernet directly to the ONT, taking 3 consecutive tests 1 hour apart.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T003]  \nAn official speed test for a refund claim must be performed using the AirFiber Desktop App or via speed.airfiber.in while connected by Ethernet directly to the ONT. You need to run three consecutive tests, spaced one hour apart.  \nSource: Refund Policy.",
+        "latency_ms": 4028.09,
+        "tokens_used": 478,
+        "prompt_tokens": 266,
+        "completion_tokens": 212
+      }
+    ],
+    "iterations": 3,
+    "total_tokens": 2346,
+    "total_cost_usd": 0.00021114,
+    "latency_ms": 20040.83,
+    "budget_hit": null,
+    "budget_config": {
+      "max_iterations": 8,
+      "max_tokens": 15000,
+      "max_cost_usd": 0.1,
+      "max_wall_clock_s": 60.0
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an AirFiber customer support agent. Resolve each support ticket by\ncalling the available tools in the appropriate order:\n\n1. Call retrieve_kb_context to fetch relevant policy or help-centre content.\n2. If the ticket requires formal escalation (Priority tier unresolved, missed\n   orders, repeated contact, or technical faults after troubleshooting),\n   call escalate_ticket with the correct reason and severity.\n3. Call generate_ticket_reply with the retrieved context (and the escalation\n   note when applicable) to draft the final reply.\n\nRules:\n- Use tools; do NOT write the reply yourself without calling generate_ticket_reply.\n- Call escalate_ticket ONLY when the situation genuinely warrants it.\n- If a previous tool call returns an error or unexpected result, adapt your plan.\n- When all needed tool calls are done, call generate_ticket_reply and then stop.\n"
+      },
+      {
+        "role": "user",
+        "content": "Ticket ID: T003\nCustomer tier: Standard\nCustomer question: What counts as an official speed test for a refund claim?"
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_e1fedef0-8f22-48c0-bd0a-952daa23ec35",
+            "type": "function",
+            "function": {
+              "name": "retrieve_kb_context",
+              "arguments": "{\"product_area\":\"troubleshooting\",\"query\":\"official speed test for refund claim\",\"top_k\":3}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_e1fedef0-8f22-48c0-bd0a-952daa23ec35",
+        "name": "retrieve_kb_context",
+        "content": "{\"tool\": \"retrieve_kb_context\", \"query\": \"official speed test for refund claim\", \"product_area\": \"troubleshooting\", \"top_k\": 3, \"passages\": \"Refund Policy: Official speed tests must be conducted via the official AirFiber Desktop App or speed.airfiber.in connected via ethernet directly to the ONT, taking 3 consecutive tests 1 hour apart.\", \"latency_ms\": 0.0, \"tokens_used\": 0}"
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_59f0350c-541d-4373-aeb4-9f0531c896c6",
+            "type": "function",
+            "function": {
+              "name": "generate_ticket_reply",
+              "arguments": "{\"context_passages\":\"Refund Policy: Official speed tests must be conducted via the official AirFiber Desktop App or speed.airfiber.in connected via ethernet directly to the ONT, taking 3 consecutive tests 1 hour apart.\",\"customer_question\":\"What counts as an official speed test for a refund claim?\",\"customer_tier\":\"Standard\",\"escalation_note\":\"\",\"ticket_id\":\"T003\",\"tone\":\"informational\"}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_59f0350c-541d-4373-aeb4-9f0531c896c6",
+        "name": "generate_ticket_reply",
+        "content": "{\"tool\": \"generate_ticket_reply\", \"reply\": \"[Ticket #T003]  \\nAn official speed test for a refund claim must be performed using the AirFiber Desktop App or via speed.airfiber.in while connected by Ethernet directly to the ONT. You need to run three consecutive tests, spaced one hour apart.  \\nSource: Refund Policy.\", \"latency_ms\": 4028.09, \"tokens_used\": 478, \"prompt_tokens\": 266, \"completion_tokens\": 212}"
+      }
+    ]
+  },
+  {
+    "system": "agent",
+    "ticket_id": "T016",
+    "reply": "[Ticket #T016]  \n\nA refund is available only if both of the following conditions are met:\n\n1. You request it within the first 30 days after your plan is activated.  \n2. Your service experiences a persistent speed drop to less than 50 % of the promised speed that cannot be resolved within 48 hours.  \n\nIf these criteria are satisfied, you may be eligible for a full refund of your plan charges.  \n\n— AirFiber Support",
+    "tools_called": [
+      "retrieve_kb_context",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "refund conditions for plan",
+        "product_area": "billing",
+        "top_k": 3,
+        "passages": "Refund Policy: Full refund of plan charges is available within the first 30 days of activation if persistent speed drops below 50% of promised speed cannot be resolved within 48 hours.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T016]  \nA refund is available only if both of the following conditions are met: (1) you request it within the first 30 days after your plan is activated, and (2) your service experiences a persistent speed drop to less than 50 % of the promised speed that cannot be resolved within 48 hours. 【Refund Policy】",
+        "latency_ms": 2831.05,
+        "tokens_used": 418,
+        "prompt_tokens": 263,
+        "completion_tokens": 155
+      }
+    ],
+    "iterations": 3,
+    "total_tokens": 3658,
+    "total_cost_usd": 0.00032922,
+    "latency_ms": 41239.85,
+    "budget_hit": null,
+    "budget_config": {
+      "max_iterations": 8,
+      "max_tokens": 15000,
+      "max_cost_usd": 0.1,
+      "max_wall_clock_s": 60.0
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an AirFiber customer support agent. Resolve each support ticket by\ncalling the available tools in the appropriate order:\n\n1. Call retrieve_kb_context to fetch relevant policy or help-centre content.\n2. If the ticket requires formal escalation (Priority tier unresolved, missed\n   orders, repeated contact, or technical faults after troubleshooting),\n   call escalate_ticket with the correct reason and severity.\n3. Call generate_ticket_reply with the retrieved context (and the escalation\n   note when applicable) to draft the final reply.\n\nRules:\n- Use tools; do NOT write the reply yourself without calling generate_ticket_reply.\n- Call escalate_ticket ONLY when the situation genuinely warrants it.\n- If a previous tool call returns an error or unexpected result, adapt your plan.\n- When all needed tool calls are done, call generate_ticket_reply and then stop.\n"
+      },
+      {
+        "role": "user",
+        "content": "Ticket ID: T016\nCustomer tier: Standard\nCustomer question: What are the conditions for getting a refund on my plan?"
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_5e66d493-aefe-4f3c-af5a-7c4c3c1bca16",
+            "type": "function",
+            "function": {
+              "name": "retrieve_kb_context",
+              "arguments": "{\"product_area\":\"billing\",\"query\":\"refund conditions for plan\",\"top_k\":3}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_5e66d493-aefe-4f3c-af5a-7c4c3c1bca16",
+        "name": "retrieve_kb_context",
+        "content": "{\"tool\": \"retrieve_kb_context\", \"query\": \"refund conditions for plan\", \"product_area\": \"billing\", \"top_k\": 3, \"passages\": \"Refund Policy: Full refund of plan charges is available within the first 30 days of activation if persistent speed drops below 50% of promised speed cannot be resolved within 48 hours.\", \"latency_ms\": 0.0, \"tokens_used\": 0}"
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_eda206fc-41d4-4c8d-81ab-9f65e9bf671f",
+            "type": "function",
+            "function": {
+              "name": "generate_ticket_reply",
+              "arguments": "{\"context_passages\":\"Refund Policy: Full refund of plan charges is available within the first 30 days of activation if persistent speed drops below 50% of promised speed cannot be resolved within 48 hours.\",\"customer_question\":\"What are the conditions for getting a refund on my plan?\",\"customer_tier\":\"Standard\",\"escalation_note\":\"\",\"ticket_id\":\"T016\",\"tone\":\"informational\"}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_eda206fc-41d4-4c8d-81ab-9f65e9bf671f",
+        "name": "generate_ticket_reply",
+        "content": "{\"tool\": \"generate_ticket_reply\", \"reply\": \"[Ticket #T016]  \\nA refund is available only if both of the following conditions are met: (1) you request it within the first 30 days after your plan is activated, and (2) your service experiences a persistent speed drop to less than 50 % of the promised speed that cannot be resolved within 48 hours. 【Refund Policy】\", \"latency_ms\": 2831.05, \"tokens_used\": 418, \"prompt_tokens\": 263, \"completion_tokens\": 155}"
+      },
+      {
+        "role": "assistant",
+        "content": "[Ticket #T016]  \n\nA refund is available only if both of the following conditions are met:\n\n1. You request it within the first 30 days after your plan is activated.  \n2. Your service experiences a persistent speed drop to less than 50 % of the promised speed that cannot be resolved within 48 hours.  \n\nIf these criteria are satisfied, you may be eligible for a full refund of your plan charges.  \n\n— AirFiber Support",
+        "tool_calls": []
+      }
+    ]
+  },
+  {
+    "system": "agent",
+    "ticket_id": "T022",
+    "reply": "[Agent error: LLM call failed — Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m0yawwr7ehx9bz16k2fsgcbr` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 6609, Requested 1698. Please try again in 2.3025s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}]",
+    "tools_called": [
+      "retrieve_kb_context",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "closing account equipment return deposit refund policy",
+        "product_area": "account",
+        "top_k": 5,
+        "passages": "Account Closure Policy: Return the ONT device and power adapter within 14 days. Non-return fee is ₹2500 for ONT and ₹1500 for mesh extender. Security deposit of ₹1000 is refunded within 7 days of device receipt.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T022]  \nTo close your account, return the ONT device and its power adapter within 14 days. If you keep the ONT, a fee of ₹2,500 applies, and a ₹1,500 fee applies for any mesh extender not returned. Your security deposit of ₹1,000 will be refunded within 7 days after we receive the equipment.  \n\nSource: Account Closure Policy.",
+        "latency_ms": 806.56,
+        "tokens_used": 542,
+        "prompt_tokens": 294,
+        "completion_tokens": 248
+      }
+    ],
+    "iterations": 3,
+    "total_tokens": 2482,
+    "total_cost_usd": 0.00022338000000000002,
+    "latency_ms": 43391.14,
+    "budget_hit": null,
+    "budget_config": {
+      "max_iterations": 8,
+      "max_tokens": 15000,
+      "max_cost_usd": 0.1,
+      "max_wall_clock_s": 60.0
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an AirFiber customer support agent. Resolve each support ticket by\ncalling the available tools in the appropriate order:\n\n1. Call retrieve_kb_context to fetch relevant policy or help-centre content.\n2. If the ticket requires formal escalation (Priority tier unresolved, missed\n   orders, repeated contact, or technical faults after troubleshooting),\n   call escalate_ticket with the correct reason and severity.\n3. Call generate_ticket_reply with the retrieved context (and the escalation\n   note when applicable) to draft the final reply.\n\nRules:\n- Use tools; do NOT write the reply yourself without calling generate_ticket_reply.\n- Call escalate_ticket ONLY when the situation genuinely warrants it.\n- If a previous tool call returns an error or unexpected result, adapt your plan.\n- When all needed tool calls are done, call generate_ticket_reply and then stop.\n"
+      },
+      {
+        "role": "user",
+        "content": "Ticket ID: T022\nCustomer tier: Standard\nCustomer question: I am closing my account, what equipment do I return, what does it cost if I do not, and when do I get my deposit?"
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_54abc0ac-5abc-40ba-a7f4-f6e826df9ec8",
+            "type": "function",
+            "function": {
+              "name": "retrieve_kb_context",
+              "arguments": "{\"product_area\":\"account\",\"query\":\"closing account equipment return deposit refund policy\",\"top_k\":5}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_54abc0ac-5abc-40ba-a7f4-f6e826df9ec8",
+        "name": "retrieve_kb_context",
+        "content": "{\"tool\": \"retrieve_kb_context\", \"query\": \"closing account equipment return deposit refund policy\", \"product_area\": \"account\", \"top_k\": 5, \"passages\": \"Account Closure Policy: Return the ONT device and power adapter within 14 days. Non-return fee is ₹2500 for ONT and ₹1500 for mesh extender. Security deposit of ₹1000 is refunded within 7 days of device receipt.\", \"latency_ms\": 0.0, \"tokens_used\": 0}"
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_ac41df73-7d8c-4a42-9555-3636d234beb6",
+            "type": "function",
+            "function": {
+              "name": "generate_ticket_reply",
+              "arguments": "{\"context_passages\":\"Account Closure Policy: Return the ONT device and power adapter within 14 days. Non-return fee is ₹2500 for ONT and ₹1500 for mesh extender. Security deposit of ₹1000 is refunded within 7 days of device receipt.\",\"customer_question\":\"I am closing my account, what equipment do I return, what does it cost if I do not, and when do I get my deposit?\",\"customer_tier\":\"Standard\",\"escalation_note\":\"\",\"ticket_id\":\"T022\",\"tone\":\"informational\"}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_ac41df73-7d8c-4a42-9555-3636d234beb6",
+        "name": "generate_ticket_reply",
+        "content": "{\"tool\": \"generate_ticket_reply\", \"reply\": \"[Ticket #T022]  \\nTo close your account, return the ONT device and its power adapter within 14 days. If you keep the ONT, a fee of ₹2,500 applies, and a ₹1,500 fee applies for any mesh extender not returned. Your security deposit of ₹1,000 will be refunded within 7 days after we receive the equipment.  \\n\\nSource: Account Closure Policy.\", \"latency_ms\": 806.56, \"tokens_used\": 542, \"prompt_tokens\": 294, \"completion_tokens\": 248}"
+      }
+    ]
+  },
+  {
+    "system": "agent",
+    "ticket_id": "T073",
+    "reply": "[Ticket #T073]  \n\nA solid (non‑flashing) orange LED on your box means the ONT is either in firmware‑update mode or detecting a degraded optical signal (around –27 dBm to –30 dBm). Please wait about 10 minutes; if the light remains orange, try a single power‑cycle of the device (unplug, wait 10 seconds, then plug back in).\n\n*Source: Troubleshooting – solid orange LED indicates firmware update mode or degraded optical signal.*",
+    "tools_called": [
+      "retrieve_kb_context",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "orange light not flashing box meaning",
+        "product_area": "troubleshooting",
+        "top_k": 3,
+        "passages": "Troubleshooting: Solid orange LED indicates ONT is in firmware update mode or degraded optical signal (-27 dBm to -30 dBm). Wait 10 minutes; if it remains orange, perform a single power cycle.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T073]  \nA solid (non‑flashing) orange LED means the ONT is either in firmware‑update mode or detecting a degraded optical signal (approximately –27 dBm to –30 dBm). Please wait about 10 minutes; if the light stays orange, try a single power‑cycle of the device.  \n\n*Source: Troubleshooting – solid orange LED indicates firmware update mode or degraded optical signal.*",
+        "latency_ms": 1103.01,
+        "tokens_used": 541,
+        "prompt_tokens": 276,
+        "completion_tokens": 265
+      }
+    ],
+    "iterations": 3,
+    "total_tokens": 3747,
+    "total_cost_usd": 0.00033723,
+    "latency_ms": 13289.73,
+    "budget_hit": null,
+    "budget_config": {
+      "max_iterations": 8,
+      "max_tokens": 15000,
+      "max_cost_usd": 0.1,
+      "max_wall_clock_s": 60.0
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an AirFiber customer support agent. Resolve each support ticket by\ncalling the available tools in the appropriate order:\n\n1. Call retrieve_kb_context to fetch relevant policy or help-centre content.\n2. If the ticket requires formal escalation (Priority tier unresolved, missed\n   orders, repeated contact, or technical faults after troubleshooting),\n   call escalate_ticket with the correct reason and severity.\n3. Call generate_ticket_reply with the retrieved context (and the escalation\n   note when applicable) to draft the final reply.\n\nRules:\n- Use tools; do NOT write the reply yourself without calling generate_ticket_reply.\n- Call escalate_ticket ONLY when the situation genuinely warrants it.\n- If a previous tool call returns an error or unexpected result, adapt your plan.\n- When all needed tool calls are done, call generate_ticket_reply and then stop.\n"
+      },
+      {
+        "role": "user",
+        "content": "Ticket ID: T073\nCustomer tier: Standard\nCustomer question: My box has an orange light that is not flashing, what does that mean?"
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_7565abe2-78f1-4439-ade5-289591e1a894",
+            "type": "function",
+            "function": {
+              "name": "retrieve_kb_context",
+              "arguments": "{\"product_area\":\"troubleshooting\",\"query\":\"orange light not flashing box meaning\",\"top_k\":3}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_7565abe2-78f1-4439-ade5-289591e1a894",
+        "name": "retrieve_kb_context",
+        "content": "{\"tool\": \"retrieve_kb_context\", \"query\": \"orange light not flashing box meaning\", \"product_area\": \"troubleshooting\", \"top_k\": 3, \"passages\": \"Troubleshooting: Solid orange LED indicates ONT is in firmware update mode or degraded optical signal (-27 dBm to -30 dBm). Wait 10 minutes; if it remains orange, perform a single power cycle.\", \"latency_ms\": 0.0, \"tokens_used\": 0}"
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_fe60ddf3-b481-46d8-92af-a7735b65af05",
+            "type": "function",
+            "function": {
+              "name": "generate_ticket_reply",
+              "arguments": "{\"context_passages\":\"Troubleshooting: Solid orange LED indicates ONT is in firmware update mode or degraded optical signal (-27 dBm to -30 dBm). Wait 10 minutes; if it remains orange, perform a single power cycle.\",\"customer_question\":\"My box has an orange light that is not flashing, what does that mean?\",\"customer_tier\":\"Standard\",\"escalation_note\":\"\",\"ticket_id\":\"T073\",\"tone\":\"empathetic\"}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_fe60ddf3-b481-46d8-92af-a7735b65af05",
+        "name": "generate_ticket_reply",
+        "content": "{\"tool\": \"generate_ticket_reply\", \"reply\": \"[Ticket #T073]  \\nA solid (non‑flashing) orange LED means the ONT is either in firmware‑update mode or detecting a degraded optical signal (approximately –27 dBm to –30 dBm). Please wait about 10 minutes; if the light stays orange, try a single power‑cycle of the device.  \\n\\n*Source: Troubleshooting – solid orange LED indicates firmware update mode or degraded optical signal.*\", \"latency_ms\": 1103.01, \"tokens_used\": 541, \"prompt_tokens\": 276, \"completion_tokens\": 265}"
+      },
+      {
+        "role": "assistant",
+        "content": "[Ticket #T073]  \n\nA solid (non‑flashing) orange LED on your box means the ONT is either in firmware‑update mode or detecting a degraded optical signal (around –27 dBm to –30 dBm). Please wait about 10 minutes; if the light remains orange, try a single power‑cycle of the device (unplug, wait 10 seconds, then plug back in).\n\n*Source: Troubleshooting – solid orange LED indicates firmware update mode or degraded optical signal.*",
+        "tool_calls": []
+      }
+    ]
+  },
+  {
+    "system": "agent",
+    "ticket_id": "T118",
+    "reply": "[Ticket #T118]  \n\nI understand how frustrating a 2‑day outage can be, especially after three months of service. According to our Refund Policy, full plan refunds are only available within the first 30 days of activation, so a full refund isn’t applicable in this case. However, outages that exceed 24 consecutive hours qualify for a pro‑rata billing credit of ₹100 per outage day after verification. You would be eligible for a credit of ₹200 for the two‑day outage.\n\n*Source: Refund Policy*",
+    "tools_called": [
+      "retrieve_kb_context",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "refund for outage policy",
+        "product_area": "billing",
+        "top_k": 3,
+        "passages": "Refund Policy: Outages exceeding 24 consecutive hours qualify for pro-rata billing credit of ₹100 per outage day upon verification. Full plan refunds are only applicable within the initial 30 days of activation.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T118]  \nI understand how frustrating a 2‑day outage can be. According to our Refund Policy, full plan refunds are only available within the first 30 days of activation, and your service has been active for three months, so a full refund isn’t applicable. However, outages that exceed 24 consecutive hours qualify for a pro‑rata billing credit of ₹100 per outage day after verification. You would be eligible for a credit of ₹200 for the two‑day outage.  \n\n*Source: Refund Policy*",
+        "latency_ms": 4143.64,
+        "tokens_used": 572,
+        "prompt_tokens": 276,
+        "completion_tokens": 296
+      }
+    ],
+    "iterations": 3,
+    "total_tokens": 3907,
+    "total_cost_usd": 0.00035163,
+    "latency_ms": 19433.62,
+    "budget_hit": null,
+    "budget_config": {
+      "max_iterations": 8,
+      "max_tokens": 15000,
+      "max_cost_usd": 0.1,
+      "max_wall_clock_s": 60.0
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an AirFiber customer support agent. Resolve each support ticket by\ncalling the available tools in the appropriate order:\n\n1. Call retrieve_kb_context to fetch relevant policy or help-centre content.\n2. If the ticket requires formal escalation (Priority tier unresolved, missed\n   orders, repeated contact, or technical faults after troubleshooting),\n   call escalate_ticket with the correct reason and severity.\n3. Call generate_ticket_reply with the retrieved context (and the escalation\n   note when applicable) to draft the final reply.\n\nRules:\n- Use tools; do NOT write the reply yourself without calling generate_ticket_reply.\n- Call escalate_ticket ONLY when the situation genuinely warrants it.\n- If a previous tool call returns an error or unexpected result, adapt your plan.\n- When all needed tool calls are done, call generate_ticket_reply and then stop.\n"
+      },
+      {
+        "role": "user",
+        "content": "Ticket ID: T118\nCustomer tier: Priority\nCustomer question: I have had service for 3 months and demand a full refund for last month's 2-day outage."
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_282d44f7-9f55-4824-b2a3-8faefc9cc539",
+            "type": "function",
+            "function": {
+              "name": "retrieve_kb_context",
+              "arguments": "{\"product_area\":\"billing\",\"query\":\"refund for outage policy\",\"top_k\":3}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_282d44f7-9f55-4824-b2a3-8faefc9cc539",
+        "name": "retrieve_kb_context",
+        "content": "{\"tool\": \"retrieve_kb_context\", \"query\": \"refund for outage policy\", \"product_area\": \"billing\", \"top_k\": 3, \"passages\": \"Refund Policy: Outages exceeding 24 consecutive hours qualify for pro-rata billing credit of ₹100 per outage day upon verification. Full plan refunds are only applicable within the initial 30 days of activation.\", \"latency_ms\": 0.0, \"tokens_used\": 0}"
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_ee2af8d1-30c0-4566-a749-5e95060128ec",
+            "type": "function",
+            "function": {
+              "name": "generate_ticket_reply",
+              "arguments": "{\"context_passages\":\"Refund Policy: Outages exceeding 24 consecutive hours qualify for pro-rata billing credit of ₹100 per outage day upon verification. Full plan refunds are only applicable within the initial 30 days of activation.\",\"customer_question\":\"I have had service for 3 months and demand a full refund for last month's 2-day outage.\",\"customer_tier\":\"Priority\",\"escalation_note\":\"\",\"ticket_id\":\"T118\",\"tone\":\"empathetic\"}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_ee2af8d1-30c0-4566-a749-5e95060128ec",
+        "name": "generate_ticket_reply",
+        "content": "{\"tool\": \"generate_ticket_reply\", \"reply\": \"[Ticket #T118]  \\nI understand how frustrating a 2‑day outage can be. According to our Refund Policy, full plan refunds are only available within the first 30 days of activation, and your service has been active for three months, so a full refund isn’t applicable. However, outages that exceed 24 consecutive hours qualify for a pro‑rata billing credit of ₹100 per outage day after verification. You would be eligible for a credit of ₹200 for the two‑day outage.  \\n\\n*Source: Refund Policy*\", \"latency_ms\": 4143.64, \"tokens_used\": 572, \"prompt_tokens\": 276, \"completion_tokens\": 296}"
+      },
+      {
+        "role": "assistant",
+        "content": "[Ticket #T118]  \n\nI understand how frustrating a 2‑day outage can be, especially after three months of service. According to our Refund Policy, full plan refunds are only available within the first 30 days of activation, so a full refund isn’t applicable in this case. However, outages that exceed 24 consecutive hours qualify for a pro‑rata billing credit of ₹100 per outage day after verification. You would be eligible for a credit of ₹200 for the two‑day outage.\n\n*Source: Refund Policy*",
+        "tool_calls": []
+      }
+    ]
+  },
+  {
+    "system": "agent",
+    "ticket_id": "T007",
+    "reply": "[Ticket #T007]  \n\nYes, the registered account holder or an authorized adult must be present at the new premises during the technician’s setup. Relocating within the same city is free of charge and typically takes **3‑5 working days** to complete.  \n\n*Source: Account Management*",
+    "tools_called": [
+      "retrieve_kb_context",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "address transfer presence required charge how long does it take",
+        "product_area": "installation",
+        "top_k": 3,
+        "passages": "Account Management: Relocation within the same city is free of charge and takes 3-5 working days. The registered account holder or an authorized adult must be present at the new premises during technician setup.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T007]  \nYes, the registered account holder or an authorized adult must be present at the new premises during the technician’s setup. The relocation within the same city is free of charge and typically takes 3‑5 working days to complete.  \n\n*Source: Account Management*",
+        "latency_ms": 795.8,
+        "tokens_used": 468,
+        "prompt_tokens": 281,
+        "completion_tokens": 187
+      }
+    ],
+    "iterations": 3,
+    "total_tokens": 3656,
+    "total_cost_usd": 0.00032904,
+    "latency_ms": 20716.9,
+    "budget_hit": null,
+    "budget_config": {
+      "max_iterations": 8,
+      "max_tokens": 15000,
+      "max_cost_usd": 0.1,
+      "max_wall_clock_s": 60.0
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an AirFiber customer support agent. Resolve each support ticket by\ncalling the available tools in the appropriate order:\n\n1. Call retrieve_kb_context to fetch relevant policy or help-centre content.\n2. If the ticket requires formal escalation (Priority tier unresolved, missed\n   orders, repeated contact, or technical faults after troubleshooting),\n   call escalate_ticket with the correct reason and severity.\n3. Call generate_ticket_reply with the retrieved context (and the escalation\n   note when applicable) to draft the final reply.\n\nRules:\n- Use tools; do NOT write the reply yourself without calling generate_ticket_reply.\n- Call escalate_ticket ONLY when the situation genuinely warrants it.\n- If a previous tool call returns an error or unexpected result, adapt your plan.\n- When all needed tool calls are done, call generate_ticket_reply and then stop.\n"
+      },
+      {
+        "role": "user",
+        "content": "Ticket ID: T007\nCustomer tier: Standard\nCustomer question: Do I need to be present for the transfer to a new address, is there a charge, and how long does it take?"
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_c09501a7-0cec-491e-a5dc-e74e7d419c31",
+            "type": "function",
+            "function": {
+              "name": "retrieve_kb_context",
+              "arguments": "{\"product_area\":\"installation\",\"query\":\"address transfer presence required charge how long does it take\",\"top_k\":3}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_c09501a7-0cec-491e-a5dc-e74e7d419c31",
+        "name": "retrieve_kb_context",
+        "content": "{\"tool\": \"retrieve_kb_context\", \"query\": \"address transfer presence required charge how long does it take\", \"product_area\": \"installation\", \"top_k\": 3, \"passages\": \"Account Management: Relocation within the same city is free of charge and takes 3-5 working days. The registered account holder or an authorized adult must be present at the new premises during technician setup.\", \"latency_ms\": 0.0, \"tokens_used\": 0}"
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "fc_0a002e3c-e992-4d37-b491-193ead12766a",
+            "type": "function",
+            "function": {
+              "name": "generate_ticket_reply",
+              "arguments": "{\"context_passages\":\"Account Management: Relocation within the same city is free of charge and takes 3-5 working days. The registered account holder or an authorized adult must be present at the new premises during technician setup.\",\"customer_question\":\"Do I need to be present for the transfer to a new address, is there a charge, and how long does it take?\",\"customer_tier\":\"Standard\",\"escalation_note\":\"\",\"ticket_id\":\"T007\",\"tone\":\"informational\"}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "fc_0a002e3c-e992-4d37-b491-193ead12766a",
+        "name": "generate_ticket_reply",
+        "content": "{\"tool\": \"generate_ticket_reply\", \"reply\": \"[Ticket #T007]  \\nYes, the registered account holder or an authorized adult must be present at the new premises during the technician’s setup. The relocation within the same city is free of charge and typically takes 3‑5 working days to complete.  \\n\\n*Source: Account Management*\", \"latency_ms\": 795.8, \"tokens_used\": 468, \"prompt_tokens\": 281, \"completion_tokens\": 187}"
+      },
+      {
+        "role": "assistant",
+        "content": "[Ticket #T007]  \n\nYes, the registered account holder or an authorized adult must be present at the new premises during the technician’s setup. Relocating within the same city is free of charge and typically takes **3‑5 working days** to complete.  \n\n*Source: Account Management*",
+        "tool_calls": []
+      }
+    ]
+  }
+]

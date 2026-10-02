@@ -1,0 +1,434 @@
+{
+  "agent": {
+    "pass_rate": 0.4,
+    "p50_latency_ms": 20378.9,
+    "total_tokens": 26093,
+    "cost_per_ticket_usd": 0.000235
+  },
+  "fixed_workflow": {
+    "pass_rate": 1.0,
+    "p50_latency_ms": 3794.5,
+    "total_tokens": 5141,
+    "cost_per_ticket_usd": 4.6e-05
+  },
+  "per_ticket": [
+    {
+      "ticket_id": "T010",
+      "system": "agent",
+      "pass": false,
+      "latency_ms": 7284.61,
+      "total_tokens": 0,
+      "total_cost_usd": 0.0,
+      "tools_called": [],
+      "iterations": 1,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": false,
+        "refund_amount_numeric": true,
+        "priority_escalation": false,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Agent error: LLM call failed — Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m0yawwr7ehx9b"
+    },
+    {
+      "ticket_id": "T017",
+      "system": "agent",
+      "pass": false,
+      "latency_ms": 29316.13,
+      "total_tokens": 1134,
+      "total_cost_usd": 0.00010206,
+      "tools_called": [
+        "retrieve_kb_context"
+      ],
+      "iterations": 2,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": false,
+        "refund_amount_numeric": true,
+        "priority_escalation": false,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Agent error: LLM call failed — Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m0yawwr7ehx9b"
+    },
+    {
+      "ticket_id": "T119",
+      "system": "agent",
+      "pass": true,
+      "latency_ms": 39721.58,
+      "total_tokens": 4088,
+      "total_cost_usd": 0.00036792,
+      "tools_called": [
+        "retrieve_kb_context",
+        "generate_ticket_reply"
+      ],
+      "iterations": 3,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Ticket #T119]  \n\nI’m sorry you’ve been experiencing slow speeds. Since the issue has persisted for more than 48 hours and you’re within the 30‑day window, you "
+    },
+    {
+      "ticket_id": "T001",
+      "system": "agent",
+      "pass": false,
+      "latency_ms": 18031.28,
+      "total_tokens": 1075,
+      "total_cost_usd": 9.675000000000001e-05,
+      "tools_called": [
+        "retrieve_kb_context"
+      ],
+      "iterations": 2,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": false,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Agent error: LLM call failed — Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m0yawwr7ehx9b"
+    },
+    {
+      "ticket_id": "T003",
+      "system": "agent",
+      "pass": false,
+      "latency_ms": 20040.83,
+      "total_tokens": 2346,
+      "total_cost_usd": 0.00021114,
+      "tools_called": [
+        "retrieve_kb_context",
+        "generate_ticket_reply"
+      ],
+      "iterations": 3,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": false,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Agent error: LLM call failed — Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m0yawwr7ehx9b"
+    },
+    {
+      "ticket_id": "T016",
+      "system": "agent",
+      "pass": true,
+      "latency_ms": 41239.85,
+      "total_tokens": 3658,
+      "total_cost_usd": 0.00032922,
+      "tools_called": [
+        "retrieve_kb_context",
+        "generate_ticket_reply"
+      ],
+      "iterations": 3,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": false,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Ticket #T016]  \n\nA refund is available only if both of the following conditions are met:\n\n1. You request it within the first 30 days after your plan is activat"
+    },
+    {
+      "ticket_id": "T022",
+      "system": "agent",
+      "pass": false,
+      "latency_ms": 43391.14,
+      "total_tokens": 2482,
+      "total_cost_usd": 0.00022338000000000002,
+      "tools_called": [
+        "retrieve_kb_context",
+        "generate_ticket_reply"
+      ],
+      "iterations": 3,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": false,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Agent error: LLM call failed — Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m0yawwr7ehx9b"
+    },
+    {
+      "ticket_id": "T073",
+      "system": "agent",
+      "pass": true,
+      "latency_ms": 13289.73,
+      "total_tokens": 3747,
+      "total_cost_usd": 0.00033723,
+      "tools_called": [
+        "retrieve_kb_context",
+        "generate_ticket_reply"
+      ],
+      "iterations": 3,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Ticket #T073]  \n\nA solid (non‑flashing) orange LED on your box means the ONT is either in firmware‑update mode or detecting a degraded optical signal (around –"
+    },
+    {
+      "ticket_id": "T118",
+      "system": "agent",
+      "pass": false,
+      "latency_ms": 19433.62,
+      "total_tokens": 3907,
+      "total_cost_usd": 0.00035163,
+      "tools_called": [
+        "retrieve_kb_context",
+        "generate_ticket_reply"
+      ],
+      "iterations": 3,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": true,
+        "priority_escalation": false,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Ticket #T118]  \n\nI understand how frustrating a 2‑day outage can be, especially after three months of service. According to our Refund Policy, full plan refund"
+    },
+    {
+      "ticket_id": "T007",
+      "system": "agent",
+      "pass": true,
+      "latency_ms": 20716.9,
+      "total_tokens": 3656,
+      "total_cost_usd": 0.00032904,
+      "tools_called": [
+        "retrieve_kb_context",
+        "generate_ticket_reply"
+      ],
+      "iterations": 3,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Ticket #T007]  \n\nYes, the registered account holder or an authorized adult must be present at the new premises during the technician’s setup. Relocating within"
+    },
+    {
+      "ticket_id": "T010",
+      "system": "fixed_workflow",
+      "pass": true,
+      "latency_ms": 3103.77,
+      "total_tokens": 623,
+      "total_cost_usd": 5.607e-05,
+      "tools_called": [
+        "retrieve_kb_context",
+        "escalate_ticket",
+        "generate_ticket_reply"
+      ],
+      "iterations": 1,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Ticket #T010] [Priority Escalation: Field Service Supervisor]\n\nWe apologize for the prolonged delay. A relocation is normally completed within 3‑5 working days"
+    },
+    {
+      "ticket_id": "T017",
+      "system": "fixed_workflow",
+      "pass": true,
+      "latency_ms": 5225.28,
+      "total_tokens": 585,
+      "total_cost_usd": 5.2650000000000006e-05,
+      "tools_called": [
+        "retrieve_kb_context",
+        "escalate_ticket",
+        "generate_ticket_reply"
+      ],
+      "iterations": 1,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Ticket #T017] [Priority Escalation: Field Service Supervisor]  \n\nI’m very sorry for the repeated inconvenience and lack of follow‑up. Because the technician mi"
+    },
+    {
+      "ticket_id": "T119",
+      "system": "fixed_workflow",
+      "pass": true,
+      "latency_ms": 3040.28,
+      "total_tokens": 535,
+      "total_cost_usd": 4.815e-05,
+      "tools_called": [
+        "retrieve_kb_context",
+        "generate_ticket_reply"
+      ],
+      "iterations": 1,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Ticket #T119]  \nWe’ve reviewed your case and, per our Refund Policy, you qualify for a full refund of the ₹1199 plan charge because the performance issue has p"
+    },
+    {
+      "ticket_id": "T001",
+      "system": "fixed_workflow",
+      "pass": true,
+      "latency_ms": 3861.33,
+      "total_tokens": 459,
+      "total_cost_usd": 4.1309999999999996e-05,
+      "tools_called": [
+        "retrieve_kb_context",
+        "generate_ticket_reply"
+      ],
+      "iterations": 1,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Ticket #T001]  \nYes, we offer dedicated business enterprise plans that include a formal 99.9% uptime SLA. These plans are available under our Enterprise AirFib"
+    },
+    {
+      "ticket_id": "T003",
+      "system": "fixed_workflow",
+      "pass": true,
+      "latency_ms": 3727.73,
+      "total_tokens": 434,
+      "total_cost_usd": 3.906e-05,
+      "tools_called": [
+        "retrieve_kb_context",
+        "generate_ticket_reply"
+      ],
+      "iterations": 1,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Ticket #T003]  \nAn official speed test for a refund claim must be performed using the AirFiber Desktop App or via speed.airfiber.in, with the testing device co"
+    },
+    {
+      "ticket_id": "T016",
+      "system": "fixed_workflow",
+      "pass": true,
+      "latency_ms": 2768.64,
+      "total_tokens": 418,
+      "total_cost_usd": 3.7619999999999996e-05,
+      "tools_called": [
+        "retrieve_kb_context",
+        "generate_ticket_reply"
+      ],
+      "iterations": 1,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Ticket #T016]  \nA refund is available only if both of the following conditions are met: (1) you request it within the first 30 days after your plan is activate"
+    },
+    {
+      "ticket_id": "T022",
+      "system": "fixed_workflow",
+      "pass": true,
+      "latency_ms": 4034.47,
+      "total_tokens": 542,
+      "total_cost_usd": 4.8780000000000004e-05,
+      "tools_called": [
+        "retrieve_kb_context",
+        "generate_ticket_reply"
+      ],
+      "iterations": 1,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Ticket #T022]  \nTo close your account, return the ONT device and its power adapter within 14 days. If you keep the ONT, a fee of ₹2,500 applies, and a ₹1,500 f"
+    },
+    {
+      "ticket_id": "T073",
+      "system": "fixed_workflow",
+      "pass": true,
+      "latency_ms": 2973.9,
+      "total_tokens": 471,
+      "total_cost_usd": 4.239e-05,
+      "tools_called": [
+        "retrieve_kb_context",
+        "generate_ticket_reply"
+      ],
+      "iterations": 1,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Ticket #T073]  \nA solid (non‑flashing) orange LED on your ONT means it is either in firmware‑update mode or detecting a degraded optical signal (approximately "
+    },
+    {
+      "ticket_id": "T118",
+      "system": "fixed_workflow",
+      "pass": true,
+      "latency_ms": 4305.44,
+      "total_tokens": 606,
+      "total_cost_usd": 5.454e-05,
+      "tools_called": [
+        "retrieve_kb_context",
+        "escalate_ticket",
+        "generate_ticket_reply"
+      ],
+      "iterations": 1,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Ticket #T118] [Priority Escalation: Priority Support Lead]  \nWe’re sorry for the inconvenience caused by the recent outage. Because your service has been activ"
+    },
+    {
+      "ticket_id": "T007",
+      "system": "fixed_workflow",
+      "pass": true,
+      "latency_ms": 5355.97,
+      "total_tokens": 468,
+      "total_cost_usd": 4.2119999999999997e-05,
+      "tools_called": [
+        "retrieve_kb_context",
+        "generate_ticket_reply"
+      ],
+      "iterations": 1,
+      "budget_hit": null,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "reply_preview": "[Ticket #T007]  \nYes, the registered account holder or an authorized adult must be present at the new premises during the technician’s setup. The relocation wit"
+    }
+  ]
+}

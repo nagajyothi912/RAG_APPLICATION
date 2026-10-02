@@ -1,23 +1,22 @@
 import { useEffect, useState } from 'react';
 import RagPage from './components/pages/RagPage';
 import ErrorAnalysisPage from './components/pages/ErrorAnalysisPage';
+import Week7Page from './components/pages/Week7Page';
 
-type Tab = 'chat' | 'analysis';
+type Tab = 'chat' | 'analysis' | 'week7';
 
 /**
- * Two tabs rather than a router: the app has exactly two screens and adding a
- * router dependency to switch between them would be more moving parts than the
- * problem has. The analysis tab is mounted lazily, so a session that never
- * opens it pays nothing for it.
+ * Three tabs: chat, error analysis, and the Week 7 agent-vs-workflow view.
+ * The hash drives navigation so links are shareable and reloads stay on tab.
  */
 function parseHash(): { tab: Tab; traceId?: string } {
   const [section, traceId] = window.location.hash.replace('#', '').split('/');
-  return section === 'analysis' ? { tab: 'analysis', traceId: traceId || undefined } : { tab: 'chat' };
+  if (section === 'analysis') return { tab: 'analysis', traceId: traceId || undefined };
+  if (section === 'week7')    return { tab: 'week7' };
+  return { tab: 'chat' };
 }
 
 export default function App() {
-  // The tab lives in the URL hash so a trace review is a link someone can send,
-  // and so a reload during one does not bounce back to the chat.
   const [route, setRoute] = useState(parseHash);
   const tab = route.tab;
 
@@ -28,7 +27,9 @@ export default function App() {
   }, []);
 
   const select = (next: Tab) => {
-    window.location.hash = next === 'analysis' ? 'analysis' : '';
+    window.location.hash =
+      next === 'analysis' ? 'analysis' :
+      next === 'week7'    ? 'week7' : '';
     setRoute({ tab: next });
   };
 
@@ -53,12 +54,23 @@ export default function App() {
         >
           Error analysis
         </button>
+        <button
+          type="button"
+          role="tab"
+          id="tab-week7"
+          aria-selected={tab === 'week7'}
+          className={tab === 'week7' ? 'is-active w7-tab-nav-btn' : 'w7-tab-nav-btn'}
+          onClick={() => select('week7')}
+        >
+          Week 7 — Agent vs Workflow
+        </button>
       </nav>
 
       <div hidden={tab !== 'chat'}>
         <RagPage />
       </div>
       {tab === 'analysis' ? <ErrorAnalysisPage active initialTraceId={route.traceId} /> : null}
+      {tab === 'week7'    ? <Week7Page /> : null}
     </div>
   );
 }

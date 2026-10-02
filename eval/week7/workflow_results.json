@@ -1,0 +1,391 @@
+[
+  {
+    "system": "fixed_workflow",
+    "ticket_id": "T010",
+    "reply": "[Ticket #T010] [Priority Escalation: Field Service Supervisor]\n\nWe apologize for the prolonged delay. A relocation is normally completed within 3‑5 working days. Since your request has now exceeded 14 days",
+    "tools_called": [
+      "retrieve_kb_context",
+      "escalate_ticket",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "We moved into this flat in July and asked for the connection to be shifted. It has been six weeks. Every week someone promises a call back. I want to know the timeline and if we get compensation.",
+        "product_area": "any",
+        "top_k": 3,
+        "passages": "Account Management: Relocations take 3-5 working days. If relocation exceeds 14 days due to technician delay, account is credited ₹100/day for downtime beyond standard timeline.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "escalate_ticket",
+        "ticket_id": "T010",
+        "reason": "missing_order",
+        "severity": "high",
+        "assigned_team": "Field Service Supervisor",
+        "sla_hours": 24,
+        "account_status": "pending",
+        "escalation_note": "[Priority Escalation: Field Service Supervisor] Ticket T010 escalated — reason: missing_order, severity: high.",
+        "latency_ms": 0.01,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T010] [Priority Escalation: Field Service Supervisor]\n\nWe apologize for the prolonged delay. A relocation is normally completed within 3‑5 working days. Since your request has now exceeded 14 days",
+        "latency_ms": 3103.59,
+        "tokens_used": 623,
+        "prompt_tokens": 323,
+        "completion_tokens": 300
+      }
+    ],
+    "iterations": 1,
+    "total_tokens": 623,
+    "total_cost_usd": 5.607e-05,
+    "latency_ms": 3103.77,
+    "budget_hit": null,
+    "budget_config": {},
+    "messages": []
+  },
+  {
+    "system": "fixed_workflow",
+    "ticket_id": "T017",
+    "reply": "[Ticket #T017] [Priority Escalation: Field Service Supervisor]  \n\nI’m very sorry for the repeated inconvenience and lack of follow‑up. Because the technician missed your installation appointment and the service has not been activated within 7 days of your ₹1999 payment, you are eligible for a full refund. The ₹1999 will be processed within 5‑7 business days.  \n\n[Source: Refund Policy]",
+    "tools_called": [
+      "retrieve_kb_context",
+      "escalate_ticket",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "Third time I am writing about this. Nobody called back. I paid 1999 on the 2nd, the engineer never turned up. Just tell me whether I get my money back.",
+        "product_area": "any",
+        "top_k": 3,
+        "passages": "Refund Policy: If installation appointment is missed by technician and service not activated within 7 days of payment, 100% refund of ₹1999 is processed within 5-7 business days.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "escalate_ticket",
+        "ticket_id": "T017",
+        "reason": "missing_order",
+        "severity": "high",
+        "assigned_team": "Field Service Supervisor",
+        "sla_hours": 24,
+        "account_status": "unactivated",
+        "escalation_note": "[Priority Escalation: Field Service Supervisor] Ticket T017 escalated — reason: missing_order, severity: high.",
+        "latency_ms": 0.03,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T017] [Priority Escalation: Field Service Supervisor]  \n\nI’m very sorry for the repeated inconvenience and lack of follow‑up. Because the technician missed your installation appointment and the service has not been activated within 7 days of your ₹1999 payment, you are eligible for a full refund. The ₹1999 will be processed within 5‑7 business days.  \n\n[Source: Refund Policy]",
+        "latency_ms": 5224.61,
+        "tokens_used": 585,
+        "prompt_tokens": 323,
+        "completion_tokens": 262
+      }
+    ],
+    "iterations": 1,
+    "total_tokens": 585,
+    "total_cost_usd": 5.2650000000000006e-05,
+    "latency_ms": 5225.28,
+    "budget_hit": null,
+    "budget_config": {},
+    "messages": []
+  },
+  {
+    "system": "fixed_workflow",
+    "ticket_id": "T119",
+    "reply": "[Ticket #T119]  \nWe’ve reviewed your case and, per our Refund Policy, you qualify for a full refund of the ₹1199 plan charge because the performance issue has persisted for more than 48 hours and you are within the 30‑day window. We will proceed with canceling your service and initiating the refund to your original payment method. You should see the credit reflected within 5‑7 business days.  \n\nSource: Refund Policy.",
+    "tools_called": [
+      "retrieve_kb_context",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "I signed up 8 days ago and speed has been under 10 Mbps every day. I want to cancel and get my ₹1199 refunded.",
+        "product_area": "any",
+        "top_k": 3,
+        "passages": "Refund Policy: Full refund of ₹1199 plan charges is provided within 30 days of activation if persistent performance issues cannot be resolved within 48 hours.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T119]  \nWe’ve reviewed your case and, per our Refund Policy, you qualify for a full refund of the ₹1199 plan charge because the performance issue has persisted for more than 48 hours and you are within the 30‑day window. We will proceed with canceling your service and initiating the refund to your original payment method. You should see the credit reflected within 5‑7 business days.  \n\nSource: Refund Policy.",
+        "latency_ms": 3039.64,
+        "tokens_used": 535,
+        "prompt_tokens": 275,
+        "completion_tokens": 260
+      }
+    ],
+    "iterations": 1,
+    "total_tokens": 535,
+    "total_cost_usd": 4.815e-05,
+    "latency_ms": 3040.28,
+    "budget_hit": null,
+    "budget_config": {},
+    "messages": []
+  },
+  {
+    "system": "fixed_workflow",
+    "ticket_id": "T001",
+    "reply": "[Ticket #T001]  \nYes, we offer dedicated business enterprise plans that include a formal 99.9% uptime SLA. These plans are available under our Enterprise AirFiber tier; you can inquire further by emailing enterprise-sales@airfiber.in.  \n\nSource: AirFiber provides residential broadband plans (AirFiber 599, 1199, 1999). Dedicated business enterprise plans with formal 99.9% uptime SLAs are available under our Enterprise AirFiber tier by contacting enterprise-sales@airfiber.in.",
+    "tools_called": [
+      "retrieve_kb_context",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "Do you have a business plan with an SLA?",
+        "product_area": "any",
+        "top_k": 3,
+        "passages": "AirFiber provides residential broadband plans (AirFiber 599, 1199, 1999). Dedicated business enterprise plans with formal 99.9% uptime SLAs are available under our Enterprise AirFiber tier by contacting enterprise-sales@airfiber.in.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T001]  \nYes, we offer dedicated business enterprise plans that include a formal 99.9% uptime SLA. These plans are available under our Enterprise AirFiber tier; you can inquire further by emailing enterprise-sales@airfiber.in.  \n\nSource: AirFiber provides residential broadband plans (AirFiber 599, 1199, 1999). Dedicated business enterprise plans with formal 99.9% uptime SLAs are available under our Enterprise AirFiber tier by contacting enterprise-sales@airfiber.in.",
+        "latency_ms": 3861.2,
+        "tokens_used": 459,
+        "prompt_tokens": 275,
+        "completion_tokens": 184
+      }
+    ],
+    "iterations": 1,
+    "total_tokens": 459,
+    "total_cost_usd": 4.1309999999999996e-05,
+    "latency_ms": 3861.33,
+    "budget_hit": null,
+    "budget_config": {},
+    "messages": []
+  },
+  {
+    "system": "fixed_workflow",
+    "ticket_id": "T003",
+    "reply": "[Ticket #T003]  \nAn official speed test for a refund claim must be performed using the AirFiber Desktop App or via speed.airfiber.in, with the testing device connected by Ethernet directly to the ONT. You need to run three consecutive tests, spaced one hour apart.  \n\nSource: Refund Policy.",
+    "tools_called": [
+      "retrieve_kb_context",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "What counts as an official speed test for a refund claim?",
+        "product_area": "any",
+        "top_k": 3,
+        "passages": "Refund Policy: Official speed tests must be conducted via the official AirFiber Desktop App or speed.airfiber.in connected via ethernet directly to the ONT, taking 3 consecutive tests 1 hour apart.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T003]  \nAn official speed test for a refund claim must be performed using the AirFiber Desktop App or via speed.airfiber.in, with the testing device connected by Ethernet directly to the ONT. You need to run three consecutive tests, spaced one hour apart.  \n\nSource: Refund Policy.",
+        "latency_ms": 3727.52,
+        "tokens_used": 434,
+        "prompt_tokens": 266,
+        "completion_tokens": 168
+      }
+    ],
+    "iterations": 1,
+    "total_tokens": 434,
+    "total_cost_usd": 3.906e-05,
+    "latency_ms": 3727.73,
+    "budget_hit": null,
+    "budget_config": {},
+    "messages": []
+  },
+  {
+    "system": "fixed_workflow",
+    "ticket_id": "T016",
+    "reply": "[Ticket #T016]  \nA refund is available only if both of the following conditions are met: (1) you request it within the first 30 days after your plan is activated, and (2) your service experiences a persistent speed drop to less than 50 % of the promised speed that cannot be resolved within 48 hours. 【Refund Policy】",
+    "tools_called": [
+      "retrieve_kb_context",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "What are the conditions for getting a refund on my plan?",
+        "product_area": "any",
+        "top_k": 3,
+        "passages": "Refund Policy: Full refund of plan charges is available within the first 30 days of activation if persistent speed drops below 50% of promised speed cannot be resolved within 48 hours.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T016]  \nA refund is available only if both of the following conditions are met: (1) you request it within the first 30 days after your plan is activated, and (2) your service experiences a persistent speed drop to less than 50 % of the promised speed that cannot be resolved within 48 hours. 【Refund Policy】",
+        "latency_ms": 2768.14,
+        "tokens_used": 418,
+        "prompt_tokens": 263,
+        "completion_tokens": 155
+      }
+    ],
+    "iterations": 1,
+    "total_tokens": 418,
+    "total_cost_usd": 3.7619999999999996e-05,
+    "latency_ms": 2768.64,
+    "budget_hit": null,
+    "budget_config": {},
+    "messages": []
+  },
+  {
+    "system": "fixed_workflow",
+    "ticket_id": "T022",
+    "reply": "[Ticket #T022]  \nTo close your account, return the ONT device and its power adapter within 14 days. If you keep the ONT, a fee of ₹2,500 applies, and a ₹1,500 fee applies for any mesh extender not returned. Your security deposit of ₹1,000 will be refunded within 7 days after we receive the equipment.  \n\nSource: Account Closure Policy.",
+    "tools_called": [
+      "retrieve_kb_context",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "I am closing my account, what equipment do I return, what does it cost if I do not, and when do I get my deposit?",
+        "product_area": "any",
+        "top_k": 3,
+        "passages": "Account Closure Policy: Return the ONT device and power adapter within 14 days. Non-return fee is ₹2500 for ONT and ₹1500 for mesh extender. Security deposit of ₹1000 is refunded within 7 days of device receipt.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T022]  \nTo close your account, return the ONT device and its power adapter within 14 days. If you keep the ONT, a fee of ₹2,500 applies, and a ₹1,500 fee applies for any mesh extender not returned. Your security deposit of ₹1,000 will be refunded within 7 days after we receive the equipment.  \n\nSource: Account Closure Policy.",
+        "latency_ms": 4034.28,
+        "tokens_used": 542,
+        "prompt_tokens": 294,
+        "completion_tokens": 248
+      }
+    ],
+    "iterations": 1,
+    "total_tokens": 542,
+    "total_cost_usd": 4.8780000000000004e-05,
+    "latency_ms": 4034.47,
+    "budget_hit": null,
+    "budget_config": {},
+    "messages": []
+  },
+  {
+    "system": "fixed_workflow",
+    "ticket_id": "T073",
+    "reply": "[Ticket #T073]  \nA solid (non‑flashing) orange LED on your ONT means it is either in firmware‑update mode or detecting a degraded optical signal (approximately –27 dBm to –30 dBm). Please wait about 10 minutes; if the orange light persists, perform a single power‑cycle of the device.  \n\nSource: Troubleshooting guide – solid orange LED indicates firmware update mode or degraded optical signal; wait 10 minutes, then power‑cycle if unchanged.",
+    "tools_called": [
+      "retrieve_kb_context",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "My box has an orange light that is not flashing, what does that mean?",
+        "product_area": "any",
+        "top_k": 3,
+        "passages": "Troubleshooting: Solid orange LED indicates ONT is in firmware update mode or degraded optical signal (-27 dBm to -30 dBm). Wait 10 minutes; if it remains orange, perform a single power cycle.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T073]  \nA solid (non‑flashing) orange LED on your ONT means it is either in firmware‑update mode or detecting a degraded optical signal (approximately –27 dBm to –30 dBm). Please wait about 10 minutes; if the orange light persists, perform a single power‑cycle of the device.  \n\nSource: Troubleshooting guide – solid orange LED indicates firmware update mode or degraded optical signal; wait 10 minutes, then power‑cycle if unchanged.",
+        "latency_ms": 2973.66,
+        "tokens_used": 471,
+        "prompt_tokens": 275,
+        "completion_tokens": 196
+      }
+    ],
+    "iterations": 1,
+    "total_tokens": 471,
+    "total_cost_usd": 4.239e-05,
+    "latency_ms": 2973.9,
+    "budget_hit": null,
+    "budget_config": {},
+    "messages": []
+  },
+  {
+    "system": "fixed_workflow",
+    "ticket_id": "T118",
+    "reply": "[Ticket #T118] [Priority Escalation: Priority Support Lead]  \nWe’re sorry for the inconvenience caused by the recent outage. Because your service has been active for more than 30 days, a full plan refund is not available. However, the outage exceeded 24 hours, so you qualify for a pro‑rata credit of ₹100 per outage day, totaling ₹200, pending verification.  \n\nWe appreciate your patience and will process the credit promptly once verification is complete.",
+    "tools_called": [
+      "retrieve_kb_context",
+      "escalate_ticket",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "I have had service for 3 months and demand a full refund for last month's 2-day outage.",
+        "product_area": "any",
+        "top_k": 3,
+        "passages": "Refund Policy: Outages exceeding 24 consecutive hours qualify for pro-rata billing credit of ₹100 per outage day upon verification. Full plan refunds are only applicable within the initial 30 days of activation.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "escalate_ticket",
+        "ticket_id": "T118",
+        "reason": "priority_customer",
+        "severity": "high",
+        "assigned_team": "Priority Support Lead",
+        "sla_hours": 2,
+        "account_status": "active",
+        "escalation_note": "[Priority Escalation: Priority Support Lead] Ticket T118 escalated — reason: priority_customer, severity: high.",
+        "latency_ms": 0.08,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T118] [Priority Escalation: Priority Support Lead]  \nWe’re sorry for the inconvenience caused by the recent outage. Because your service has been active for more than 30 days, a full plan refund is not available. However, the outage exceeded 24 hours, so you qualify for a pro‑rata credit of ₹100 per outage day, totaling ₹200, pending verification.  \n\nWe appreciate your patience and will process the credit promptly once verification is complete.",
+        "latency_ms": 4304.88,
+        "tokens_used": 606,
+        "prompt_tokens": 306,
+        "completion_tokens": 300
+      }
+    ],
+    "iterations": 1,
+    "total_tokens": 606,
+    "total_cost_usd": 5.454e-05,
+    "latency_ms": 4305.44,
+    "budget_hit": null,
+    "budget_config": {},
+    "messages": []
+  },
+  {
+    "system": "fixed_workflow",
+    "ticket_id": "T007",
+    "reply": "[Ticket #T007]  \nYes, the registered account holder or an authorized adult must be present at the new premises during the technician’s setup. The relocation within the same city is free of charge and typically takes 3‑5 working days to complete.  \n\n*Source: Account Management*",
+    "tools_called": [
+      "retrieve_kb_context",
+      "generate_ticket_reply"
+    ],
+    "tool_results": [
+      {
+        "tool": "retrieve_kb_context",
+        "query": "Do I need to be present for the transfer to a new address, is there a charge, and how long does it take?",
+        "product_area": "any",
+        "top_k": 3,
+        "passages": "Account Management: Relocation within the same city is free of charge and takes 3-5 working days. The registered account holder or an authorized adult must be present at the new premises during technician setup.",
+        "latency_ms": 0.0,
+        "tokens_used": 0
+      },
+      {
+        "tool": "generate_ticket_reply",
+        "reply": "[Ticket #T007]  \nYes, the registered account holder or an authorized adult must be present at the new premises during the technician’s setup. The relocation within the same city is free of charge and typically takes 3‑5 working days to complete.  \n\n*Source: Account Management*",
+        "latency_ms": 5355.57,
+        "tokens_used": 468,
+        "prompt_tokens": 281,
+        "completion_tokens": 187
+      }
+    ],
+    "iterations": 1,
+    "total_tokens": 468,
+    "total_cost_usd": 4.2119999999999997e-05,
+    "latency_ms": 5355.97,
+    "budget_hit": null,
+    "budget_config": {},
+    "messages": []
+  }
+]

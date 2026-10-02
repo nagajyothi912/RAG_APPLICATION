@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.analysis import router as analysis_router
 from app.api.chat import router as chat_router
 from app.api.documents import router as documents_router
+from app.api.week7 import router as week7_router
 from app.config import settings
 from app.services import langfuse_sink
 from app.services.rag_service import get_rag_service
@@ -50,3 +51,4 @@ app.add_middleware(
 app.include_router(documents_router, prefix="/api")
 app.include_router(chat_router, prefix="/api")
 app.include_router(analysis_router, prefix="/api")
+app.include_router(week7_router, prefix="/api")
