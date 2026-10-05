@@ -25,7 +25,12 @@ from typing import Any, Dict, List, Optional
 
 from openai import OpenAI
 
-from .tools import TOOL_SCHEMAS, dispatch_tool
+from .tools import (
+    TOOL_SCHEMAS,
+    TOOL_SCHEMAS_BASELINE,
+    TOOL_SCHEMAS_MITIGATED,
+    dispatch_tool,
+)
 
 # ---------------------------------------------------------------------------
 # Budget defaults (can be overridden per-run)
@@ -94,18 +99,19 @@ class BudgetTracker:
 
 
 # ---------------------------------------------------------------------------
-# System prompt for the agent
+# System prompts for the agent (Baseline vs Mitigated)
 # ---------------------------------------------------------------------------
 
-AGENT_SYSTEM_PROMPT = """\
+AGENT_SYSTEM_PROMPT_BASELINE = """\
 You are an AirFiber customer support agent. Resolve each support ticket by
 calling the available tools in the appropriate order:
 
 1. Call retrieve_kb_context to fetch relevant policy or help-centre content.
-2. If the ticket requires formal escalation (Priority tier unresolved, missed
+2. If helpful, you can check customer records with lookup_order_record.
+3. If the ticket requires formal escalation (Priority tier unresolved, missed
    orders, repeated contact, or technical faults after troubleshooting),
    call escalate_ticket with the correct reason and severity.
-3. Call generate_ticket_reply with the retrieved context (and the escalation
+4. Call generate_ticket_reply with the retrieved context (and the escalation
    note when applicable) to draft the final reply.
 
 Rules:
@@ -114,6 +120,30 @@ Rules:
 - If a previous tool call returns an error or unexpected result, adapt your plan.
 - When all needed tool calls are done, call generate_ticket_reply and then stop.
 """
+
+AGENT_SYSTEM_PROMPT_MITIGATED = """\
+You are an AirFiber customer support agent. Resolve each support ticket by
+calling the available tools in the appropriate order:
+
+1. Call retrieve_kb_context to fetch relevant policy or help-centre content.
+2. MANDATORY ORDER RECORD VERIFICATION: For any ticket requesting a refund,
+   cancellation, deposit return, compensation, or reporting billing/installation
+   issues, you MUST call lookup_order_record using the customer's ticket_id to inspect
+   the official CRM order record BEFORE drafting a reply or escalating.
+   Never draft a refund or compensation reply without first opening the order record.
+3. If the ticket requires formal escalation (Priority tier unresolved, missed
+   orders, repeated contact, or technical faults after troubleshooting),
+   call escalate_ticket with the verified reason and severity.
+4. Call generate_ticket_reply with the retrieved context and verified order facts to draft the final reply.
+
+Rules:
+- Ground all refund and compensation decisions in lookup_order_record verification.
+- Use tools; do NOT write the reply yourself without calling generate_ticket_reply.
+- Call escalate_ticket ONLY when the situation genuinely warrants it.
+- When all needed tool calls are done, call generate_ticket_reply and then stop.
+"""
+
+AGENT_SYSTEM_PROMPT = AGENT_SYSTEM_PROMPT_BASELINE
 
 
 # ---------------------------------------------------------------------------
@@ -125,28 +155,31 @@ def run_agent(
     client: OpenAI,
     model: str,
     budget: Optional[BudgetTracker] = None,
+    mitigated: bool = False,
+    tool_schemas: Optional[List[Dict[str, Any]]] = None,
+    system_prompt: Optional[str] = None,
+    sanitize_input: bool = False,
 ) -> Dict[str, Any]:
     """
-    Run the ReAct agent on one ticket.
-
-    Returns a result dict with:
-        reply          : str  — the final drafted reply (or partial if budget hit)
-        tools_called   : list — ordered sequence of tool names invoked
-        tool_results   : list — full result dict from each tool call
-        iterations     : int
-        total_tokens   : int
-        total_cost_usd : float
-        latency_ms     : float
-        budget_hit     : str | None — which budget fired, if any
-        budget_config  : dict
-        messages       : list — full conversation for audit
+    Run the ReAct agent on one ticket. Supports baseline and mitigated modes.
     """
     if budget is None:
         budget = BudgetTracker()
 
+    active_schemas = (
+        tool_schemas
+        if tool_schemas is not None
+        else (TOOL_SCHEMAS_MITIGATED if mitigated else TOOL_SCHEMAS_BASELINE)
+    )
+    active_prompt = (
+        system_prompt
+        if system_prompt is not None
+        else (AGENT_SYSTEM_PROMPT_MITIGATED if mitigated else AGENT_SYSTEM_PROMPT_BASELINE)
+    )
+
     wall_start   = time.perf_counter()
     messages: List[Dict[str, Any]] = [
-        {"role": "system", "content": AGENT_SYSTEM_PROMPT},
+        {"role": "system", "content": active_prompt},
         {
             "role": "user",
             "content": (
@@ -157,6 +190,7 @@ def run_agent(
         },
     ]
     tools_called: List[str] = []
+    tool_calls_record: List[Dict[str, Any]] = []
     tool_results: List[Dict[str, Any]] = []
     reply        = ""
     budget_hit   = None
@@ -170,18 +204,28 @@ def run_agent(
 
         budget.iterations += 1
 
-        # ── LLM decides the next action ─────────────────────────────────────
-        try:
-            response = client.chat.completions.create(
-                model=model,
-                messages=messages,
-                tools=TOOL_SCHEMAS,
-                tool_choice="auto",
-                temperature=0.0,
-                max_tokens=512,
-            )
-        except Exception as exc:
-            reply = f"[Agent error: LLM call failed — {exc}]"
+        # ── LLM decides the next action (with rate limit retry) ───────────────
+        response = None
+        for attempt in range(4):
+            try:
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    tools=active_schemas,
+                    tool_choice="auto",
+                    temperature=0.0,
+                    max_tokens=512,
+                )
+                break
+            except Exception as exc:
+                err_str = str(exc)
+                if "429" in err_str and attempt < 3:
+                    time.sleep(3.0 * (attempt + 1))
+                    continue
+                reply = f"[Agent error: LLM call failed — {exc}]"
+                break
+
+        if response is None:
             break
 
         usage = getattr(response, "usage", None)
@@ -225,12 +269,18 @@ def run_agent(
                 args = {}
 
             tools_called.append(name)
+            tool_calls_record.append({
+                "id": tc.id,
+                "name": name,
+                "arguments": args,
+            })
             result = dispatch_tool(
                 name=name,
                 args=args,
                 client=client,
                 model=model,
                 context_override=ticket.get("context"),
+                sanitize_input=sanitize_input,
             )
             tool_results.append(result)
 
@@ -254,7 +304,9 @@ def run_agent(
         "ticket_id":     ticket["ticket_id"],
         "reply":         reply,
         "tools_called":  tools_called,
+        "tool_calls":    tool_calls_record,
         "tool_results":  tool_results,
+        "mitigated":      mitigated,
         "iterations":    budget.iterations,
         "total_tokens":  budget.total_tokens,
         "total_cost_usd": budget.total_cost,

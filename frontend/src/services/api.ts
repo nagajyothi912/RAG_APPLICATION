@@ -397,3 +397,127 @@ export function triggerWeek7Experiment() {
 export function triggerBudgetTest() {
   return request<{ status: string; message: string }>('/api/week7/budget-test', { method: 'POST' });
 }
+
+/* ---------------------------------------------------------------- Week 8 */
+
+export type Week8TrajectoryMetrics = {
+  tool_choice_accuracy: number;
+  argument_validity_rate: number;
+  step_efficiency: number;
+  cost_per_ticket_usd: {
+    mean: number;
+    p50: number;
+    max: number;
+  };
+};
+
+export type Week8PriceTag = {
+  added_latency_ms: number;
+  added_tokens_per_ticket: number;
+  added_cost_per_ticket_usd: number;
+  flexibility_tradeoff: string;
+};
+
+export type Week8Summary = {
+  outcome_pass_rate_baseline: number;
+  trajectory_pass_rate_baseline: number;
+  outcome_vs_trajectory_gap: number;
+  top_failure_mode: string;
+  top_mode_before: number;
+  top_mode_after: number;
+  mitigation_applied: string;
+  price_tag: Week8PriceTag;
+};
+
+export type Week8TicketRun = {
+  ticket_id: string;
+  category: string;
+  accepts_multiple_paths: boolean;
+  valid_paths: string[][];
+  tools_called: string[];
+  steps_taken: number;
+  steps_needed: number;
+  step_efficiency: number;
+  tool_choice_accuracy: number;
+  argument_validity_rate: number;
+  argument_failures: string[];
+  trajectory_passed: boolean;
+  outcome_passed: boolean;
+  outcome_assertions: Record<string, boolean>;
+  is_right_answer_wrong_path: boolean;
+  failure_mode: string | null;
+  latency_ms: number;
+  total_tokens: number;
+  total_cost_usd: number;
+  reply_preview: string;
+};
+
+export type Week8EvalSet = {
+  mitigated: boolean;
+  total_tickets: number;
+  outcome_pass_rate: number;
+  trajectory_pass_rate: number;
+  outcome_vs_trajectory_gap: number;
+  four_trajectory_numbers: Week8TrajectoryMetrics;
+  runtime_metrics: {
+    latency_p50_ms: number;
+    latency_mean_ms: number;
+    tokens_mean: number;
+  };
+  failure_mode_counts: Record<string, number>;
+  right_answer_wrong_path_cases: Week8TicketRun[];
+  results: Week8TicketRun[];
+};
+
+export type Week8RegressionRow = {
+  mode: string;
+  description: string;
+  before_count: number;
+  after_count: number;
+  delta: number;
+  status: string;
+};
+
+export type Week8BonusChallenge = {
+  attack_payload: string;
+  vulnerable_run: {
+    reply: string;
+    obeyed_attack: boolean;
+    latency_ms: number;
+    tokens_used: number;
+  };
+  defended_run: {
+    reply: string;
+    obeyed_attack: boolean;
+    guardrail_passed: boolean;
+    guardrail_violations: string[];
+    latency_ms: number;
+    tokens_used: number;
+  };
+  defense_price_tag: {
+    added_latency_ms: number;
+    added_tokens: number;
+  };
+};
+
+export type Week8Response = {
+  available: boolean;
+  summary?: Week8Summary;
+  baseline_eval?: Week8EvalSet;
+  mitigated_eval?: Week8EvalSet;
+  named_gap_case?: Week8TicketRun;
+  regression_table?: Week8RegressionRow[];
+  bonus_challenge?: Week8BonusChallenge;
+};
+
+export function getWeek8Results() {
+  return request<Week8Response>('/api/week8/results');
+}
+
+export function triggerWeek8Experiment() {
+  return request<{ status: string; message: string }>('/api/week8/run', { method: 'POST' });
+}
+
+export function runWeek8AttackDefense() {
+  return request<Week8BonusChallenge>('/api/week8/attack-defense', { method: 'POST' });
+}
