@@ -1,0 +1,152 @@
+{
+  "captured_at": "2026-10-08T16:02:50+00:00",
+  "server_command": "python -m mcp_servers.ticket_history.server",
+  "transport": "stdio (newline-delimited JSON-RPC 2.0 on stdin/stdout)",
+  "exchange": [
+    {
+      "direction": "client -> server",
+      "raw": "{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"initialize\", \"params\": {\"protocolVersion\": \"2025-11-25\", \"capabilities\": {}, \"clientInfo\": {\"name\": \"week9-wire-capture\", \"version\": \"1.0\"}}}",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "initialize",
+        "params": {
+          "protocolVersion": "2025-11-25",
+          "capabilities": {},
+          "clientInfo": {
+            "name": "week9-wire-capture",
+            "version": "1.0"
+          }
+        }
+      }
+    },
+    {
+      "direction": "server -> client",
+      "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"protocolVersion\":\"2025-11-25\",\"capabilities\":{\"experimental\":{},\"prompts\":{\"listChanged\":false},\"resources\":{\"subscribe\":false,\"listChanged\":false},\"tools\":{\"listChanged\":false}},\"serverInfo\":{\"name\":\"support-ops-ticket-history\",\"version\":\"1.30.0\"}}}",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": {
+          "protocolVersion": "2025-11-25",
+          "capabilities": {
+            "experimental": {},
+            "prompts": {
+              "listChanged": false
+            },
+            "resources": {
+              "subscribe": false,
+              "listChanged": false
+            },
+            "tools": {
+              "listChanged": false
+            }
+          },
+          "serverInfo": {
+            "name": "support-ops-ticket-history",
+            "version": "1.30.0"
+          }
+        }
+      }
+    },
+    {
+      "direction": "client -> server",
+      "raw": "{\"jsonrpc\": \"2.0\", \"method\": \"notifications/initialized\"}",
+      "message": {
+        "jsonrpc": "2.0",
+        "method": "notifications/initialized"
+      }
+    },
+    {
+      "direction": "client -> server",
+      "raw": "{\"jsonrpc\": \"2.0\", \"id\": 2, \"method\": \"tools/list\"}",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 2,
+        "method": "tools/list"
+      }
+    },
+    {
+      "direction": "server -> client",
+      "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":{\"tools\":[{\"name\":\"lookup_ticket\",\"description\":\"\\n    Look up a support ticket by its id (format TCK-nnnn).\\n\\n    Returns the ticket status, contact count, the customer's tier, the order\\n    (plan, amount paid, payment status) and the installation / activation status.\\n    Use it whenever a ticket id is mentioned, before saying anything about that\\n    customer's order, payment or installation.\\n    \",\"inputSchema\":{\"properties\":{\"ticket_id\":{\"title\":\"Ticket Id\",\"type\":\"string\"}},\"required\":[\"ticket_id\"],\"title\":\"lookup_ticketArguments\",\"type\":\"object\"}},{\"name\":\"get_escalation_history\",\"description\":\"\\n    The escalation history behind a ticket (format TCK-nnnn), oldest first:\\n    when it was escalated, to which team and level, why, and what happened.\\n\\n    Use it to see whether a customer was promised a callback or a refund and\\n    whether that promise was kept. An empty list means it was never escalated.\\n    \",\"inputSchema\":{\"properties\":{\"ticket_id\":{\"title\":\"Ticket Id\",\"type\":\"string\"}},\"required\":[\"ticket_id\"],\"title\":\"get_escalation_historyArguments\",\"type\":\"object\"}}]}}",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 2,
+        "result": {
+          "tools": [
+            {
+              "name": "lookup_ticket",
+              "description": "\n    Look up a support ticket by its id (format TCK-nnnn).\n\n    Returns the ticket status, contact count, the customer's tier, the order\n    (plan, amount paid, payment status) and the installation / activation status.\n    Use it whenever a ticket id is mentioned, before saying anything about that\n    customer's order, payment or installation.\n    ",
+              "inputSchema": {
+                "properties": {
+                  "ticket_id": {
+                    "title": "Ticket Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "ticket_id"
+                ],
+                "title": "lookup_ticketArguments",
+                "type": "object"
+              }
+            },
+            {
+              "name": "get_escalation_history",
+              "description": "\n    The escalation history behind a ticket (format TCK-nnnn), oldest first:\n    when it was escalated, to which team and level, why, and what happened.\n\n    Use it to see whether a customer was promised a callback or a refund and\n    whether that promise was kept. An empty list means it was never escalated.\n    ",
+              "inputSchema": {
+                "properties": {
+                  "ticket_id": {
+                    "title": "Ticket Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "ticket_id"
+                ],
+                "title": "get_escalation_historyArguments",
+                "type": "object"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "direction": "client -> server",
+      "raw": "{\"jsonrpc\": \"2.0\", \"id\": 3, \"method\": \"tools/call\", \"params\": {\"name\": \"lookup_ticket\", \"arguments\": {\"ticket_id\": \"TCK-4471\"}}}",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 3,
+        "method": "tools/call",
+        "params": {
+          "name": "lookup_ticket",
+          "arguments": {
+            "ticket_id": "TCK-4471"
+          }
+        }
+      }
+    },
+    {
+      "direction": "server -> client",
+      "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"ticket_id\\\": \\\"TCK-4471\\\",\\n  \\\"customer\\\": {\\n    \\\"name\\\": \\\"Priya Raman\\\",\\n    \\\"phone\\\": \\\"+91-98xxxx4471\\\",\\n    \\\"customer_id\\\": \\\"CUST-20931\\\",\\n    \\\"tier\\\": \\\"Priority\\\"\\n  },\\n  \\\"subject\\\": \\\"Paid for installation, engineer never came - wants refund\\\",\\n  \\\"status\\\": \\\"open\\\",\\n  \\\"opened_at\\\": \\\"2026-09-02T10:14:00+05:30\\\",\\n  \\\"last_update\\\": \\\"2026-09-07T18:40:00+05:30\\\",\\n  \\\"contact_count\\\": 3,\\n  \\\"order\\\": {\\n    \\\"order_id\\\": \\\"ORD-77812\\\",\\n    \\\"plan\\\": \\\"AirFiber_1999_3M\\\",\\n    \\\"amount_paid_inr\\\": 1999,\\n    \\\"paid_on\\\": \\\"2026-09-02\\\",\\n    \\\"payment_status\\\": \\\"cleared\\\"\\n  },\\n  \\\"install\\\": {\\n    \\\"slot\\\": \\\"2026-09-04 09:00-12:00\\\",\\n    \\\"visit_status\\\": \\\"missed_by_dispatch\\\",\\n    \\\"activated\\\": false\\n  },\\n  \\\"latest_note\\\": \\\"Customer has written three times; no callback logged after 2026-09-05.\\\"\\n}\"}],\"isError\":false}}",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 3,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"ticket_id\": \"TCK-4471\",\n  \"customer\": {\n    \"name\": \"Priya Raman\",\n    \"phone\": \"+91-98xxxx4471\",\n    \"customer_id\": \"CUST-20931\",\n    \"tier\": \"Priority\"\n  },\n  \"subject\": \"Paid for installation, engineer never came - wants refund\",\n  \"status\": \"open\",\n  \"opened_at\": \"2026-09-02T10:14:00+05:30\",\n  \"last_update\": \"2026-09-07T18:40:00+05:30\",\n  \"contact_count\": 3,\n  \"order\": {\n    \"order_id\": \"ORD-77812\",\n    \"plan\": \"AirFiber_1999_3M\",\n    \"amount_paid_inr\": 1999,\n    \"paid_on\": \"2026-09-02\",\n    \"payment_status\": \"cleared\"\n  },\n  \"install\": {\n    \"slot\": \"2026-09-04 09:00-12:00\",\n    \"visit_status\": \"missed_by_dispatch\",\n    \"activated\": false\n  },\n  \"latest_note\": \"Customer has written three times; no callback logged after 2026-09-05.\"\n}"
+            }
+          ],
+          "isError": false
+        }
+      }
+    }
+  ],
+  "server_stderr_not_protocol": [
+    "2026-10-08 21:32:50,614 INFO ticket-history: Processing request of type ListToolsRequest",
+    "2026-10-08 21:32:50,615 INFO ticket-history: Processing request of type CallToolRequest",
+    "2026-10-08 21:32:50,616 INFO ticket-history: 2026-10-08T16:02:50+00:00 tool=lookup_ticket ticket_id=TCK-4471 outcome=found"
+  ]
+}

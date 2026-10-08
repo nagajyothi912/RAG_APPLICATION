@@ -1,0 +1,187 @@
+{
+  "what_this_is": "Raw MCP exchange with the ticket-history server over stdio, captured by backend/scripts/week9_capture_wire.py with no SDK on the client side. 'message' is exactly what was sent (the byte-exact line is in evidence/wire.raw.json). 'annotations' explains every top-level field.",
+  "where_the_model_call_happens": "The model call happens only in the host - backend/app/agents/week9/agent.py sending chat.completions to Groq - and never in this exchange: not in the MCP client, not in the ticket-history server, which only reads tickets.json.",
+  "captured_at": "2026-10-08T16:02:50+00:00",
+  "server_command": "python -m mcp_servers.ticket_history.server",
+  "transport": "stdio (newline-delimited JSON-RPC 2.0 on stdin/stdout)",
+  "exchange": [
+    {
+      "step": "1. initialize (request)",
+      "direction": "client -> server",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "initialize",
+        "params": {
+          "protocolVersion": "2025-11-25",
+          "capabilities": {},
+          "clientInfo": {
+            "name": "week9-wire-capture",
+            "version": "1.0"
+          }
+        }
+      },
+      "annotations": {
+        "jsonrpc": "Protocol tag. Always the string \"2.0\": says this line is a JSON-RPC 2.0 message. MCP does not define its own envelope; it reuses JSON-RPC.",
+        "id": "1 - chosen by the client. The server must echo the same id on its reply so the client can pair request and response. Having an id makes this a request (expects an answer).",
+        "method": "\"initialize\" - the first message of every MCP session. Nothing else may be sent until it completes.",
+        "params": "What the client brings to the handshake: protocolVersion (the newest MCP spec revision the client speaks, 2025-11-25), capabilities (features the CLIENT offers the server, e.g. sampling or roots - empty here, we offer none), clientInfo (name/version, for the server's logs only)."
+      }
+    },
+    {
+      "step": "2. initialize (response)",
+      "direction": "server -> client",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": {
+          "protocolVersion": "2025-11-25",
+          "capabilities": {
+            "experimental": {},
+            "prompts": {
+              "listChanged": false
+            },
+            "resources": {
+              "subscribe": false,
+              "listChanged": false
+            },
+            "tools": {
+              "listChanged": false
+            }
+          },
+          "serverInfo": {
+            "name": "support-ops-ticket-history",
+            "version": "1.30.0"
+          }
+        }
+      },
+      "annotations": {
+        "jsonrpc": "Protocol tag. Always the string \"2.0\": says this line is a JSON-RPC 2.0 message. MCP does not define its own envelope; it reuses JSON-RPC.",
+        "id": "1 - the echo of the request id; this is the answer to step 1.",
+        "result": "Success payload (a response has either result or error, never both). protocolVersion: the revision the server agrees to speak (it can answer with an older one; the client must then speak that or disconnect). capabilities: what the SERVER offers - tools, resources, prompts; listChanged:false means it will not notify if its tool list changes. serverInfo: name/version - 'support-ops-ticket-history', so we can tell which server answered."
+      }
+    },
+    {
+      "step": "3. notifications/initialized (notification)",
+      "direction": "client -> server",
+      "message": {
+        "jsonrpc": "2.0",
+        "method": "notifications/initialized"
+      },
+      "annotations": {
+        "jsonrpc": "Protocol tag. Always the string \"2.0\": says this line is a JSON-RPC 2.0 message. MCP does not define its own envelope; it reuses JSON-RPC.",
+        "method": "\"notifications/initialized\" - the client confirms the handshake is done; normal traffic may start.",
+        "(no id)": "There is NO id field: that is what makes this a notification. The server must not reply, and it gets no reply."
+      }
+    },
+    {
+      "step": "4. tools/list (request)",
+      "direction": "client -> server",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 2,
+        "method": "tools/list"
+      },
+      "annotations": {
+        "jsonrpc": "Protocol tag. Always the string \"2.0\": says this line is a JSON-RPC 2.0 message. MCP does not define its own envelope; it reuses JSON-RPC.",
+        "id": "2 - new request, new id.",
+        "method": "\"tools/list\" - discovery: ask the server what tools it offers. This is the call the agent makes at startup instead of having a hard-coded tool list.",
+        "(no params)": "params omitted: no cursor, so this asks for the first (and here only) page."
+      }
+    },
+    {
+      "step": "5. tools/list (response)",
+      "direction": "server -> client",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 2,
+        "result": {
+          "tools": [
+            {
+              "name": "lookup_ticket",
+              "description": "\n    Look up a support ticket by its id (format TCK-nnnn).\n\n    Returns the ticket status, contact count, the customer's tier, the order\n    (plan, amount paid, payment status) and the installation / activation status.\n    Use it whenever a ticket id is mentioned, before saying anything about that\n    customer's order, payment or installation.\n    ",
+              "inputSchema": {
+                "properties": {
+                  "ticket_id": {
+                    "title": "Ticket Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "ticket_id"
+                ],
+                "title": "lookup_ticketArguments",
+                "type": "object"
+              }
+            },
+            {
+              "name": "get_escalation_history",
+              "description": "\n    The escalation history behind a ticket (format TCK-nnnn), oldest first:\n    when it was escalated, to which team and level, why, and what happened.\n\n    Use it to see whether a customer was promised a callback or a refund and\n    whether that promise was kept. An empty list means it was never escalated.\n    ",
+              "inputSchema": {
+                "properties": {
+                  "ticket_id": {
+                    "title": "Ticket Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "ticket_id"
+                ],
+                "title": "get_escalation_historyArguments",
+                "type": "object"
+              }
+            }
+          ]
+        }
+      },
+      "annotations": {
+        "jsonrpc": "Protocol tag. Always the string \"2.0\": says this line is a JSON-RPC 2.0 message. MCP does not define its own envelope; it reuses JSON-RPC.",
+        "id": "2 - pairs with step 4.",
+        "result": "result.tools: one entry per tool. name: what the model will call it. description: the docstring - this text IS the prompt the model reads to decide when and how to use the tool. inputSchema: JSON Schema of the arguments (generated from the Python type hints); the agent passes it to Groq unchanged as the function's parameters. No nextCursor, so there are no more pages. These two names are where 'tools before -> after' is counted from."
+      }
+    },
+    {
+      "step": "6. tools/call (request)",
+      "direction": "client -> server",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 3,
+        "method": "tools/call",
+        "params": {
+          "name": "lookup_ticket",
+          "arguments": {
+            "ticket_id": "TCK-4471"
+          }
+        }
+      },
+      "annotations": {
+        "jsonrpc": "Protocol tag. Always the string \"2.0\": says this line is a JSON-RPC 2.0 message. MCP does not define its own envelope; it reuses JSON-RPC.",
+        "id": "3 - new request.",
+        "method": "\"tools/call\" - run one tool. In the agent this is sent only after the MODEL chose the tool and wrote the arguments; the MCP client just forwards that choice.",
+        "params": "name: which tool (lookup_ticket). arguments: an object that must match the tool's inputSchema - here {ticket_id: TCK-4471}."
+      }
+    },
+    {
+      "step": "7. tools/call (response)",
+      "direction": "server -> client",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 3,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"ticket_id\": \"TCK-4471\",\n  \"customer\": {\n    \"name\": \"Priya Raman\",\n    \"phone\": \"+91-98xxxx4471\",\n    \"customer_id\": \"CUST-20931\",\n    \"tier\": \"Priority\"\n  },\n  \"subject\": \"Paid for installation, engineer never came - wants refund\",\n  \"status\": \"open\",\n  \"opened_at\": \"2026-09-02T10:14:00+05:30\",\n  \"last_update\": \"2026-09-07T18:40:00+05:30\",\n  \"contact_count\": 3,\n  \"order\": {\n    \"order_id\": \"ORD-77812\",\n    \"plan\": \"AirFiber_1999_3M\",\n    \"amount_paid_inr\": 1999,\n    \"paid_on\": \"2026-09-02\",\n    \"payment_status\": \"cleared\"\n  },\n  \"install\": {\n    \"slot\": \"2026-09-04 09:00-12:00\",\n    \"visit_status\": \"missed_by_dispatch\",\n    \"activated\": false\n  },\n  \"latest_note\": \"Customer has written three times; no callback logged after 2026-09-05.\"\n}"
+            }
+          ],
+          "isError": false
+        }
+      },
+      "annotations": {
+        "jsonrpc": "Protocol tag. Always the string \"2.0\": says this line is a JSON-RPC 2.0 message. MCP does not define its own envelope; it reuses JSON-RPC.",
+        "id": "3 - pairs with step 6.",
+        "result": "content: a list of content blocks the host gives back to the model - one text block holding the ticket as JSON. isError: false means the tool ran fine. A tool failure (bad ticket id) would still be a normal result with isError:true and a readable message, so the model can recover; a JSON-RPC 'error' member instead of 'result' would mean a protocol-level failure (unknown method, malformed request)."
+      }
+    }
+  ]
+}

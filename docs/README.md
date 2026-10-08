@@ -12,5 +12,6 @@ One guide per week. Each one explains that week by itself: the requirement, the 
 | 6 | Checking an LLM judge against blind human labels | [week6/WEEK6_GUIDE.md](week6/WEEK6_GUIDE.md) | [week6/README.md](week6/README.md) |
 | 7 | A ticket-reply agent vs a fixed workflow, with safety budgets | [week7/WEEK7_GUIDE.md](week7/WEEK7_GUIDE.md) | top-level `eval/week7/` results |
 | 8 | Agent failure modes, trajectory evals, prompt-injection defense | [week8/WEEK8_GUIDE.md](week8/WEEK8_GUIDE.md) | [week8/README.md](week8/README.md), [week8/WEEK8_CONCEPTS_AND_DEMO_GUIDE.md](week8/WEEK8_CONCEPTS_AND_DEMO_GUIDE.md) |
+| 9 | MCP: the agent discovers tools; a second server added by config only | [week9/WEEK9_GUIDE.md](week9/WEEK9_GUIDE.md) | [assignments/W9-Task-Set-A.md](assignments/W9-Task-Set-A.md), [week9/README.md](week9/README.md) (submission) |
 
 The `WEEKn_GUIDE.md` files summarize the work. The write-ups in the right-hand column are the graded originals, and the guides link to them rather than replacing them.

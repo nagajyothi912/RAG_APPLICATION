@@ -1,0 +1,16 @@
+diff --git a/backend/config/mcp_servers.json b/backend/config/mcp_servers.json
+index 8bb0853..f387e7e 100644
+--- a/backend/config/mcp_servers.json
++++ b/backend/config/mcp_servers.json
+@@ -4,6 +4,11 @@
+       "command": "${PYTHON}",
+       "args": ["-m", "mcp_servers.help_centre.server"],
+       "cwd": ".."
++    },
++    "ticket-history": {
++      "command": "${PYTHON}",
++      "args": ["-m", "mcp_servers.ticket_history.server"],
++      "cwd": ".."
+     }
+   }
+ }

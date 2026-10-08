@@ -1,0 +1,18 @@
+# Requirement 2 - agent module diff between server one and server one + two
+# Agent module: backend/app/agents/week9/ (agent.py, mcp_host.py, __init__.py)
+# server one        = tag w9-server1   (f6e3330)
+# server one + two  = tag w9-server1+2 (a592f55)
+#
+# $ git diff w9-server1 w9-server1+2 -- backend/app/agents/week9/
+# (no output above = no changed lines)
+#
+# $ git diff --numstat w9-server1 w9-server1+2 -- backend/app/agents/week9/ | wc -l
+# 0 files changed, 0 lines added, 0 lines removed
+#
+# For contrast, everything that DID change between the two tags:
+# $ git diff --stat w9-server1 w9-server1+2
+#  backend/config/mcp_servers.json                 |   5 +
+#  backend/mcp_servers/ticket_history/__init__.py  |   0
+#  backend/mcp_servers/ticket_history/server.py    | 117 ++++++++++++++++++++++++
+#  backend/mcp_servers/ticket_history/tickets.json |  80 ++++++++++++++++
+#  4 files changed, 202 insertions(+)
