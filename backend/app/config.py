@@ -48,6 +48,19 @@ class Settings(BaseSettings):
     langfuse_base_url: str = "https://us.cloud.langfuse.com"
     langfuse_environment: str = "development"
 
+    # Role-based login. Two fixed accounts, one per role: the chatbot account can
+    # ask questions and read the library; the admin account also manages
+    # documents and sees every week's evaluation. AUTH_SECRET signs the session
+    # tokens - left empty, a random one is drawn per process, so every restart
+    # signs everyone out. AUTH_ENABLED=false is for the test suite only.
+    auth_enabled: bool = True
+    auth_secret: str = ""
+    auth_token_ttl_minutes: int = 480
+    admin_username: str = "admin"
+    admin_password: str = "admin123"
+    chatbot_username: str = "user"
+    chatbot_password: str = "user123"
+
     @property
     def api_key(self) -> str:
         return self.groq_api_key.strip()

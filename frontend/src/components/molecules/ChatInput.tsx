@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import Button from '../atoms/Button';
 import TextArea from '../atoms/TextArea';
 import RetrievalControls from './RetrievalControls';
+import { areaLabel } from '../organisms/HelpSidebar';
 import GoldenQuestions from './GoldenQuestions';
-import type { AskOptions, GoldenQuestion, RetrievalMode } from '../../services/api';
+import { VARIANT_MODE, type AskOptions, type ChatVariant, type GoldenQuestion, type RetrievalMode } from '../../services/api';
 
 type ChatInputProps = {
   onSend: (text: string, options: AskOptions) => void;
@@ -14,6 +15,7 @@ type ChatInputProps = {
   defaultTopK: number;
   hybridAvailable: boolean;
   rerankerAvailable: boolean;
+  variant?: ChatVariant;
 };
 
 export default function ChatInput({
@@ -25,9 +27,11 @@ export default function ChatInput({
   defaultTopK,
   hybridAvailable,
   rerankerAvailable,
+  variant = 'week4',
 }: ChatInputProps) {
+  const isChatbot = variant === 'chatbot';
   const [value, setValue] = useState('');
-  const [mode, setMode] = useState<RetrievalMode>('week3');
+  const [mode, setMode] = useState<RetrievalMode>(VARIANT_MODE[variant]);
   const [topK, setTopK] = useState(defaultTopK);
   const [productArea, setProductArea] = useState('');
   const [sourceFile, setSourceFile] = useState('');
@@ -122,14 +126,16 @@ export default function ChatInput({
         submit();
       }}
     >
-      <GoldenQuestions
-        questions={goldenQuestions}
-        open={goldenOpen}
-        onToggle={() => setGoldenOpen((current) => !current)}
-        onPick={pickGolden}
-        disabled={disabled}
-        activeId={activeGoldenId}
-      />
+      {isChatbot ? null : (
+        <GoldenQuestions
+          questions={goldenQuestions}
+          open={goldenOpen}
+          onToggle={() => setGoldenOpen((current) => !current)}
+          onPick={pickGolden}
+          disabled={disabled}
+          activeId={activeGoldenId}
+        />
+      )}
 
       <RetrievalControls
         mode={mode}
@@ -142,12 +148,16 @@ export default function ChatInput({
         productArea={productArea}
         onProductAreaChange={setProductArea}
         productAreas={productAreas}
+        areaOptionLabel={isChatbot ? areaLabel : undefined}
         sourceFile={sourceFile}
         onSourceFileChange={selectDocument}
         documents={documents}
         disabled={disabled}
         hybridAvailable={hybridAvailable}
         rerankerAvailable={rerankerAvailable}
+        showModeToggle={variant === 'week4'}
+        showTopK={!isChatbot}
+        areaLabel={isChatbot ? 'Topic' : 'Product area'}
       />
 
       <div className="chat-input-row">
@@ -176,7 +186,9 @@ export default function ChatInput({
           placeholder={
             sourceFile
               ? `Ask about ${sourceFile}…`
-              : 'Ask about the uploaded documents…'
+              : isChatbot
+                ? 'Ask about plans, billing, installation or troubleshooting…'
+                : 'Ask about the uploaded documents…'
           }
           disabled={disabled}
           rows={2}

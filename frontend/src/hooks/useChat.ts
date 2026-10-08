@@ -46,5 +46,10 @@ export function useChat() {
     [loading],
   );
 
-  return { messages, loading, error, send };
+  const reset = useCallback(() => {
+    setMessages([]);
+    setError(null);
+  }, []);
+
+  return { messages, loading, error, send, reset };
 }

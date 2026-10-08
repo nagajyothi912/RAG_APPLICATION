@@ -2,9 +2,9 @@
   {
     "mode": "skipped_order_lookup",
     "description": "Skipped Order Verification on refund/compensation inquiries",
-    "before_count": 3,
+    "before_count": 2,
     "after_count": 0,
-    "delta": -3,
+    "delta": -2,
     "status": "Eliminated"
   },
   {
@@ -27,9 +27,9 @@
     "mode": "redundant_steps",
     "description": "Repeated/cyclical tool invocations causing step bloat",
     "before_count": 1,
-    "after_count": 1,
-    "delta": 0,
-    "status": "Unchanged"
+    "after_count": 0,
+    "delta": -1,
+    "status": "Eliminated"
   },
   {
     "mode": "unhandled_injection",

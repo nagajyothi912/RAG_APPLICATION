@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 
 from app.schemas import (
     DocumentListResponse,
@@ -7,6 +7,7 @@ from app.schemas import (
     UploadResponse,
 )
 from app.services.rag_service import SCORE_THRESHOLD, SUPPORTED_EXTENSIONS, get_rag_service
+from app.services.auth import current_user, require_admin
 from app.services.retrieval import availability
 
 router = APIRouter(tags=["documents"])
@@ -29,14 +30,14 @@ def health() -> HealthResponse:
     )
 
 
-@router.get("/golden-questions", response_model=GoldenSetResponse)
+@router.get("/golden-questions", response_model=GoldenSetResponse, dependencies=[Depends(current_user)])
 def golden_questions() -> GoldenSetResponse:
     """The curated question set the chat UI offers as one-click prompts."""
     service = get_rag_service()
     return GoldenSetResponse(questions=service.golden_questions())
 
 
-@router.get("/documents", response_model=DocumentListResponse)
+@router.get("/documents", response_model=DocumentListResponse, dependencies=[Depends(current_user)])
 def list_documents() -> DocumentListResponse:
     service = get_rag_service()
     return DocumentListResponse(
@@ -47,7 +48,7 @@ def list_documents() -> DocumentListResponse:
     )
 
 
-@router.post("/documents/upload", response_model=UploadResponse)
+@router.post("/documents/upload", response_model=UploadResponse, dependencies=[Depends(require_admin)])
 async def upload_documents(files: list[UploadFile] = File(...)) -> UploadResponse:
     if not files:
         raise HTTPException(status_code=400, detail="No files were uploaded.")
@@ -76,7 +77,7 @@ async def upload_documents(files: list[UploadFile] = File(...)) -> UploadRespons
     return UploadResponse(**result)
 
 
-@router.delete("/documents", response_model=DocumentListResponse)
+@router.delete("/documents", response_model=DocumentListResponse, dependencies=[Depends(require_admin)])
 def delete_document(name: str = Query(..., min_length=1)) -> DocumentListResponse:
     service = get_rag_service()
     try:

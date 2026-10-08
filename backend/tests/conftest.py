@@ -31,6 +31,15 @@ os.environ["TRACE_ENABLED"] = "false"
 # backend/.env would otherwise ship a trace to their live project on every
 # test run that exercises the chat route.
 os.environ["LANGFUSE_ENABLED"] = "false"
+# Login is off for the suite so the existing route tests need no token;
+# tests/test_auth.py switches it back on per test. Fixed accounts and secret
+# keep it independent of a developer's backend/.env.
+os.environ["AUTH_ENABLED"] = "false"
+os.environ["AUTH_SECRET"] = "test-secret"
+os.environ["ADMIN_USERNAME"] = "admin"
+os.environ["ADMIN_PASSWORD"] = "admin123"
+os.environ["CHATBOT_USERNAME"] = "user"
+os.environ["CHATBOT_PASSWORD"] = "user123"
 os.environ["TRACE_PATH"] = str(Path(TMP_DOCS).parent / "rag-traces" / "test.jsonl")
 
 

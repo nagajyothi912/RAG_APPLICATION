@@ -1,5 +1,18 @@
 export type RetrievalMode = 'week3' | 'week4';
 
+/**
+ * Which chat a page is. The chatbot always runs the full pipeline with no
+ * week-specific controls; the admin Week 3 tab is pinned to dense retrieval;
+ * the admin Week 4 tab keeps the toggle and the golden set to compare them.
+ */
+export type ChatVariant = 'chatbot' | 'week3' | 'week4';
+
+export const VARIANT_MODE: Record<ChatVariant, RetrievalMode> = {
+  chatbot: 'week4',
+  week3: 'week3',
+  week4: 'week4',
+};
+
 export type SourceChunk = {
   source: string;
   chunk_id: number;
@@ -163,13 +176,78 @@ async function readError(response: Response) {
   }
 }
 
+/* ------------------------------------------------------------ Session */
+
+export type Role = 'chatbot' | 'admin';
+
+export type AuthUser = {
+  username: string;
+  role: Role;
+};
+
+export type LoginResponse = {
+  token: string;
+  expires_at: number;
+  user: AuthUser;
+};
+
+const TOKEN_KEY = 'ask-my-documents.token';
+
+/** Fired when the backend rejects the stored token, so the app can sign out. */
+export const SESSION_EXPIRED_EVENT = 'ask-my-documents:session-expired';
+
+// Storage can be unavailable (private windows, blocked site data). The token
+// then lives for this page load only, which is still a working session.
+let memoryToken: string | null = null;
+
+export function getToken(): string | null {
+  try {
+    return window.localStorage.getItem(TOKEN_KEY) ?? memoryToken;
+  } catch {
+    return memoryToken;
+  }
+}
+
+export function setToken(token: string | null) {
+  memoryToken = token;
+  try {
+    if (token) {
+      window.localStorage.setItem(TOKEN_KEY, token);
+    } else {
+      window.localStorage.removeItem(TOKEN_KEY);
+    }
+  } catch {
+    // Kept in memory only.
+  }
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, options);
+  const headers = new Headers(options.headers);
+  const token = getToken();
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+  const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
   if (!response.ok) {
+    if (response.status === 401 && token && !path.startsWith('/api/auth/login')) {
+      window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+    }
     const error = await readError(response);
     throw new ApiError(error.message, response.status, error.extra);
   }
   return response.json() as Promise<T>;
+}
+
+export function login(username: string, password: string, role: Role) {
+  return request<LoginResponse>('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password, role }),
+  });
+}
+
+export function getCurrentUser() {
+  return request<AuthUser>('/api/auth/me');
 }
 
 export function uploadDocuments(files: File[]) {
@@ -520,4 +598,46 @@ export function triggerWeek8Experiment() {
 
 export function runWeek8AttackDefense() {
   return request<Week8BonusChallenge>('/api/week8/attack-defense', { method: 'POST' });
+}
+
+/* ---------------------------------------------------------------- Week 6 */
+
+export type Week6Result = {
+  ticket_id: string;
+  week5_mode: string;
+  human: number;
+  judge: number | null;
+  agree: boolean;
+  votes?: number[];
+  error?: boolean;
+  explanation?: string;
+};
+
+export type Week6Run = {
+  label: string;
+  description: string;
+  file: string;
+  judge: string;
+  model: string;
+  run_at: string;
+  labels_commit: string;
+  runs: number;
+  agreement_per_run: number[];
+  agree: number;
+  total: number;
+  held_out_agree: number;
+  held_out_total: number;
+  by_mode: Record<string, { agree: number; total: number }>;
+  results: Week6Result[];
+};
+
+export type Week6Response = {
+  available: boolean;
+  few_shot_tickets: string[];
+  prediction: string | null;
+  runs: Week6Run[];
+};
+
+export function getWeek6Results() {
+  return request<Week6Response>('/api/week6/results');
 }

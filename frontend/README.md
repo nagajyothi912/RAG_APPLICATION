@@ -31,6 +31,10 @@ There is no linter and no test runner here. `npm run build` runs `tsc --noEmit` 
 
 Atomic Design under `src/components/`: atoms → molecules → organisms → templates → pages.
 
+## Roles
+
+`App.tsx` shows `LoginPage` until the backend confirms a session (`hooks/useAuth.ts`, token in `localStorage`, re-checked with `/api/auth/me` on load). The **chatbot** role gets `ChatbotApp`: `RagPage variant="chatbot"`, fixed to the full Week 4 pipeline with no technical controls. The **admin** role gets `AdminConsole`, with one tab per week (`#week3` … `#week8`; Week 5 keeps `#analysis/TR-xxxx`) and a `#chatbot` preview. A 401 from any request signs the user out.
+
 ## Features
 
 - **Citations.** `MessageBubble` renders every retrieved chunk under the answer with its `article_id`, `product_area`, section path, similarity score, and preview.

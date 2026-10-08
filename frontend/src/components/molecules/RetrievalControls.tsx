@@ -16,6 +16,13 @@ type RetrievalControlsProps = {
   disabled: boolean;
   hybridAvailable: boolean;
   rerankerAvailable: boolean;
+  /** Off where the mode is fixed: the chatbot and the Week 3 tab. */
+  showModeToggle?: boolean;
+  /** Off in the chatbot, which uses the server's top-k. */
+  showTopK?: boolean;
+  areaLabel?: string;
+  /** Display names for product areas; the raw value is still what is sent. */
+  areaOptionLabel?: (area: string) => string;
 };
 
 const TOP_K_CHOICES = [1, 2, 3, 4, 5, 6, 8, 10];
@@ -34,6 +41,10 @@ export default function RetrievalControls({
   disabled,
   hybridAvailable,
   rerankerAvailable,
+  showModeToggle = true,
+  showTopK = true,
+  areaLabel = 'Product area',
+  areaOptionLabel = (area: string) => area,
 }: RetrievalControlsProps) {
   // A document filter already implies its own product area, and ANDing the two
   // can silently retrieve nothing. Pinning one document wins; the area select
@@ -42,23 +53,27 @@ export default function RetrievalControls({
 
   return (
     <div className="retrieval-controls">
-      <ModeToggle
-        value={mode}
-        onChange={onModeChange}
-        disabled={disabled}
-        hybridAvailable={hybridAvailable}
-        rerankerAvailable={rerankerAvailable}
-      />
+      {showModeToggle ? (
+        <ModeToggle
+          value={mode}
+          onChange={onModeChange}
+          disabled={disabled}
+          hybridAvailable={hybridAvailable}
+          rerankerAvailable={rerankerAvailable}
+        />
+      ) : null}
 
-      <Select
-        id="control-top-k"
-        label="Top K"
-        value={String(topK)}
-        onChange={(value) => onTopKChange(Number(value))}
-        disabled={disabled}
-        hint="How many chunks are retrieved and passed to the model as context."
-        options={TOP_K_CHOICES.map((k) => ({ value: String(k), label: String(k) }))}
-      />
+      {showTopK ? (
+        <Select
+          id="control-top-k"
+          label="Top K"
+          value={String(topK)}
+          onChange={(value) => onTopKChange(Number(value))}
+          disabled={disabled}
+          hint="How many chunks are retrieved and passed to the model as context."
+          options={TOP_K_CHOICES.map((k) => ({ value: String(k), label: String(k) }))}
+        />
+      ) : null}
 
       {/* <Select
         id="control-document"
@@ -75,7 +90,7 @@ export default function RetrievalControls({
 
       <Select
         id="control-product-area"
-        label="Product area"
+        label={areaLabel}
         value={areaLockedByDocument ? '' : productArea}
         onChange={onProductAreaChange}
         disabled={disabled || areaLockedByDocument || productAreas.length === 0}
@@ -85,8 +100,8 @@ export default function RetrievalControls({
             : 'Answer only from chunks tagged with this product_area.'
         }
         options={[
-          { value: '', label: areaLockedByDocument ? 'Set by document' : 'All areas' },
-          ...productAreas.map((area) => ({ value: area, label: area })),
+          { value: '', label: areaLockedByDocument ? 'Set by document' : 'All topics' },
+          ...productAreas.map((area) => ({ value: area, label: areaOptionLabel(area) })),
         ]}
       />
     </div>

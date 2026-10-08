@@ -1,5 +1,7 @@
 # Weekly guides
 
+**Using the app:** [ROLES_GUIDE.md](ROLES_GUIDE.md) covers signing in, the User (chatbot) assistant and the Admin console.
+
 One guide per week. Each one explains that week by itself: the requirement, the problem in plain words, the concepts, what was built and what wasn't, the results, how to run it, and a glossary. Start with the week you want. Every week after Week 3 builds on the app from the weeks before it.
 
 | Week | Theme | Guide | Original write-ups and deliverables |

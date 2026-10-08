@@ -1,9 +1,23 @@
 import type { ChatMessage, SourceChunk } from '../../services/api';
 import Badge from '../atoms/Badge';
+import RichText from '../atoms/RichText';
 
 type MessageBubbleProps = {
   message: ChatMessage;
+  /**
+   * Admin tabs show how retrieval behaved: mode, top-k, the refusal gate and
+   * per-stage scores. The chatbot shows only what a customer needs - the
+   * answer and where it came from.
+   */
+  technical?: boolean;
 };
+
+/** "help_centre/billing_faq.md" -> "Billing faq": a readable article name for users. */
+function articleName(source: string) {
+  const base = source.split('/').pop() ?? source;
+  const words = base.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
 
 const MODE_LABEL: Record<string, string> = {
   week3: 'Week 3 · dense',
@@ -26,7 +40,7 @@ function rankMovement(source: SourceChunk, finalPosition: number) {
   return `dense #${source.dense_rank} → #${finalPosition} ${arrow}`;
 }
 
-export default function MessageBubble({ message }: MessageBubbleProps) {
+export default function MessageBubble({ message, technical = true }: MessageBubbleProps) {
   const isUser = message.role === 'user';
   const sources = message.sources ?? [];
   const retrieval = message.retrieval;
@@ -36,7 +50,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
     <article className={`message-bubble ${isUser ? 'message-user' : 'message-assistant'}`}>
       <span className="message-role">{isUser ? 'You' : 'Assistant'}</span>
 
-      {isUser && options ? (
+      {isUser && options && technical ? (
         <div className="message-options">
           <Badge tone="accent">{MODE_LABEL[options.mode] ?? options.mode}</Badge>
           <Badge>top k {options.topK}</Badge>
@@ -45,9 +59,15 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
         </div>
       ) : null}
 
-      <p className="message-content">{message.content}</p>
+      {isUser ? (
+        <p className="message-content">{message.content}</p>
+      ) : (
+        <div className="message-content">
+          <RichText text={message.content} />
+        </div>
+      )}
 
-      {!isUser && retrieval ? (
+      {!isUser && retrieval && technical ? (
         <div className="retrieval-summary">
           <Badge tone="accent">{MODE_LABEL[retrieval.mode] ?? retrieval.mode}</Badge>
           {retrieval.mode === 'week4' ? (
@@ -73,7 +93,11 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
       {!isUser && sources.length > 0 ? (
         <details className="citation-list">
           <summary>
-            {sources.length} source{sources.length > 1 ? 's' : ''}
+            {technical
+              ? `${sources.length} source${sources.length > 1 ? 's' : ''}`
+              : `From ${new Set(sources.map((source) => source.source)).size} help article${
+                  new Set(sources.map((source) => source.source)).size > 1 ? 's' : ''
+                }`}
           </summary>
           <ol>
             {sources.map((source, index) => {
@@ -81,13 +105,16 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
               return (
                 <li key={`${source.source}-${source.chunk_id}-${index}`} className="citation">
                   <div className="citation-head">
-                    <strong>{source.source}</strong>
+                    <strong>{technical ? source.source : articleName(source.source)}</strong>
                     {source.article_id ? <Badge tone="accent">{source.article_id}</Badge> : null}
                     {source.product_area ? <Badge>{source.product_area}</Badge> : null}
-                    <span className="citation-score">chunk #{source.chunk_id}</span>
+                    {technical ? (
+                      <span className="citation-score">chunk #{source.chunk_id}</span>
+                    ) : null}
                   </div>
                   {source.section ? <div className="citation-section">{source.section}</div> : null}
 
+                  {technical ? (
                   <div className="citation-scores">
                     <span className="score-pill">
                       <em>dense</em> {source.dense_score.toFixed(3)}
@@ -106,6 +133,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
                     ) : null}
                     {movement ? <span className="score-move">{movement}</span> : null}
                   </div>
+                  ) : null}
 
                   <p className="citation-preview">{source.preview}…</p>
                   {source.last_updated && source.last_updated !== 'unknown' ? (

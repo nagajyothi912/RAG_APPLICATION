@@ -56,7 +56,9 @@ The first start downloads the MiniLM model from Hugging Face.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/health` | Status, Groq configuration, chunking config, and which retrieval stages are live |
+| `POST` | `/api/auth/login` | `{ "username", "password", "role"? }` → `{ "token", "expires_at", "user": { "username", "role" } }`. If `role` doesn't match the account, the response is 403 |
+| `GET` | `/api/auth/me` | The signed-in user |
+| `GET` | `/api/health` | Status, Groq configuration, chunking config, and which retrieval stages are live (public) |
 | `GET` | `/api/documents` | Indexed files with metadata, chunk counts, and known product areas |
 | `GET` | `/api/golden-questions` | The 14 curated questions the chat UI offers, resolved against what is indexed |
 | `POST` | `/api/documents/upload` | Multipart `files` (one file, many files, or a folder) |
@@ -64,6 +66,8 @@ The first start downloads the MiniLM model from Hugging Face.
 | `POST` | `/api/chat` | `{ "message", "mode"?, "product_area"?, "source_file"?, "top_k"? }` → `{ "answer", "sources", "mode", "retrieval" }` |
 
 Supported uploads: `.txt`, `.md`, `.pdf`.
+
+Every route except `/api/health` and `/api/auth/login` needs `Authorization: Bearer <token>`. The chatbot role can chat and list documents and golden questions. Upload, delete, and the `/api/analysis/*`, `/api/week6/results`, `/api/week7/*` and `/api/week8/*` routes need the admin role (`app/services/auth.py`). `/api/week6/results` serves the committed judge runs from `eval/week6/runs/`. `tests/conftest.py` sets `AUTH_ENABLED=false`, and `tests/test_auth.py` turns it back on to test the access rules.
 
 `mode` is `week3` (default — dense vectors only, the notebook pipeline) or `week4` (BM25 + dense fused with RRF, then cross-encoder reranked). `source_file` accepts a relative path or a bare filename and 404s if it matches no indexed document, or if a bare name is ambiguous.
 

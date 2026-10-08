@@ -13,6 +13,7 @@ This document provides a complete, user-friendly breakdown of how the applicatio
 3. [System Architecture & Data Flow](#system-architecture--data-flow)
 4. [Step-by-Step User Instructions](#step-by-step-user-instructions)
    - [Starting the Application](#starting-the-application)
+   - [Signing In: User and Admin](#signing-in-user-and-admin)
    - [Uploading & Managing Knowledge Base Documents](#uploading--managing-knowledge-base-documents)
    - [Asking Questions & Viewing Citations](#asking-questions--viewing-citations)
    - [Using Metadata & Product Area Filters](#using-metadata--product-area-filters)
@@ -127,11 +128,26 @@ npm run dev
 
 ---
 
+### Signing In: User and Admin
+
+The app opens on a sign-in card with two roles. The full guide is in [docs/ROLES_GUIDE.md](docs/ROLES_GUIDE.md).
+
+| Role | Default login | What you get |
+| :--- | :--- | :--- |
+| **User** | `user` / `user123` | The **AirFiber Support Assistant**: one chat for customer questions, with help topics, common questions and cited answers. It always uses the full Week 4 pipeline and has no technical controls. |
+| **Admin** | `admin` / `admin123` | The **Admin console**: one tab per week (Week 3–8), document upload and delete, and a **Chatbot** tab that previews the User view. |
+
+Change the passwords and set `AUTH_SECRET` in `backend/.env`. The backend enforces the roles: a User cannot upload, delete, or open the week tabs, even through the API.
+
+The steps below for uploading documents, the filters, and the golden question set are **Admin** features, on the **Week 3** and **Week 4** tabs. A User only types a question, optionally picks a **Topic**, or clicks a **Common question**.
+
+---
+
 ### Uploading & Managing Knowledge Base Documents
 
-1. Open the web interface in your browser (`http://localhost:5173`).
-2. Locate the **Knowledge Base** sidebar on the left.
-3. Click **Upload Files** or drag and drop supported files (`.pdf`, `.md`, `.txt`).
+1. Open the web interface in your browser (`http://localhost:5173`) and sign in as **Admin**.
+2. Open the **Week 3** or **Week 4** tab and find the **Documents** sidebar on the left.
+3. Click **Choose files** or **Choose folder** (`.pdf`, `.md`, `.txt`), then **Upload & index**.
 4. To test with sample data, upload the files located in the `sample_documents/` repository folder:
    - `help_centre/airfiber_plans.md` (KB-001)
    - `help_centre/billing_faq.md` (KB-002)
@@ -160,7 +176,7 @@ npm run dev
 
 You can scope your search to specific areas to refine accuracy and avoid cross-topic confusion:
 
-* **Document Scope Filter**: Click the **Document** dropdown in the chat input toolbar to scope search strictly to a single document (e.g. `billing_faq.md`).
+* **Document Scope**: picking a golden question scopes the search to that question's document. The standalone **Document** dropdown is currently hidden in the UI, but the API still accepts `source_file`.
 * **Product Area Filter**: Select a specific area (e.g., `billing`, `installation`, `troubleshooting`, `plans`).
 * *Example*: Asking *"What is the 500 rupee charge for?"* with the `installation` area selected will return the installation charge from KB-005, whereas asking without a filter may return relocation charges from KB-006.
 

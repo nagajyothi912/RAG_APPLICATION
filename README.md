@@ -22,6 +22,17 @@ PyTorch is only the runtime for MiniLM embeddings (`sentence-transformers`). It 
 
 You need Python 3.11+ (**arm64 build on Apple Silicon**), Node.js 18+, and a Groq API key in `backend/.env` as `GROQ_API_KEY`.
 
+## Login and roles
+
+The app opens on a sign-in screen with two roles. The backend checks the role on every request, so hiding a tab is not the only protection.
+
+| Role | Default account | What it sees |
+| --- | --- | --- |
+| **Chatbot** | `user` / `user123` | One support assistant, **AirFiber Support Assistant**. It always runs the full pipeline (BM25 + dense, RRF, cross-encoder rerank, refusal gate) with cited answers and a topic filter. There are no week tabs, retrieval toggle, top-k, golden set, or upload/delete. |
+| **Admin** | `admin` / `admin123` | **Admin console**, with one tab per week. Week 3 is dense-only chat plus document management, Week 4 is the Week 3 vs Week 4 comparison with the golden set, Week 5 is error analysis, Week 6 is judge validation, Week 7 is agent vs workflow, and Week 8 is trajectory evals. A **Chatbot** tab previews what users see. |
+
+The chatbot role can call `/api/chat`, `/api/documents` (list only) and `/api/golden-questions`. Uploading, deleting, and every `/api/analysis`, `/api/week6`, `/api/week7` and `/api/week8` route are admin-only (403 otherwise). `/api/health` is public. Full guide: [docs/ROLES_GUIDE.md](docs/ROLES_GUIDE.md). Change the passwords and set `AUTH_SECRET` in `backend/.env`. With no `AUTH_SECRET`, a restart signs everyone out.
+
 ## Corpus
 
 Seven mock help-centre articles in [sample_documents/](sample_documents/). Every article carries YAML front-matter that becomes per-chunk metadata.
@@ -126,6 +137,11 @@ Copy `backend/.env.example` to `backend/.env`.
 | `SCORE_THRESHOLD` | `0.15` | Below this, the app says it does not know |
 | `DOCS_DIR` | `data/docs` | Uploaded files |
 | `CORS_ORIGINS` | `http://localhost:5173,...` | Allowed UI origins |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | `admin` / `admin123` | Admin account |
+| `CHATBOT_USERNAME` / `CHATBOT_PASSWORD` | `user` / `user123` | Chatbot account |
+| `AUTH_SECRET` | random per process | Signs session tokens |
+| `AUTH_TOKEN_TTL_MINUTES` | `480` | Session length |
+| `AUTH_ENABLED` | `true` | `false` only for the test suite |
 
 Defaults are the values chosen in [results.md](results.md).
 
