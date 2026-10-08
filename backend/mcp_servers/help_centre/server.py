@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import re
 import sys
 
 from mcp.server.fastmcp import FastMCP
@@ -102,9 +103,37 @@ def search_help_centre(query: str, product_area: str | None = None, top_k: int =
     }
 
 
+def _not_found_message(article_id: str, known: dict[str, str]) -> str:
+    """Say what was wrong, what a valid id looks like, and which ids exist - enough to fix the call."""
+    digits = re.sub(r"\D", "", article_id)
+    guess = f"KB-{int(digits):03d}" if digits else None
+    hint = f" Did you mean {guess}?" if guess in known else ""
+    listing = "; ".join(f"{kb} ({title})" for kb, title in sorted(known.items()))
+    return (
+        f"article '{article_id}' not found: article ids look like KB-nnn with three digits, "
+        f"e.g. KB-004 (not KB-4).{hint} Valid ids: {listing}. "
+        "Call get_article again with one of these, or use search_help_centre if you don't know the id."
+    )
+
+
 @mcp.tool()
 def get_article(article_id: str) -> dict:
-    """Get article."""
+    """
+    Fetch one complete help-centre article by its id, e.g. KB-004.
+
+    Use this when you already know which article you need: the customer quotes an
+    article id, or a search_help_centre passage cites one and you need the whole
+    article (every section, full tables) instead of a single passage. If you do not
+    know the id, call search_help_centre first.
+
+    Args:
+        article_id: 'KB-' followed by exactly three digits, zero-padded - KB-004,
+            not KB-4, kb4 or "article 4". Customers often shorten ids; pad them
+            before calling.
+
+    If the id does not exist, the error lists every valid id with its title.
+    Pick the right one and call again; do not retry the same id.
+    """
     svc = service()
     chunks = sorted(
         (chunk for chunk in svc.store.chunks if chunk.article_id == article_id),
@@ -112,7 +141,8 @@ def get_article(article_id: str) -> dict:
     )
     if not chunks:
         logger.info("get_article %r -> not found", article_id)
-        raise ToolError("Error 3")
+        known = {chunk.article_id: chunk.title for chunk in svc.store.chunks if chunk.article_id}
+        raise ToolError(_not_found_message(article_id, known))
     first = chunks[0]
     logger.info("get_article %r -> %d chunks", article_id, len(chunks))
     return {

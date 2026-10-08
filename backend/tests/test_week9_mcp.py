@@ -128,3 +128,43 @@ def test_help_centre_server_tools_in_memory():
             assert missing.isError
 
     asyncio.run(go())
+
+
+def test_get_article_error_is_recoverable():
+    """Requirement 5: the not-found message says the format, suggests the fix and lists valid ids."""
+    from mcp_servers.help_centre.server import _not_found_message
+
+    message = _not_found_message("KB-4", {"KB-004": "Troubleshooting", "KB-001": "Plans"})
+    assert "KB-nnn" in message and "Did you mean KB-004?" in message
+    assert "KB-001 (Plans); KB-004 (Troubleshooting)" in message
+    assert "Error 3" not in message
+    assert "Did you mean" not in _not_found_message("KB-999", {"KB-004": "Troubleshooting"})
+
+
+def test_ticket_history_server_in_memory(tmp_path, monkeypatch):
+    from mcp.shared.memory import create_connected_server_and_client_session
+
+    from mcp_servers.ticket_history import server
+
+    monkeypatch.setattr(server, "ACCESS_LOG", tmp_path / "access.log")
+
+    async def go():
+        async with create_connected_server_and_client_session(server.mcp._mcp_server) as session:
+            names = [tool.name for tool in (await session.list_tools()).tools]
+            assert names == ["lookup_ticket", "get_escalation_history"]
+
+            found = await session.call_tool("lookup_ticket", {"ticket_id": "tck-4471"})
+            assert not found.isError and "Priya Raman" in found.content[0].text
+
+            history = await session.call_tool("get_escalation_history", {"ticket_id": "TCK-4471"})
+            assert json.loads(history.content[0].text)["escalations"][0]["team"] == "Field Dispatch"
+
+            malformed = await session.call_tool("lookup_ticket", {"ticket_id": "4471"})
+            assert malformed.isError and "TCK-nnnn" in malformed.content[0].text
+            missing = await session.call_tool("lookup_ticket", {"ticket_id": "TCK-9999"})
+            assert missing.isError and "not found" in missing.content[0].text
+
+    asyncio.run(go())
+    # every call is audited: tool, ticket id and outcome - but no caller identity
+    lines = (tmp_path / "access.log").read_text().splitlines()
+    assert len(lines) == 4 and "tool=lookup_ticket ticket_id=TCK-4471 outcome=found" in lines[0]
