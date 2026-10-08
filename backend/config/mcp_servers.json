@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "help-centre": {
+      "command": "${PYTHON}",
+      "args": ["-m", "mcp_servers.help_centre.server"],
+      "cwd": ".."
+    }
+  }
+}
