@@ -1,0 +1,80 @@
+{
+  "_comment": "Mock ticketing-system export. All names and numbers are fictional.",
+  "tickets": {
+    "TCK-4471": {
+      "ticket_id": "TCK-4471",
+      "customer": {"name": "Priya Raman", "phone": "+91-98xxxx4471", "customer_id": "CUST-20931", "tier": "Priority"},
+      "subject": "Paid for installation, engineer never came - wants refund",
+      "status": "open",
+      "opened_at": "2026-09-02T10:14:00+05:30",
+      "last_update": "2026-09-07T18:40:00+05:30",
+      "contact_count": 3,
+      "order": {"order_id": "ORD-77812", "plan": "AirFiber_1999_3M", "amount_paid_inr": 1999, "paid_on": "2026-09-02", "payment_status": "cleared"},
+      "install": {"slot": "2026-09-04 09:00-12:00", "visit_status": "missed_by_dispatch", "activated": false},
+      "latest_note": "Customer has written three times; no callback logged after 2026-09-05."
+    },
+    "TCK-4410": {
+      "ticket_id": "TCK-4410",
+      "customer": {"name": "Arjun Mehta", "phone": "+91-97xxxx4410", "customer_id": "CUST-18820", "tier": "Priority"},
+      "subject": "Relocation request pending six weeks",
+      "status": "open",
+      "opened_at": "2026-07-28T09:02:00+05:30",
+      "last_update": "2026-09-08T11:20:00+05:30",
+      "contact_count": 6,
+      "order": {"order_id": "ORD-71204", "plan": "AirFiber_1199_1M", "amount_paid_inr": 1199, "paid_on": "2026-07-01", "payment_status": "cleared"},
+      "install": {"slot": null, "visit_status": "relocation_not_scheduled", "activated": false},
+      "latest_note": "Feasibility at new address approved 2026-08-20; no install slot booked."
+    },
+    "TCK-4519": {
+      "ticket_id": "TCK-4519",
+      "customer": {"name": "Neha Kulkarni", "phone": "+91-99xxxx4519", "customer_id": "CUST-22417", "tier": "Standard"},
+      "subject": "Speed under 10 Mbps since activation, wants to cancel",
+      "status": "open",
+      "opened_at": "2026-09-14T20:05:00+05:30",
+      "last_update": "2026-09-15T09:30:00+05:30",
+      "contact_count": 1,
+      "order": {"order_id": "ORD-80155", "plan": "AirFiber_1199_1M", "amount_paid_inr": 1199, "paid_on": "2026-09-06", "payment_status": "cleared"},
+      "install": {"slot": "2026-09-06 14:00-17:00", "visit_status": "completed", "activated": true},
+      "latest_note": "No official speed test on file yet."
+    },
+    "TCK-4518": {
+      "ticket_id": "TCK-4518",
+      "customer": {"name": "Rahul Iyer", "phone": "+91-90xxxx4518", "customer_id": "CUST-15570", "tier": "Priority"},
+      "subject": "Full refund demanded for 2-day outage",
+      "status": "pending_customer",
+      "opened_at": "2026-09-10T08:45:00+05:30",
+      "last_update": "2026-09-11T16:10:00+05:30",
+      "contact_count": 2,
+      "order": {"order_id": "ORD-61930", "plan": "AirFiber_999_1M", "amount_paid_inr": 999, "paid_on": "2026-06-17", "payment_status": "cleared"},
+      "install": {"slot": "2026-06-17 10:00-13:00", "visit_status": "completed", "activated": true},
+      "latest_note": "Outage 2026-08-28 to 2026-08-30 confirmed by NOC (area fibre cut)."
+    },
+    "TCK-4422": {
+      "ticket_id": "TCK-4422",
+      "customer": {"name": "Farah Sheikh", "phone": "+91-88xxxx4422", "customer_id": "CUST-09114", "tier": "Standard"},
+      "subject": "Account closure and deposit refund",
+      "status": "open",
+      "opened_at": "2026-09-18T12:00:00+05:30",
+      "last_update": "2026-09-18T12:00:00+05:30",
+      "contact_count": 1,
+      "order": {"order_id": "ORD-40021", "plan": "AirFiber_599_1M", "amount_paid_inr": 599, "paid_on": "2025-09-18", "payment_status": "cleared"},
+      "install": {"slot": "2025-09-20 09:00-12:00", "visit_status": "completed", "activated": true},
+      "latest_note": "ONT return pickup not yet booked."
+    }
+  },
+  "escalations": {
+    "TCK-4471": [
+      {"at": "2026-09-04T13:05:00+05:30", "level": "L1", "team": "Field Dispatch", "reason": "Install slot missed; reschedule requested", "outcome": "no reschedule logged"},
+      {"at": "2026-09-06T10:30:00+05:30", "level": "L2", "team": "Installation Escalations", "reason": "Second contact; customer asks for refund", "outcome": "callback promised within 24h - not made"},
+      {"at": "2026-09-07T18:40:00+05:30", "level": "L2", "team": "Billing Escalations", "reason": "Refund of INR 1999 requested for unactivated connection", "outcome": "awaiting approval"}
+    ],
+    "TCK-4410": [
+      {"at": "2026-08-05T15:00:00+05:30", "level": "L1", "team": "Relocation Desk", "reason": "Shift request pending feasibility", "outcome": "feasibility raised"},
+      {"at": "2026-08-25T11:45:00+05:30", "level": "L2", "team": "Relocation Escalations", "reason": "Feasibility approved, no slot booked after 3 weeks", "outcome": "slot booking assigned, not completed"},
+      {"at": "2026-09-08T11:20:00+05:30", "level": "L3", "team": "Customer Experience", "reason": "Six-week delay, Priority customer, compensation asked", "outcome": "open"}
+    ],
+    "TCK-4518": [
+      {"at": "2026-09-11T16:10:00+05:30", "level": "L1", "team": "Billing", "reason": "Outage credit vs full refund dispute", "outcome": "pro-rata credit offered"}
+    ]
+  }
+}

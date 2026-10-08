@@ -4,6 +4,11 @@
       "command": "${PYTHON}",
       "args": ["-m", "mcp_servers.help_centre.server"],
       "cwd": ".."
+    },
+    "ticket-history": {
+      "command": "${PYTHON}",
+      "args": ["-m", "mcp_servers.ticket_history.server"],
+      "cwd": ".."
     }
   }
 }
