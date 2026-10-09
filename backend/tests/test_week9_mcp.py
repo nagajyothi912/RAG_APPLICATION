@@ -54,10 +54,10 @@ def test_host_discovers_routes_and_namespaces(tmp_path):
     async def go():
         async with McpHost(_config(tmp_path, {"one": _echo("one"), "two": _echo("two")})) as host:
             discovery = host.discovery()
-            assert discovery["tool_count"] == 4
-            assert discovery["servers"]["one"]["tools"] == ["echo", "fail"]
+            assert discovery["tool_count"] == 6
+            assert discovery["servers"]["one"]["tools"] == ["echo", "whoami", "fail"]
             # the second server's identical names are namespaced, not dropped
-            assert set(host.tools) == {"echo", "fail", "two__echo", "two__fail"}
+            assert set(host.tools) == {"echo", "whoami", "fail", "two__echo", "two__whoami", "two__fail"}
             assert [t["function"]["name"] for t in host.openai_tools()] == list(host.tools)
 
             ok = await host.call("two__echo", {"text": "hi"})
@@ -96,7 +96,7 @@ def test_agent_loop_uses_discovered_tools(tmp_path):
     )
     assert trace["final_reply"] == "Final reply."
     assert trace["tools_called"] == ["one.echo"]
-    assert [t["function"]["name"] for t in completions.requests[0]["tools"]] == ["echo", "fail"]
+    assert [t["function"]["name"] for t in completions.requests[0]["tools"]] == ["echo", "whoami", "fail"]
     # the tool result went back to the model on the next turn
     assert completions.requests[1]["messages"][-1] == {"role": "tool", "tool_call_id": "c0", "content": "pong"}
 
@@ -151,7 +151,10 @@ def test_ticket_history_server_in_memory(tmp_path, monkeypatch):
     async def go():
         async with create_connected_server_and_client_session(server.mcp._mcp_server) as session:
             names = [tool.name for tool in (await session.list_tools()).tools]
-            assert names == ["lookup_ticket", "get_escalation_history"]
+            assert names == ["list_tickets", "lookup_ticket", "get_escalation_history"]
+
+            listed = json.loads((await session.call_tool("list_tickets", {})).content[0].text)["tickets"]
+            assert len(listed) == 5 and listed[0]["last_update"] >= listed[-1]["last_update"]
 
             found = await session.call_tool("lookup_ticket", {"ticket_id": "tck-4471"})
             assert not found.isError and "Priya Raman" in found.content[0].text
@@ -164,7 +167,98 @@ def test_ticket_history_server_in_memory(tmp_path, monkeypatch):
             missing = await session.call_tool("lookup_ticket", {"ticket_id": "TCK-9999"})
             assert missing.isError and "not found" in missing.content[0].text
 
+            # the host's caller travels as _meta and lands in the access log
+            await session.call_tool(
+                "lookup_ticket", {"ticket_id": "TCK-4410"}, meta={"caller": {"username": "user", "role": "chatbot"}}
+            )
+
     asyncio.run(go())
-    # every call is audited: tool, ticket id and outcome - but no caller identity
     lines = (tmp_path / "access.log").read_text().splitlines()
-    assert len(lines) == 4 and "tool=lookup_ticket ticket_id=TCK-4471 outcome=found" in lines[0]
+    assert len(lines) == 6
+    assert "caller=unscoped tool=list_tickets ticket_id=* outcome=5_listed" in lines[0]
+    assert "caller=unscoped tool=lookup_ticket ticket_id=TCK-4471 outcome=found" in lines[1]
+    assert "caller=user/chatbot tool=lookup_ticket ticket_id=TCK-4410 outcome=found" in lines[-1]
+
+
+def test_in_process_transport_forwards_caller_meta(tmp_path):
+    """The web app runs a server inside its own process; it is still a real MCP session."""
+    config = _config(tmp_path, {"local": {"module": "tests.fixtures.mcp_echo_server", "object": "mcp"}})
+
+    async def go():
+        async with McpHost(config) as host:
+            assert host.discovery()["servers"]["local"]["transport"] == "in-process"
+            assert (await host.call("echo", {"text": "hi"})).text == "hi"
+            who = await host.call("whoami", {}, meta={"caller": {"username": "user", "role": "chatbot"}})
+            assert "'username': 'user'" in who.text
+            assert (await host.call("whoami", {})).text == "nobody"
+
+    asyncio.run(go())
+
+
+def test_agent_always_replies_when_out_of_turns(tmp_path):
+    """Out of tool turns, the agent makes one last call with tools off instead of returning nothing."""
+    completions = _FakeCompletions(
+        [("", [("echo", {"text": "a"})]), ("", [("echo", {"text": "b"})]), ("Best effort reply.", [])]
+    )
+    client = SimpleNamespace(chat=SimpleNamespace(completions=completions))
+    trace = asyncio.run(
+        week9_agent.run("q", config_path=_config(tmp_path, {"one": _echo()}), model="m", client=client, max_iterations=2)
+    )
+    assert trace["final_reply"] == "Best effort reply."
+    assert trace["stop_reason"] == "max_iterations (2), answered without tools"
+    assert completions.requests[-1]["tool_choice"] == "none"
+
+
+def test_assistant_response_extracts_sources_and_tickets():
+    from app.services.assistant import _response
+
+    passage = {"article_id": "KB-004", "source_file": "t.md", "section": "LEDs", "product_area": "troubleshooting", "text": "red"}
+    trace = {
+        "final_reply": "Answer.",
+        "stop_reason": "answered",
+        "steps": [
+            {"type": "model", "usage": {"total_tokens": 10}},
+            {"type": "tool_call", "server": "h", "tool": "search", "arguments": {"query": "x"}, "is_error": False,
+             "latency_ms": 5.0, "text": json.dumps({"passages": [passage, passage]})},
+            {"type": "tool_call", "server": "t", "tool": "lookup", "arguments": {"ticket_id": "TCK-4410"},
+             "is_error": False, "latency_ms": 2.0, "text": json.dumps({"ticket_id": "TCK-4410"})},
+            {"type": "tool_call", "server": "t", "tool": "lookup", "arguments": {"ticket_id": "4471"},
+             "is_error": True, "latency_ms": 1.0, "text": "'4471' is not a ticket id."},
+            {"type": "model", "usage": {"total_tokens": 7}},
+        ],
+    }
+    out = _response(trace)
+    assert [s["article_id"] for s in out["sources"]] == ["KB-004"]
+    assert out["tickets"] == ["TCK-4410"]
+    assert [c["is_error"] for c in out["tool_calls"]] == [False, False, True]
+    assert (out["model_turns"], out["total_tokens"]) == (2, 17)
+
+
+def test_assistant_endpoint(monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+    from app.services import assistant as assistant_module
+
+    with TestClient(app) as client:
+        # the suite never starts the MCP servers, so the endpoint reports unavailable
+        assert client.post("/api/assistant", json={"message": "hi"}).status_code == 503
+
+        async def fake_ask(message, user):
+            return {"answer": f"echo {message}", "tool_calls": [], "sources": [], "tickets": [],
+                    "stop_reason": "answered", "model_turns": 1, "total_tokens": 3}
+
+        monkeypatch.setattr(assistant_module.get_assistant(), "ask", fake_ask)
+        response = client.post("/api/assistant", json={"message": "status of TCK-4471?"})
+        assert response.status_code == 200 and response.json()["answer"] == "echo status of TCK-4471?"
+
+
+def test_tool_output_is_compacted_and_capped_for_the_model():
+    from app.agents.week9.agent import _for_model
+
+    pretty = json.dumps({"passages": [{"text": "x" * 50}]}, indent=2)
+    assert _for_model(pretty, None) == pretty  # the CLI agent sends tool output untouched
+    compact = _for_model(pretty, 1000)
+    assert compact == '{"passages":[{"text":"' + "x" * 50 + '"}]}'
+    cut = _for_model("y" * 30, 10)
+    assert cut == "y" * 10 + " ...[truncated 20 chars]"

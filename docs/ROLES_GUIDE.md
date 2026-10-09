@@ -68,7 +68,6 @@ Things to know:
 │  Installation... │   (conversation)                                      │
 │  Plans and pri...│                                                       │
 │  Connection p... │                                                       │
-│                  │  Topic [All topics ▾]                                 │
 │ Common questions │  [ Ask about plans, billing, installation or ...] Send│
 │  [What speed...] │                                                       │
 └──────────────────┴───────────────────────────────────────────────────────┘
@@ -78,7 +77,7 @@ Things to know:
 | --- | --- |
 | **I can help with** | The topics the help centre covers, with how many articles each has. They come from the articles an admin has uploaded, so the list changes when the library changes. |
 | **Common questions** | Click one to ask it straight away, searching every topic. |
-| **Topic** | Optional. Limits the search to one topic, for example *Billing, payments and refunds*. Leave it on **All topics** unless an answer keeps coming from the wrong area. |
+| **Ticket questions** | Clickable examples that ask about a support ticket ([§3.6](#36-asking-about-a-support-ticket)). |
 | **Message box** | Type your question. **Enter** sends it and **Shift + Enter** adds a new line. |
 | **New chat** | Clears the conversation. |
 | **Sign out** | Ends the session and returns to the sign-in card. |
@@ -108,7 +107,7 @@ The assistant answers **only** from the help centre. If the help centre does not
 What to try:
 
 - Rephrase using the words the help centre would use: the plan name, the LED colour, the error code.
-- Set **Topic** to the right area.
+- Name the topic in the question ("billing", "installation").
 - Ask a narrower question ("late fee on prepaid packs" rather than "tell me about billing").
 - If it is genuinely not covered, contact human support. The assistant cannot help with things outside the articles.
 
@@ -116,28 +115,35 @@ What to try:
 
 ### 3.5 What happens behind the scenes
 
-The User sees none of the controls the project used to study retrieval, but every answer still goes through the complete pipeline:
+The customer chatbot is the **Week 9 MCP agent**. Instead of one fixed search, the model decides which tools to call:
 
 ```
-your question
-   │
-   ├─► keyword search (BM25) ──┐
-   │                           ├─► fused (RRF) ─► re-ranked (cross-encoder) ─► top 5 passages
-   └─► meaning search (dense) ─┘                                                   │
-                                                                                   ▼
-   best meaning-match score < 0.15 ? ──yes──► "I don't know…" (model not called)
-                         │ no
-                         ▼
-   Groq model writes the answer from those passages only, citing them
+your question ──► Groq model reads the 5 tool descriptions (discovered over MCP)
+                      │
+                      ├─► help-centre server (in-process)   search_help_centre, get_article
+                      │      └─ Week 4 retrieval: BM25 + dense, RRF, cross-encoder rerank
+                      └─► ticket-history server (stdio)     list_tickets, lookup_ticket, get_escalation_history
+                      │
+                  …repeats until it has what it needs (max 8 tool turns, then it must answer)…
+                      ▼
+   reply in plain words, mentioning the article ids it used
 ```
 
-- This is the Week 4 retrieval mode (`week4`): Week 3's meaning search plus Week 4's keyword search and re-ranking.
-- The refusal gate and the citations come from Week 3.
-- If tracing is enabled on the server, every question is logged for the Week 5 error analysis.
-- A User cannot pick Week 3 mode, change top-k, or use the golden question set.
-- **Caveat:** the Week 4 experiment measured keyword + meaning search *without* the re-ranker as slightly better (see [week4/WEEK4_GUIDE.md](week4/WEEK4_GUIDE.md)). The app has no mode for that combination yet.
+- The help-centre search is still the Week 4 pipeline, now reached through MCP.
+- **The Week 3 refusal gate (score < 0.15 → "I don't know") does not apply here.** The search tool returns the best passages whatever their score, and the *model* decides whether they answer the question. The Week 3 and Week 4 admin tabs still use the gated `/api/chat`.
+- Assistant questions are **not** written to the Week 5 trace log. Ticket lookups are logged in `backend/data/ticket_history_access.log`.
+- The **Topic** filter, Week 3/4 toggle, top-k and golden set are not shown; the assistant picks its own search area.
+- An answer typically takes 2–10 seconds: one to three model turns, plus tool calls of a few milliseconds each.
 
-### 3.6 What a User cannot do
+### 3.6 Asking about a support ticket
+
+The assistant can also answer from the **ticket system** (the Week 9 ticket-history MCP server): status, contact count, order and install status, and escalation history. Give the id (*"Has anyone called back the customer on ticket TCK-4471?"*), or describe the ticket (*"the relocation complaint that has been open for six weeks"*) and the assistant finds it first. The sidebar's **Ticket questions** are clickable examples. The ids in the sample data are TCK-4471, TCK-4410, TCK-4519, TCK-4518 and TCK-4422.
+
+- **Any signed-in user can ask about any ticket.** Logins aren't linked to customers, so every User can see every customer's name, phone and payments. That's fine for this fictional data, and would not be for real customers.
+- Every ticket lookup is logged with **who asked** (`caller=user/chatbot`) in `backend/data/ticket_history_access.log`.
+- The assistant only **looks things up**. It's told never to promise callbacks, refunds or reschedules.
+
+### 3.7 What a User cannot do
 
 Upload, delete or rename articles, or open any week's evaluation pages. The interface doesn't offer these, and the server refuses them (HTTP 403) if they are attempted directly.
 
@@ -163,7 +169,7 @@ The left column of the Week 3 and Week 4 tabs is the knowledge base. Changes her
 
 - **Upload:** **Choose files** or **Choose folder** (`.txt`, `.md` and `.pdf`), then **Upload & index**. Folder upload keeps sub-folder names, and the top-level folder becomes the article's topic if the file has no front-matter.
 - **Delete:** **Delete** next to an article removes it and rebuilds the index.
-- **Front-matter matters.** `article_id`, `product_area` and `last_updated` at the top of a Markdown file become the citation ID, the **Topic** the User filters by, and the "last updated" date. The sample articles are in [`sample_documents/`](../sample_documents/).
+- **Front-matter matters.** `article_id`, `product_area` and `last_updated` at the top of a Markdown file become the citation ID, the topic shown in the User's "I can help with" list, and the "last updated" date. The sample articles are in [`sample_documents/`](../sample_documents/).
 
 ### 4.3 The tabs, week by week
 
@@ -175,6 +181,7 @@ The left column of the Week 3 and Week 4 tabs is the knowledge base. Changes her
 | **Week 6 · Judge validation** | How often the AI judge agrees with blind human labels: v1 single run (92.3%), v1 majority of 3 (96.2%), v2 majority of 3 (96.2%), plus held-out agreement and the committed prediction | Tick **Only disagreements**; click a ticket to read each judge's explanation. Read-only, from `backend/eval/week6/runs/` | [WEEK6_GUIDE](week6/WEEK6_GUIDE.md) |
 | **Week 7 · Agent vs workflow** | The ticket-reply agent compared with the fixed workflow: **Comparison Table**, **Budget Log**, **Third Tool Diff** | **▶ Run Experiment**, **⚡ Budget Test**, **↻ Refresh** | [WEEK7_GUIDE](week7/WEEK7_GUIDE.md) |
 | **Week 8 · Trajectory evals** | Five sub-tabs: the four trajectory numbers, the 10 cases and their allowed paths, the single fix and its cost, the per-mode regression check, and the prompt-injection bonus | **▶ Run Evaluation**, **↻ Refresh Data**, **⚡ Re-run Attack Simulation** | [WEEK8_GUIDE](week8/WEEK8_GUIDE.md) |
+| **Week 9 · MCP agent** | The same assistant customers use, with the MCP servers it discovered (server, transport, tools) in the sidebar and every `tools/call` shown under each answer: server, tool, arguments, ok/isError, latency | Click a **Try** example or ask about a ticket or the help centre | [WEEK9_GUIDE](week9/WEEK9_GUIDE.md) |
 | **Chatbot · What users see** | Exactly the User assistant, including the help sidebar | Check what a customer will experience after changing the library | [§3](#3-user-guide-the-airfiber-support-assistant) |
 
 **The run buttons call Groq and cost tokens.** Week 7 **Run Experiment**, Week 7 **Budget Test**, Week 8 **Run Evaluation** and Week 8 **Re-run Attack Simulation** all call the model. They run in the background and **overwrite the committed results files** in `eval/week7/` and `eval/week8/`, so the numbers on the page change. Press **Refresh** when they finish. If you only want to review the results, don't press them.
@@ -191,7 +198,9 @@ Enforced by the backend on every request. Hiding something in the interface is n
 | --- | :-: | :-: | :-: | --- |
 | Check the server is up | ✅ | ✅ | ✅ | `GET /api/health` |
 | Sign in / see who I am | ✅ / — | ✅ | ✅ | `POST /api/auth/login`, `GET /api/auth/me` |
-| Ask a question | ❌ 401 | ✅ | ✅ | `POST /api/chat` |
+| Ask a question (Week 3/4 RAG tabs) | ❌ 401 | ✅ | ✅ | `POST /api/chat` |
+| Ask the assistant (help centre + **any** ticket) | ❌ 401 | ✅ | ✅ | `POST /api/assistant` |
+| See the MCP servers and tools | ❌ 401 | ❌ 403 | ✅ | `GET /api/assistant/servers` |
 | See the article list and topics | ❌ 401 | ✅ | ✅ | `GET /api/documents` |
 | See golden / common questions | ❌ 401 | ✅ | ✅ | `GET /api/golden-questions` |
 | Upload articles | ❌ 401 | ❌ 403 | ✅ | `POST /api/documents/upload` |

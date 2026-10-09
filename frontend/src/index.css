@@ -3204,3 +3204,95 @@ p {
   background: rgba(196, 92, 38, 0.08);
   font-weight: 600;
 }
+
+/* ------------------------------------------------------------------ MCP assistant */
+
+.agent-details {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.agent-checked {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tool-call-list {
+  list-style: decimal;
+  margin: 8px 0 0;
+  padding-left: 1.4em;
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.tool-call-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.tool-call-list li.is-error .tool-call-outcome {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.tool-call-args {
+  color: var(--ink-soft);
+  word-break: break-all;
+}
+
+.tool-call-outcome,
+.tool-call-stop {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.tool-call-stop {
+  margin-top: 6px;
+}
+
+.mcp-servers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.mcp-servers li {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 250, 243, 0.06);
+  display: grid;
+  gap: 6px;
+}
+
+.mcp-server-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mcp-server-meta {
+  font-size: 0.75rem;
+  color: rgba(244, 239, 228, 0.6);
+}
+
+.mcp-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mcp-tools code {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(196, 92, 38, 0.2);
+  color: var(--paper);
+}

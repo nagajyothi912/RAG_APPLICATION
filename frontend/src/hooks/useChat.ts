@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { sendChat, type AskOptions, type ChatMessage } from '../services/api';
+import { sendAssistant, sendChat, type AskOptions, type ChatMessage } from '../services/api';
 
 export function useChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -27,6 +27,27 @@ export function useChat() {
       setError(null);
 
       try {
+        if (options.agent) {
+          const result = await sendAssistant(content);
+          setMessages((current) => [
+            ...current,
+            {
+              id: crypto.randomUUID(),
+              role: 'assistant',
+              content: result.answer || 'Sorry, I could not put an answer together. Please try rephrasing.',
+              options,
+              agent: {
+                toolCalls: result.tool_calls,
+                sources: result.sources,
+                tickets: result.tickets,
+                stopReason: result.stop_reason,
+                modelTurns: result.model_turns,
+                totalTokens: result.total_tokens,
+              },
+            },
+          ]);
+          return;
+        }
         const result = await sendChat(content, options);
         const assistantMessage: ChatMessage = {
           id: crypto.randomUUID(),

@@ -7,7 +7,7 @@ import Week6Page from './Week6Page';
 import Week7Page from './Week7Page';
 import Week8Page from './Week8Page';
 
-type TabId = 'week3' | 'week4' | 'week5' | 'week6' | 'week7' | 'week8' | 'chatbot';
+type TabId = 'week3' | 'week4' | 'week5' | 'week6' | 'week7' | 'week8' | 'week9' | 'chatbot';
 
 type TabDef = { id: TabId; hash: string; label: string; caption: string };
 
@@ -20,11 +20,12 @@ const TABS: TabDef[] = [
   { id: 'week6', hash: 'week6', label: 'Week 6', caption: 'Judge validation' },
   { id: 'week7', hash: 'week7', label: 'Week 7', caption: 'Agent vs workflow' },
   { id: 'week8', hash: 'week8', label: 'Week 8', caption: 'Trajectory evals' },
+  { id: 'week9', hash: 'week9', label: 'Week 9', caption: 'MCP agent' },
   { id: 'chatbot', hash: 'chatbot', label: 'Chatbot', caption: 'What users see' },
 ];
 
 // The chat tabs stay mounted once opened so their conversation survives a tab switch.
-const KEEP_MOUNTED: TabId[] = ['week3', 'week4', 'chatbot'];
+const KEEP_MOUNTED: TabId[] = ['week3', 'week4', 'week9', 'chatbot'];
 
 function parseHash(): { tab: TabId; traceId?: string } {
   const [section, traceId] = window.location.hash.replace('#', '').split('/');
@@ -61,7 +62,7 @@ export default function AdminConsole({ user, onLogout }: AdminConsoleProps) {
   const keptChat = (id: TabId) =>
     visited.has(id) ? (
       <div hidden={tab !== id} style={{ height: '100%', width: '100%' }}>
-        <RagPage variant={id === 'chatbot' ? 'chatbot' : (id as 'week3' | 'week4')} active={tab === id} />
+        <RagPage variant={id === 'chatbot' ? 'chatbot' : (id as 'week3' | 'week4' | 'week9')} active={tab === id} />
       </div>
     ) : null;
 

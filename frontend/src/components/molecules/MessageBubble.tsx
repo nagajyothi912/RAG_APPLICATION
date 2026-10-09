@@ -19,6 +19,84 @@ function articleName(source: string) {
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
+const humanize = (name: string) => {
+  const words = name.replace(/[_-]+/g, ' ').trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+};
+
+/**
+ * What the MCP assistant did to produce this answer. Admins (technical) see each
+ * tools/call with its server, arguments, outcome and latency; customers see a
+ * short "checked" line and the help articles the answer drew on.
+ */
+function AgentDetails({ agent, technical }: { agent: NonNullable<ChatMessage['agent']>; technical: boolean }) {
+  const checked = Array.from(
+    new Set(
+      agent.toolCalls
+        .filter((call) => !call.is_error)
+        .map((call) => {
+          const ticket = typeof call.arguments.ticket_id === 'string' ? ` ${call.arguments.ticket_id}` : '';
+          return `${humanize(call.tool)}${ticket}`;
+        }),
+    ),
+  );
+
+  return (
+    <div className="agent-details">
+      {technical ? (
+        <details className="citation-list" open>
+          <summary>
+            {agent.toolCalls.length} MCP tool call{agent.toolCalls.length === 1 ? '' : 's'} · {agent.modelTurns} model
+            turn{agent.modelTurns === 1 ? '' : 's'} · {agent.totalTokens.toLocaleString()} tokens
+          </summary>
+          <ol className="tool-call-list">
+            {agent.toolCalls.map((call, index) => (
+              <li key={index} className={call.is_error ? 'is-error' : undefined}>
+                <Badge tone="accent">{call.server}</Badge>
+                <code>{call.tool}</code>
+                <code className="tool-call-args">{JSON.stringify(call.arguments)}</code>
+                <span className="tool-call-outcome">
+                  {call.is_error ? 'isError' : 'ok'}
+                  {call.latency_ms !== null ? ` · ${Math.round(call.latency_ms)} ms` : ''}
+                </span>
+              </li>
+            ))}
+          </ol>
+          <p className="tool-call-stop">stop: {agent.stopReason}</p>
+        </details>
+      ) : checked.length ? (
+        <div className="agent-checked">
+          {checked.map((label) => (
+            <Badge key={label}>{label}</Badge>
+          ))}
+        </div>
+      ) : null}
+
+      {agent.sources.length ? (
+        <details className="citation-list">
+          <summary>
+            From {new Set(agent.sources.map((source) => source.article_id)).size} help article
+            {new Set(agent.sources.map((source) => source.article_id)).size === 1 ? '' : 's'}
+          </summary>
+          <ol>
+            {agent.sources.map((source, index) => (
+              <li key={`${source.article_id}-${index}`} className="citation">
+                <div className="citation-head">
+                  <strong>{technical ? source.source_file : articleName(source.source_file)}</strong>
+                  {source.article_id ? <Badge tone="accent">{source.article_id}</Badge> : null}
+                  {source.product_area ? <Badge>{source.product_area}</Badge> : null}
+                </div>
+                {source.section ? <div className="citation-section">{source.section}</div> : null}
+                <p className="citation-preview">{source.preview}…</p>
+              </li>
+            ))}
+          </ol>
+        </details>
+      ) : null}
+    </div>
+  );
+}
+
 const MODE_LABEL: Record<string, string> = {
   week3: 'Week 3 · dense',
   week4: 'Week 4 · hybrid + rerank',
@@ -50,7 +128,7 @@ export default function MessageBubble({ message, technical = true }: MessageBubb
     <article className={`message-bubble ${isUser ? 'message-user' : 'message-assistant'}`}>
       <span className="message-role">{isUser ? 'You' : 'Assistant'}</span>
 
-      {isUser && options && technical ? (
+      {isUser && options && technical && !options.agent ? (
         <div className="message-options">
           <Badge tone="accent">{MODE_LABEL[options.mode] ?? options.mode}</Badge>
           <Badge>top k {options.topK}</Badge>
@@ -90,6 +168,8 @@ export default function MessageBubble({ message, technical = true }: MessageBubb
         support. The summary still reports how many there are, so the reader
         knows evidence exists before deciding to open it.
       */}
+      {!isUser && message.agent ? <AgentDetails agent={message.agent} technical={technical} /> : null}
+
       {!isUser && sources.length > 0 ? (
         <details className="citation-list">
           <summary>

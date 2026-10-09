@@ -7,13 +7,22 @@ it can be bolted on to the agent by config alone).
 
 Exposes ticket lookup by id and the escalation history behind it:
 
+  list_tickets()                      every ticket, one line each, newest first
   lookup_ticket(ticket_id)            the ticket, the customer, the order and install status
   get_escalation_history(ticket_id)   every escalation step, oldest first
 
+Every caller sees every ticket - there is no per-customer scoping. The host
+may attach the signed-in user to each tools/call as request `_meta`:
+
+    {"caller": {"username": "user", "role": "chatbot"}}
+
+It is used only to record WHO asked in the access log. `_meta` is not a tool
+argument, so the model never sees it and cannot forge it. Callers that send
+none (the Week 9 CLI agent, MCP Inspector, tests) are logged as "unscoped".
+
 Reaches: tickets.json next to this file (stands in for the ticketing system).
 Logs: one line per call to stderr AND to backend/data/ticket_history_access.log
-(timestamp, tool, ticket id). There is no caller identity on stdio, so the log
-cannot say WHO asked. No model call anywhere in this server.
+(timestamp, caller, tool, ticket id, outcome). No model call anywhere in this server.
 
 Run from backend/:
     python -m mcp_servers.ticket_history.server               # stdio
@@ -30,7 +39,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import Context, FastMCP
 from mcp.server.fastmcp.exceptions import ToolError
 
 HERE = Path(__file__).resolve().parent
@@ -48,8 +57,24 @@ def _data() -> dict:
     return json.loads(DATA_FILE.read_text("utf-8"))
 
 
-def _audit(tool: str, ticket_id: str, outcome: str) -> None:
-    line = f"{datetime.now(timezone.utc).isoformat(timespec='seconds')} tool={tool} ticket_id={ticket_id} outcome={outcome}"
+def _caller(ctx: Context | None) -> dict | None:
+    """The signed-in user the host attached to this call, or None for an unscoped caller."""
+    meta = ctx.request_context.meta if ctx is not None else None
+    caller = (meta.model_extra or {}).get("caller") if meta is not None else None
+    return caller if isinstance(caller, dict) else None
+
+
+def _who(caller: dict | None) -> str:
+    if caller is None:
+        return "unscoped"
+    return f"{caller.get('username', '?')}/{caller.get('role', '?')}"
+
+
+def _audit(tool: str, ticket_id: str, outcome: str, caller: dict | None = None) -> None:
+    line = (
+        f"{datetime.now(timezone.utc).isoformat(timespec='seconds')} caller={_who(caller)} "
+        f"tool={tool} ticket_id={ticket_id} outcome={outcome}"
+    )
     logger.info(line)
     try:
         ACCESS_LOG.parent.mkdir(parents=True, exist_ok=True)
@@ -59,19 +84,42 @@ def _audit(tool: str, ticket_id: str, outcome: str) -> None:
         pass
 
 
-def _check_id(tool: str, ticket_id: str, known: dict) -> str:
+def _check_id(tool: str, ticket_id: str, known: dict, caller: dict | None) -> str:
     ticket_id = ticket_id.strip().upper()
     if not TICKET_ID.match(ticket_id):
-        _audit(tool, ticket_id, "malformed")
+        _audit(tool, ticket_id, "malformed", caller)
         raise ToolError(f"'{ticket_id}' is not a ticket id. Ticket ids look like TCK-nnnn (e.g. TCK-4471).")
     if ticket_id not in known:
-        _audit(tool, ticket_id, "not_found")
-        raise ToolError(f"Ticket {ticket_id} not found in the ticketing system. Check the id with the customer.")
+        _audit(tool, ticket_id, "not_found", caller)
+        raise ToolError(
+            f"Ticket {ticket_id} not found in the ticketing system. "
+            "Call list_tickets to see the ticket ids that exist, or check the id with the customer."
+        )
     return ticket_id
 
 
 @mcp.tool()
-def lookup_ticket(ticket_id: str) -> dict:
+def list_tickets(ctx: Context) -> dict:
+    """
+    List every support ticket: id, subject, status and last update, newest first.
+
+    Use it when someone asks about a ticket without giving its id ("the refund
+    ticket", "the relocation complaint"), or asks which tickets are open; then
+    call lookup_ticket on the right one. Never guess a ticket id.
+    """
+    caller = _caller(ctx)
+    tickets = list(_data()["tickets"].values())
+    tickets.sort(key=lambda t: t.get("last_update", ""), reverse=True)
+    _audit("list_tickets", "*", f"{len(tickets)}_listed", caller)
+    return {
+        "tickets": [
+            {k: t.get(k) for k in ("ticket_id", "subject", "status", "last_update")} for t in tickets
+        ]
+    }
+
+
+@mcp.tool()
+def lookup_ticket(ticket_id: str, ctx: Context) -> dict:
     """
     Look up a support ticket by its id (format TCK-nnnn).
 
@@ -80,14 +128,15 @@ def lookup_ticket(ticket_id: str) -> dict:
     Use it whenever a ticket id is mentioned, before saying anything about that
     customer's order, payment or installation.
     """
+    caller = _caller(ctx)
     tickets = _data()["tickets"]
-    ticket_id = _check_id("lookup_ticket", ticket_id, tickets)
-    _audit("lookup_ticket", ticket_id, "found")
+    ticket_id = _check_id("lookup_ticket", ticket_id, tickets, caller)
+    _audit("lookup_ticket", ticket_id, "found", caller)
     return tickets[ticket_id]
 
 
 @mcp.tool()
-def get_escalation_history(ticket_id: str) -> dict:
+def get_escalation_history(ticket_id: str, ctx: Context) -> dict:
     """
     The escalation history behind a ticket (format TCK-nnnn), oldest first:
     when it was escalated, to which team and level, why, and what happened.
@@ -95,10 +144,11 @@ def get_escalation_history(ticket_id: str) -> dict:
     Use it to see whether a customer was promised a callback or a refund and
     whether that promise was kept. An empty list means it was never escalated.
     """
+    caller = _caller(ctx)
     data = _data()
-    ticket_id = _check_id("get_escalation_history", ticket_id, data["tickets"])
+    ticket_id = _check_id("get_escalation_history", ticket_id, data["tickets"], caller)
     history = data["escalations"].get(ticket_id, [])
-    _audit("get_escalation_history", ticket_id, f"{len(history)}_events")
+    _audit("get_escalation_history", ticket_id, f"{len(history)}_events", caller)
     return {"ticket_id": ticket_id, "escalations": history}
 
 

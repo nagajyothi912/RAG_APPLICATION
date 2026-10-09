@@ -24,6 +24,7 @@ import asyncio
 import json
 import sys
 import time
+from contextlib import nullcontext
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -57,6 +58,23 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+def _for_model(text: str, max_chars: int | None) -> str:
+    """
+    Tool output as the model will read it. With a cap: JSON is re-serialised
+    compactly (servers pretty-print it; the indentation is pure token cost) and
+    anything still over the cap is cut, with a note saying so.
+    """
+    if max_chars is None:
+        return text
+    try:
+        text = json.dumps(json.loads(text), ensure_ascii=False, separators=(",", ":"))
+    except ValueError:
+        pass
+    if len(text) > max_chars:
+        text = text[:max_chars] + f" ...[truncated {len(text) - max_chars} chars]"
+    return text
+
+
 async def run(
     question: str,
     *,
@@ -66,8 +84,25 @@ async def run(
     max_iterations: int = MAX_ITERATIONS,
     seed_call: tuple[str, dict] | None = None,
     client: Any = None,
+    host: McpHost | None = None,
+    call_meta: dict | None = None,
+    instructions: str | None = None,
+    request_options: dict | None = None,
+    max_tool_chars: int | None = None,
 ) -> dict:
-    """Answer one ticket. Returns the full trace: discovery, every model turn, every tool call."""
+    """
+    Answer one ticket. Returns the full trace: discovery, every model turn, every tool call.
+
+    host:         an already-connected McpHost to reuse (the web app keeps one open);
+                  without it, one is opened from config_path for this run and closed after.
+    call_meta:    sent as _meta on every tools/call (e.g. who is signed in, for a server's
+                  access log). The model never sees it.
+    instructions: extra system-prompt text from the caller.
+    request_options: extra chat.completions parameters for every model call
+                  (e.g. max_completion_tokens, reasoning_effort).
+    max_tool_chars: cap on each tool result as sent back to the model (compact JSON,
+                  then truncated); the trace keeps the full text.
+    """
     model = model or settings.groq_model
     client = client or AsyncOpenAI(api_key=settings.api_key, base_url=settings.groq_base_url)
     trace: dict[str, Any] = {
@@ -78,11 +113,11 @@ async def run(
         "steps": [],
     }
 
-    async with McpHost(config_path) as host:
+    async with nullcontext(host) if host is not None else McpHost(config_path) as host:
         trace["discovery"] = host.discovery()
         tools = host.openai_tools()
         messages: list[dict] = [
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": SYSTEM_PROMPT + (f"\n{instructions}\n" if instructions else "")},
             {"role": "user", "content": question},
         ]
 
@@ -98,12 +133,18 @@ async def run(
                     ],
                 }
             )
-            outcome = await host.call(name, arguments)
-            messages.append({"role": "tool", "tool_call_id": call_id, "content": outcome.text})
+            outcome = await host.call(name, arguments, meta=call_meta)
+            messages.append({"role": "tool", "tool_call_id": call_id, "content": _for_model(outcome.text, max_tool_chars)})
             trace["steps"].append({"type": "tool_call", "seeded": True, **outcome.__dict__})
 
         for iteration in range(1, max_iterations + 1):
-            request: dict[str, Any] = {"model": model, "messages": messages, "tools": tools, "tool_choice": "auto"}
+            request: dict[str, Any] = {
+                "model": model,
+                "messages": messages,
+                "tools": tools,
+                "tool_choice": "auto",
+                **(request_options or {}),
+            }
             if temperature is not None:
                 request["temperature"] = temperature
             started = time.perf_counter()
@@ -147,12 +188,38 @@ async def run(
                     messages.append({"role": "tool", "tool_call_id": call.id, "content": text})
                     trace["steps"].append({"type": "tool_call", "tool": call.function.name, "is_error": True, "text": text})
                     continue
-                outcome = await host.call(call.function.name, arguments)
-                messages.append({"role": "tool", "tool_call_id": call.id, "content": outcome.text})
+                outcome = await host.call(call.function.name, arguments, meta=call_meta)
+                messages.append({"role": "tool", "tool_call_id": call.id, "content": _for_model(outcome.text, max_tool_chars)})
                 trace["steps"].append({"type": "tool_call", "seeded": False, **outcome.__dict__})
         else:
-            trace["final_reply"] = ""
-            trace["stop_reason"] = f"max_iterations ({max_iterations})"
+            # Out of tool turns. Rather than return nothing, make one last call with
+            # tools switched off so the model answers from what it already found and
+            # says plainly what it could not confirm.
+            messages.append(
+                {
+                    "role": "system",
+                    "content": "You have no tool calls left. Write the final reply now using only what the tools "
+                    "already returned, and say clearly what you could not confirm.",
+                }
+            )
+            request = {"model": model, "messages": messages, "tools": tools, "tool_choice": "none", **(request_options or {})}
+            if temperature is not None:
+                request["temperature"] = temperature
+            response = await client.chat.completions.create(**request)
+            usage = getattr(response, "usage", None)
+            final = response.choices[0].message.content or ""
+            trace["steps"].append(
+                {
+                    "type": "model",
+                    "iteration": max_iterations + 1,
+                    "content": final,
+                    "tool_calls": [],
+                    "usage": usage.model_dump() if usage is not None else None,
+                    "forced_final": True,
+                }
+            )
+            trace["final_reply"] = final
+            trace["stop_reason"] = f"max_iterations ({max_iterations}), answered without tools"
 
     trace["finished_at"] = _now()
     trace["tools_called"] = [

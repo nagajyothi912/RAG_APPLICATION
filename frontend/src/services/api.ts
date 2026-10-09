@@ -5,13 +5,20 @@ export type RetrievalMode = 'week3' | 'week4';
  * week-specific controls; the admin Week 3 tab is pinned to dense retrieval;
  * the admin Week 4 tab keeps the toggle and the golden set to compare them.
  */
-export type ChatVariant = 'chatbot' | 'week3' | 'week4';
+export type ChatVariant = 'chatbot' | 'week3' | 'week4' | 'week9';
 
 export const VARIANT_MODE: Record<ChatVariant, RetrievalMode> = {
   chatbot: 'week4',
   week3: 'week3',
   week4: 'week4',
+  week9: 'week4',
 };
+
+/**
+ * Variants answered by the MCP assistant (/api/assistant: help centre + ticket
+ * history) instead of the RAG-only /api/chat.
+ */
+export const AGENT_VARIANTS: ChatVariant[] = ['chatbot', 'week9'];
 
 export type SourceChunk = {
   source: string;
@@ -81,6 +88,49 @@ export type AskOptions = {
   topK: number;
   productArea: string | null;
   sourceFile: string | null;
+  /** Ask the MCP assistant instead of the RAG chat; the retrieval fields are then unused. */
+  agent?: boolean;
+};
+
+export type ToolCallInfo = {
+  server: string;
+  tool: string;
+  arguments: Record<string, unknown>;
+  is_error: boolean;
+  latency_ms: number | null;
+};
+
+export type AssistantSource = {
+  article_id: string;
+  source_file: string;
+  section: string;
+  product_area: string;
+  preview: string;
+};
+
+export type AssistantResponse = {
+  answer: string;
+  tool_calls: ToolCallInfo[];
+  sources: AssistantSource[];
+  tickets: string[];
+  stop_reason: string;
+  model_turns: number;
+  total_tokens: number;
+};
+
+export type McpServerInfo = {
+  server_name: string;
+  server_version: string;
+  protocol_version: string;
+  transport: string;
+  tools: string[];
+};
+
+export type McpDiscovery = {
+  config: string;
+  servers: Record<string, McpServerInfo>;
+  tool_count: number;
+  tool_names: string[];
 };
 
 export type SkippedFile = {
@@ -135,6 +185,15 @@ export type ChatMessage = {
   /** Echoed onto both bubbles so scrollback stays readable after the controls move on. */
   options?: AskOptions;
   retrieval?: RetrievalInfo;
+  /** Set on MCP assistant answers. */
+  agent?: {
+    toolCalls: ToolCallInfo[];
+    sources: AssistantSource[];
+    tickets: string[];
+    stopReason: string;
+    modelTurns: number;
+    totalTokens: number;
+  };
 };
 
 export type UploadStatusKind = 'idle' | 'uploading' | 'success' | 'error';
@@ -274,6 +333,18 @@ export function sendChat(message: string, options: AskOptions) {
       mode: options.mode,
     }),
   });
+}
+
+export function sendAssistant(message: string) {
+  return request<AssistantResponse>('/api/assistant', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message }),
+  });
+}
+
+export function getAssistantServers() {
+  return request<McpDiscovery>('/api/assistant/servers');
 }
 
 export function listGoldenQuestions() {

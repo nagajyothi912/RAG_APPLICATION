@@ -35,6 +35,8 @@ os.environ["LANGFUSE_ENABLED"] = "false"
 # tests/test_auth.py switches it back on per test. Fixed accounts and secret
 # keep it independent of a developer's backend/.env.
 os.environ["AUTH_ENABLED"] = "false"
+# The MCP-backed web assistant spawns servers and calls Groq; never in the suite.
+os.environ["ASSISTANT_ENABLED"] = "false"
 os.environ["AUTH_SECRET"] = "test-secret"
 os.environ["ADMIN_USERNAME"] = "admin"
 os.environ["ADMIN_PASSWORD"] = "admin123"

@@ -2,13 +2,28 @@ import { useEffect, useMemo, useState } from 'react';
 import { useDocuments } from '../../hooks/useDocuments';
 import { useChat } from '../../hooks/useChat';
 import { useGoldenQuestions } from '../../hooks/useGoldenQuestions';
-import { getHealth, type ChatVariant, type HealthResponse } from '../../services/api';
+import { AGENT_VARIANTS, getHealth, type ChatVariant, type HealthResponse } from '../../services/api';
 import RagLayout from '../templates/RagLayout';
 import FileUpload from '../organisms/FileUpload';
 import DocumentList from '../organisms/DocumentList';
 import HelpSidebar from '../organisms/HelpSidebar';
+import McpServersPanel from '../organisms/McpServersPanel';
 import ChatWindow from '../organisms/ChatWindow';
 import StatusMessage from '../atoms/StatusMessage';
+
+const TICKET_QUESTIONS = [
+  'Which support tickets are open right now?',
+  'Has anyone called back the customer on ticket TCK-4471?',
+  'What is happening with the relocation complaint that has been open for six weeks?',
+];
+
+const WEEK9_EXAMPLES = [
+  'Has anyone called back the customer on ticket TCK-4471?',
+  'What is happening with the relocation complaint that has been open for six weeks?',
+  'Customer on TCK-4518 wants a full refund for the outage. What happened and what does our policy allow?',
+  'What does a blinking red LED on my router mean?',
+  'Look up ticket 4471',
+];
 
 type RagPageProps = {
   variant: ChatVariant;
@@ -25,7 +40,12 @@ type RagPageProps = {
 export default function RagPage({ variant, active = true, resetKey = 0 }: RagPageProps) {
   const documents = useDocuments();
   const chat = useChat();
-  const canManage = variant !== 'chatbot';
+  // Only the admin Week 3/4 tabs manage documents; the assistant variants
+  // (customer chatbot, admin Week 9) answer through MCP instead.
+  const canManage = variant === 'week3' || variant === 'week4';
+  const isAgent = AGENT_VARIANTS.includes(variant);
+  const askAgent = (question: string) =>
+    chat.send(question, { mode: 'week4', topK: 5, productArea: null, sourceFile: null, agent: true });
   const { refresh } = documents;
   const { reset } = chat;
 
@@ -69,21 +89,18 @@ export default function RagPage({ variant, active = true, resetKey = 0 }: RagPag
               {canManage ? `Backend unreachable: ${healthError}` : 'The assistant is offline right now. Try again shortly.'}
             </StatusMessage>
           ) : null}
-          {!canManage ? (
+          {variant === 'chatbot' ? (
             <HelpSidebar
               productAreas={documents.productAreas}
               metadata={documents.metadata}
               questions={golden.questions}
-              disabled={chat.loading || documents.indexedChunks === 0}
-              onAsk={(question) =>
-                chat.send(question, {
-                  mode: 'week4',
-                  topK: health?.top_k ?? 5,
-                  productArea: null,
-                  sourceFile: null,
-                })
-              }
+              ticketQuestions={TICKET_QUESTIONS}
+              disabled={chat.loading}
+              onAsk={askAgent}
             />
+          ) : null}
+          {variant === 'week9' ? (
+            <McpServersPanel active={active} examples={WEEK9_EXAMPLES} onAsk={askAgent} disabled={chat.loading} />
           ) : null}
           {canManage ? (
             <FileUpload
@@ -114,7 +131,7 @@ export default function RagPage({ variant, active = true, resetKey = 0 }: RagPag
           loading={chat.loading}
           error={chat.error}
           onSend={chat.send}
-          canAsk={documents.indexedChunks > 0}
+          canAsk={isAgent || documents.indexedChunks > 0}
           productAreas={documents.productAreas}
           documents={documents.documents}
           goldenQuestions={golden.questions}

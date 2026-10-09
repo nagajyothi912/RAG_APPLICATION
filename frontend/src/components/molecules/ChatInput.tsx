@@ -4,7 +4,7 @@ import TextArea from '../atoms/TextArea';
 import RetrievalControls from './RetrievalControls';
 import { areaLabel } from '../organisms/HelpSidebar';
 import GoldenQuestions from './GoldenQuestions';
-import { VARIANT_MODE, type AskOptions, type ChatVariant, type GoldenQuestion, type RetrievalMode } from '../../services/api';
+import { AGENT_VARIANTS, VARIANT_MODE, type AskOptions, type ChatVariant, type GoldenQuestion, type RetrievalMode } from '../../services/api';
 
 type ChatInputProps = {
   onSend: (text: string, options: AskOptions) => void;
@@ -30,6 +30,9 @@ export default function ChatInput({
   variant = 'week4',
 }: ChatInputProps) {
   const isChatbot = variant === 'chatbot';
+  // The MCP assistant picks its own tools and search area, so the RAG controls
+  // (mode, top-k, product area, golden set) do not apply to it.
+  const isAgent = AGENT_VARIANTS.includes(variant);
   const [value, setValue] = useState('');
   const [mode, setMode] = useState<RetrievalMode>(VARIANT_MODE[variant]);
   const [topK, setTopK] = useState(defaultTopK);
@@ -75,6 +78,7 @@ export default function ChatInput({
       topK,
       productArea: sourceFile ? null : productArea || null,
       sourceFile: sourceFile || null,
+      agent: isAgent,
     });
     setValue('');
     setActiveGoldenId(null);
@@ -126,7 +130,7 @@ export default function ChatInput({
         submit();
       }}
     >
-      {isChatbot ? null : (
+      {isChatbot || isAgent ? null : (
         <GoldenQuestions
           questions={goldenQuestions}
           open={goldenOpen}
@@ -137,6 +141,7 @@ export default function ChatInput({
         />
       )}
 
+      {isAgent ? null : (
       <RetrievalControls
         mode={mode}
         onModeChange={setMode}
@@ -159,6 +164,7 @@ export default function ChatInput({
         showTopK={!isChatbot}
         areaLabel={isChatbot ? 'Topic' : 'Product area'}
       />
+      )}
 
       <div className="chat-input-row">
         <label className="visually-hidden" htmlFor="chat-message">
@@ -186,8 +192,8 @@ export default function ChatInput({
           placeholder={
             sourceFile
               ? `Ask about ${sourceFile}…`
-              : isChatbot
-                ? 'Ask about plans, billing, installation or troubleshooting…'
+              : isAgent
+                ? 'Ask about plans, billing, a connection problem, or a ticket (e.g. TCK-4471)…'
                 : 'Ask about the uploaded documents…'
           }
           disabled={disabled}

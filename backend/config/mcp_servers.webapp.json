@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "help-centre": {
+      "module": "mcp_servers.help_centre.server",
+      "object": "mcp"
+    },
+    "ticket-history": {
+      "command": "${PYTHON}",
+      "args": ["-m", "mcp_servers.ticket_history.server"],
+      "cwd": ".."
+    }
+  }
+}

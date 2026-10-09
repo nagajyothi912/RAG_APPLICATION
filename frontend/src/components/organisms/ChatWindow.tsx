@@ -10,11 +10,11 @@ const HEADER: Record<ChatVariant, { eyebrow: string; title: string; lede: string
     eyebrow: 'AirFiber support',
     title: 'How can we help today?',
     lede:
-      'Answers come only from the AirFiber help centre, with the article each one is from. ' +
-      'If the help centre does not cover something, the assistant says so instead of guessing.',
+      'Ask about AirFiber plans, bills, refunds, installation or a connection problem, or about a ' +
+      'support ticket. Answers come from the help centre and the ticket system, and say where they came from.',
     empty:
-      'Ask anything about your AirFiber plan, bill, refund, installation or connection - type your ' +
-      'question below, or pick one of the common questions on the left.',
+      'Type your question below, or pick one on the left. For a ticket, give its id (like TCK-4471) ' +
+      'or describe it ("the relocation complaint").',
   },
   week3: {
     eyebrow: 'Week 3 · baseline RAG',
@@ -26,6 +26,16 @@ const HEADER: Record<ChatVariant, { eyebrow: string; title: string; lede: string
     empty:
       'Pick one of the golden questions below, or ask your own. Narrow the search with the ' +
       'product-area and top-k controls.',
+  },
+  week9: {
+    eyebrow: 'Week 9 · MCP agent',
+    title: 'Help centre + ticket history over MCP',
+    lede:
+      'The same assistant customers use. The agent discovers its tools from the MCP servers listed ' +
+      'on the left and decides which to call; every answer shows each tools/call with its server.',
+    empty:
+      'Try a ticket question ("Has anyone called back the customer on TCK-4471?"), a ticket without ' +
+      'its id ("the relocation complaint"), or a help-centre question.',
   },
   week4: {
     eyebrow: 'Week 4 · hybrid retrieval',
@@ -97,7 +107,13 @@ export default function ChatWindow({
         {loading ? (
           <div className="typing-indicator">
             <Spinner size="sm" label="Generating answer" />
-            <span>{isChatbot ? 'Looking through the help centre…' : 'Retrieving chunks and generating an answer…'}</span>
+            <span>
+              {variant === 'week9'
+                ? 'Agent is calling MCP tools…'
+                : isChatbot
+                  ? 'Checking the help centre and tickets…'
+                  : 'Retrieving chunks and generating an answer…'}
+            </span>
           </div>
         ) : null}
       </div>

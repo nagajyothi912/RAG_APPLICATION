@@ -11,9 +11,15 @@ Config format (the same shape Claude Desktop and most MCP hosts use):
     {
       "mcpServers": {
         "<name>": {"command": "${PYTHON}", "args": ["-m", "pkg.server"], "cwd": "..", "env": {}},
-        "<name>": {"url": "http://host:port/mcp", "headers": {"Authorization": "Bearer ..."}}
+        "<name>": {"url": "http://host:port/mcp", "headers": {"Authorization": "Bearer ..."}},
+        "<name>": {"module": "pkg.server", "object": "mcp"}
       }
     }
+
+The third form runs a FastMCP server inside this process over in-memory
+streams - still a real MCP session (initialize, tools/list, tools/call), just
+without a subprocess. The web app uses it so its MCP server shares the app's
+live search index instead of building a second, stale one.
 
 `${PYTHON}` is replaced with this interpreter, and a relative `cwd` is resolved
 against the config file's folder, so the config works on any checkout.
@@ -21,6 +27,7 @@ against the config file's folder, so the config works on any checkout.
 
 from __future__ import annotations
 
+import importlib
 import json
 import os
 import re
@@ -31,9 +38,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+import anyio
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import get_default_environment, stdio_client
 from mcp.client.streamable_http import streamablehttp_client
+from mcp.shared.memory import create_client_server_memory_streams
 
 _TOOL_NAME_OK = re.compile(r"[^a-zA-Z0-9_-]")
 
@@ -47,6 +56,8 @@ class ServerConfig:
     cwd: str | None = None
     url: str | None = None
     headers: dict[str, str] = field(default_factory=dict)
+    module: str | None = None
+    object: str = "mcp"
 
 
 @dataclass
@@ -90,6 +101,8 @@ def load_config(path: str | Path) -> list[ServerConfig]:
                 cwd=cwd,
                 url=entry.get("url"),
                 headers=dict(entry.get("headers", {})),
+                module=entry.get("module"),
+                object=entry.get("object", "mcp"),
             )
         )
     return servers
@@ -128,14 +141,31 @@ class McpHost:
     async def __aexit__(self, *exc) -> None:
         await self._stack.aclose()
 
+    async def _in_process(self, server: ServerConfig):
+        """Run a FastMCP server object in this process; return the client's two streams."""
+        target = getattr(importlib.import_module(server.module), server.object)
+        low_level = getattr(target, "_mcp_server", target)
+        client_streams, (server_read, server_write) = await self._stack.enter_async_context(
+            create_client_server_memory_streams()
+        )
+        task_group = await self._stack.enter_async_context(anyio.create_task_group())
+        task_group.start_soon(
+            lambda: low_level.run(server_read, server_write, low_level.create_initialization_options())
+        )
+        # Exit runs in reverse: stop the server task before its streams close.
+        self._stack.callback(task_group.cancel_scope.cancel)
+        return client_streams
+
     async def _connect(self, server: ServerConfig) -> None:
-        if server.url:
+        if server.module:
+            read, write = await self._in_process(server)
+        elif server.url:
             read, write, _ = await self._stack.enter_async_context(
                 streamablehttp_client(server.url, headers=server.headers or None)
             )
         else:
             if not server.command:
-                raise ValueError(f"MCP server '{server.name}' needs either 'command' or 'url'.")
+                raise ValueError(f"MCP server '{server.name}' needs 'command', 'url' or 'module'.")
             params = StdioServerParameters(
                 command=server.command,
                 args=server.args,
@@ -150,7 +180,7 @@ class McpHost:
             "server_name": init.serverInfo.name,
             "server_version": init.serverInfo.version,
             "protocol_version": str(init.protocolVersion),
-            "transport": "streamable-http" if server.url else "stdio",
+            "transport": "in-process" if server.module else "streamable-http" if server.url else "stdio",
         }
 
         cursor = None
@@ -201,7 +231,9 @@ class McpHost:
             for tool in self.tools.values()
         ]
 
-    async def call(self, name: str, arguments: dict) -> ToolOutcome:
+    async def call(self, name: str, arguments: dict, meta: dict | None = None) -> ToolOutcome:
+        """Run one tool. `meta` travels as the request's _meta - context for the server
+        (e.g. who is signed in) that the model neither sees nor controls."""
         tool = self.tools.get(name)
         if tool is None:
             return ToolOutcome(
@@ -213,7 +245,7 @@ class McpHost:
                 latency_ms=0.0,
             )
         started = time.perf_counter()
-        result = await self._sessions[tool.server].call_tool(tool.remote_name, arguments)
+        result = await self._sessions[tool.server].call_tool(tool.remote_name, arguments, meta=meta)
         return ToolOutcome(
             server=tool.server,
             tool=tool.remote_name,

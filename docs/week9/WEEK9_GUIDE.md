@@ -161,7 +161,7 @@ The TCK-4471 reply says *"I've opened a priority reschedule for you"*. No tool d
 - **Server one starts slowly** (about 14 s per spawn, to load MiniLM and index 30 chunks), and every agent run spawns it again.
 - **Results are single runs at temperature 0** (n = 1 per row).
 - **The Week 9 agent is separate from the Week 7/8 agent,** so those weeks' results stay reproducible. It has no budgets (iterations only, max 8) and no output guardrail.
-- **Not in the web UI.** The admin console has no Week 9 tab; everything runs from the command line.
+- **Web chat (added after the submission tags).** The customer chatbot and a new admin **Week 9** tab now use this agent through `POST /api/assistant` (`backend/app/services/assistant.py`). The web app keeps one MCP connection set open for its whole life, from its own config `backend/config/mcp_servers.webapp.json`: the help-centre server runs **in-process**, so it searches the app's live index, and ticket-history runs over stdio. The ticket server gained `list_tickets` (5 tools in the web app), and logs the **caller** the host sends as `_meta`. **Any signed-in user can ask about any ticket; there's no per-customer scoping.** That's acceptable only because the data is fictional. The agent also now writes a reply when it runs out of turns, instead of returning nothing. None of this changes the tagged evidence: the zero-line diff is between `w9-server1` and `w9-server1+2`.
 
 ---
 

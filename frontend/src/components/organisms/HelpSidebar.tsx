@@ -6,6 +6,8 @@ type HelpSidebarProps = {
   questions: GoldenQuestion[];
   onAsk: (question: string) => void;
   disabled: boolean;
+  /** Example ticket questions, answered from the ticket-history MCP server. */
+  ticketQuestions?: string[];
 };
 
 const AREA_LABEL: Record<string, string> = {
@@ -32,6 +34,7 @@ export default function HelpSidebar({
   questions,
   onAsk,
   disabled,
+  ticketQuestions = [],
 }: HelpSidebarProps) {
   const articlesPerArea = new Map<string, number>();
   for (const row of metadata) {
@@ -65,6 +68,24 @@ export default function HelpSidebar({
           </ul>
         )}
       </section>
+
+      {ticketQuestions.length ? (
+        <section className="help-questions">
+          <header className="section-heading">
+            <h2>Ticket questions</h2>
+            <p>Status, callbacks and escalations of a support ticket.</p>
+          </header>
+          <ul>
+            {ticketQuestions.map((question) => (
+              <li key={question}>
+                <button type="button" onClick={() => onAsk(question)} disabled={disabled}>
+                  {question}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {common.length ? (
         <section className="help-questions">

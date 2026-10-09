@@ -61,6 +61,15 @@ class Settings(BaseSettings):
     chatbot_username: str = "user"
     chatbot_password: str = "user123"
 
+    # The web assistant (/api/assistant): the Week 9 MCP agent behind the chat UI.
+    # It keeps one set of MCP connections open for the life of the server, using
+    # its own config so the Week 9 CLI config (and its tagged evidence) is untouched.
+    assistant_enabled: bool = True
+    assistant_mcp_config: Path = BACKEND_ROOT / "config" / "mcp_servers.webapp.json"
+    # Empty = GROQ_MODEL. Groq rate-limits per model, so a separate model here gives
+    # the assistant its own tokens-per-minute allowance apart from /api/chat.
+    assistant_model: str = ""
+
     @property
     def api_key(self) -> str:
         return self.groq_api_key.strip()
@@ -72,6 +81,13 @@ class Settings(BaseSettings):
     @property
     def resolved_docs_dir(self) -> Path:
         path = Path(self.docs_dir)
+        if not path.is_absolute():
+            path = BACKEND_ROOT / path
+        return path
+
+    @property
+    def resolved_assistant_config(self) -> Path:
+        path = Path(self.assistant_mcp_config)
         if not path.is_absolute():
             path = BACKEND_ROOT / path
         return path

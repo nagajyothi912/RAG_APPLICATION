@@ -5,6 +5,7 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.analysis import router as analysis_router
+from app.api.assistant import router as assistant_router
 from app.api.auth import router as auth_router
 from app.api.chat import router as chat_router
 from app.api.documents import router as documents_router
@@ -14,6 +15,7 @@ from app.api.week8 import router as week8_router
 from app.config import settings
 from app.services import langfuse_sink
 from app.services.auth import current_user, require_admin, warn_on_default_credentials
+from app.services.assistant import get_assistant
 from app.services.rag_service import get_rag_service
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -30,9 +32,12 @@ async def lifespan(_app: FastAPI):
         service.llm_configured,
     )
     warn_on_default_credentials()
+    if settings.assistant_enabled:
+        await get_assistant().start()
     if langfuse_sink.enabled():
         logger.info("Langfuse tracing on -> %s", settings.langfuse_base_url)
     yield
+    await get_assistant().stop()
     # The SDK batches spans and flushes on an interval, so a server stopped
     # shortly after a request would otherwise drop that request's trace.
     langfuse_sink.flush()
@@ -62,6 +67,7 @@ admin_only = [Depends(require_admin)]
 
 app.include_router(auth_router, prefix="/api")
 app.include_router(documents_router, prefix="/api")
+app.include_router(assistant_router, prefix="/api")
 app.include_router(chat_router, prefix="/api", dependencies=signed_in)
 app.include_router(analysis_router, prefix="/api", dependencies=admin_only)
 app.include_router(week6_router, prefix="/api", dependencies=admin_only)
