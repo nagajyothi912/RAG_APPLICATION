@@ -2,8 +2,8 @@
 Ticket-history MCP server ("server two").
 
 Owner: Support Ops (simulated for Week 9 - in the brief this server is written
-and run by another team; here it lives in its own package with its own data so
-it can be bolted on to the agent by config alone).
+and run by another team; here it lives in its own package so it can be bolted
+on to the agent by config alone).
 
 Exposes ticket lookup by id and the escalation history behind it:
 
@@ -20,7 +20,11 @@ It is used only to record WHO asked in the access log. `_meta` is not a tool
 argument, so the model never sees it and cannot forge it. Callers that send
 none (the Week 9 CLI agent, MCP Inspector, tests) are logged as "unscoped".
 
-Reaches: tickets.json next to this file (stands in for the ticketing system).
+Reaches: the ticket exports uploaded as documents - every *.json under DOCS_DIR
+with a "tickets" object (and optional "escalations"), merged, re-read on every
+call so an upload or delete is live without a restart. Nothing is bundled with
+the server; with no export uploaded it has no tickets. The sample export is
+sample_documents/tickets/tickets.json.
 Logs: one line per call to stderr AND to backend/data/ticket_history_access.log
 (timestamp, caller, tool, ticket id, outcome). No model call anywhere in this server.
 
@@ -42,8 +46,10 @@ from pathlib import Path
 from mcp.server.fastmcp import Context, FastMCP
 from mcp.server.fastmcp.exceptions import ToolError
 
+from app.config import settings
+
 HERE = Path(__file__).resolve().parent
-DATA_FILE = HERE / "tickets.json"
+DOCS_DIR = settings.resolved_docs_dir
 ACCESS_LOG = HERE.parents[1] / "data" / "ticket_history_access.log"
 TICKET_ID = re.compile(r"^TCK-\d{4}$")
 
@@ -54,7 +60,21 @@ mcp = FastMCP("support-ops-ticket-history")
 
 
 def _data() -> dict:
-    return json.loads(DATA_FILE.read_text("utf-8"))
+    """Every uploaded ticket export under DOCS_DIR, merged (later files win on a clash)."""
+    tickets: dict = {}
+    escalations: dict = {}
+    files = sorted(p for p in Path(DOCS_DIR).rglob("*.json") if p.is_file()) if Path(DOCS_DIR).is_dir() else []
+    for path in files:
+        try:
+            export = json.loads(path.read_text("utf-8"))
+        except (OSError, ValueError) as exc:
+            logger.warning("skipping %s: %s", path.name, exc)
+            continue
+        if not isinstance(export, dict) or not isinstance(export.get("tickets"), dict):
+            continue
+        tickets.update({str(k).upper(): v for k, v in export["tickets"].items()})
+        escalations.update({str(k).upper(): v for k, v in (export.get("escalations") or {}).items()})
+    return {"tickets": tickets, "escalations": escalations}
 
 
 def _caller(ctx: Context | None) -> dict | None:
@@ -89,6 +109,12 @@ def _check_id(tool: str, ticket_id: str, known: dict, caller: dict | None) -> st
     if not TICKET_ID.match(ticket_id):
         _audit(tool, ticket_id, "malformed", caller)
         raise ToolError(f"'{ticket_id}' is not a ticket id. Ticket ids look like TCK-nnnn (e.g. TCK-4471).")
+    if not known:
+        _audit(tool, ticket_id, "no_ticket_data", caller)
+        raise ToolError(
+            "No ticket data is available: no ticket export has been uploaded to the document library. "
+            "Tell the customer the ticket can't be looked up right now."
+        )
     if ticket_id not in known:
         _audit(tool, ticket_id, "not_found", caller)
         raise ToolError(

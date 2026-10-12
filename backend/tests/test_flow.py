@@ -131,6 +131,27 @@ def test_delete_document(client: TestClient):
     assert path.name not in body["documents"]
 
 
+def test_upload_ticket_export(client: TestClient):
+    """A .json ticket export is stored for the ticket-history server, never chunked."""
+    path = SAMPLE_ROOT / "tickets" / "tickets.json"
+    before = client.get("/api/health").json()
+    response = client.post(
+        "/api/documents/upload",
+        files=[
+            ("files", _file_tuple(path)),
+            ("files", ("broken.json", b"{not json", "application/json")),
+            ("files", ("other.json", b'{"rows": []}', "application/json")),
+        ],
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["uploaded"] == ["tickets.json"]
+    assert "tickets.json" in body["documents"]
+    assert {s["filename"] for s in body["skipped"]} == {"broken.json", "other.json"}
+    assert body["indexed_chunks"] == before["indexed_chunks"]
+    client.delete("/api/documents", params={"name": "tickets.json"})
+
+
 def test_delete_missing_document(client: TestClient):
     response = client.delete("/api/documents", params={"name": "does-not-exist.md"})
     assert response.status_code == 404

@@ -19,6 +19,7 @@ from app.agents.week9.mcp_host import McpHost, load_config
 BACKEND = Path(__file__).resolve().parents[1]
 AGENT_DIR = BACKEND / "app" / "agents" / "week9"
 ECHO_SERVER = Path(__file__).resolve().parent / "fixtures" / "mcp_echo_server.py"
+SAMPLE_TICKETS = BACKEND.parent / "sample_documents" / "tickets" / "tickets.json"
 
 
 def _config(tmp_path, servers: dict) -> Path:
@@ -147,9 +148,21 @@ def test_ticket_history_server_in_memory(tmp_path, monkeypatch):
     from mcp_servers.ticket_history import server
 
     monkeypatch.setattr(server, "ACCESS_LOG", tmp_path / "access.log")
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    monkeypatch.setattr(server, "DOCS_DIR", docs)
 
     async def go():
         async with create_connected_server_and_client_session(server.mcp._mcp_server) as session:
+            # nothing uploaded yet: no tickets, and lookups say so
+            assert json.loads((await session.call_tool("list_tickets", {})).content[0].text)["tickets"] == []
+            empty = await session.call_tool("lookup_ticket", {"ticket_id": "TCK-4471"})
+            assert empty.isError and "No ticket data" in empty.content[0].text
+
+            # the export arrives as an uploaded document and is live on the next call
+            (docs / "tickets.json").write_bytes(SAMPLE_TICKETS.read_bytes())
+            (docs / "notes.json").write_text("{not json", "utf-8")  # ignored, not fatal
+
             names = [tool.name for tool in (await session.list_tools()).tools]
             assert names == ["list_tickets", "lookup_ticket", "get_escalation_history"]
 
@@ -174,9 +187,10 @@ def test_ticket_history_server_in_memory(tmp_path, monkeypatch):
 
     asyncio.run(go())
     lines = (tmp_path / "access.log").read_text().splitlines()
-    assert len(lines) == 6
-    assert "caller=unscoped tool=list_tickets ticket_id=* outcome=5_listed" in lines[0]
-    assert "caller=unscoped tool=lookup_ticket ticket_id=TCK-4471 outcome=found" in lines[1]
+    assert len(lines) == 8
+    assert "outcome=0_listed" in lines[0] and "outcome=no_ticket_data" in lines[1]
+    assert "caller=unscoped tool=list_tickets ticket_id=* outcome=5_listed" in lines[2]
+    assert "caller=unscoped tool=lookup_ticket ticket_id=TCK-4471 outcome=found" in lines[3]
     assert "caller=user/chatbot tool=lookup_ticket ticket_id=TCK-4410 outcome=found" in lines[-1]
 
 

@@ -16,7 +16,7 @@ export default function FileSelector({ onFilesChosen }: FileSelectorProps) {
         className="visually-hidden"
         type="file"
         multiple
-        accept=".txt,.md,.pdf,text/plain,text/markdown,application/pdf"
+        accept=".txt,.md,.pdf,.json,text/plain,text/markdown,application/pdf,application/json"
         onChange={(event) => {
           onFilesChosen(event.target.files);
           event.target.value = '';

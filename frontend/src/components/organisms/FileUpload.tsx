@@ -31,7 +31,7 @@ export default function FileUpload({
     <section className="file-upload">
       <header className="section-heading">
         <h2>Documents</h2>
-        <p>Upload .txt, .md, or .pdf files. Folder upload keeps relative paths.</p>
+        <p>Upload .txt, .md, or .pdf files, or a .json ticket export for ticket lookups. Folder upload keeps relative paths.</p>
       </header>
       <FileSelector onFilesChosen={onFilesChosen} />
       {selectedFiles.length > 0 ? (

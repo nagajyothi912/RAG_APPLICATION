@@ -73,7 +73,11 @@ from app.services.retrieval import (
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_EXTENSIONS = {".txt", ".md", ".pdf"}
+SUPPORTED_EXTENSIONS = {".txt", ".md", ".pdf", ".json"}
+# A .json upload is a ticket export for the ticket-history MCP server, which
+# reads it straight from DOCS_DIR. It is stored and listed like any document
+# but never chunked or embedded (load_documents skips it).
+TICKET_EXPORT_EXTENSION = ".json"
 EMBED_MODEL_NAME = settings.embed_model_name
 SCORE_THRESHOLD = settings.score_threshold
 
@@ -233,6 +237,19 @@ def derive_metadata(source: str, front_matter: dict) -> dict:
         "last_updated": front_matter.get("last_updated") or "unknown",
         "title": front_matter.get("title") or stem,
     }
+
+
+def ticket_export_problem(content: bytes) -> str | None:
+    """Why an uploaded .json is not a usable ticket export, or None when it is."""
+    try:
+        data = json.loads(content.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError):
+        return "Not valid JSON. A .json upload must be a ticket export."
+    if not isinstance(data, dict) or not isinstance(data.get("tickets"), dict):
+        return 'A ticket export needs a "tickets" object keyed by ticket id (e.g. "TCK-4471").'
+    if not isinstance(data.get("escalations", {}), dict):
+        return '"escalations" must be an object keyed by ticket id.'
+    return None
 
 
 def load_documents(docs_dir: str) -> List[LoadedDocument]:
@@ -663,7 +680,8 @@ class RagService:
             meta.setdefault(chunk.source, chunk.metadata())
         rows = []
         for name in self.list_documents():
-            row = dict(meta.get(name, {"source_file": name, "article_id": "", "product_area": UNCATEGORIZED, "last_updated": "unknown"}))
+            fallback_area = "tickets" if name.lower().endswith(TICKET_EXPORT_EXTENSION) else UNCATEGORIZED
+            row = dict(meta.get(name, {"source_file": name, "article_id": "", "product_area": fallback_area, "last_updated": "unknown"}))
             row["chunks"] = counts.get(name, 0)
             rows.append(row)
         return rows
@@ -705,7 +723,7 @@ class RagService:
                 skipped.append(
                     {
                         "filename": relative,
-                        "reason": f"Unsupported file type '{ext or 'unknown'}'. Allowed: .txt, .md, .pdf",
+                        "reason": f"Unsupported file type '{ext or 'unknown'}'. Allowed: .txt, .md, .pdf, .json (ticket export)",
                     }
                 )
                 continue
@@ -713,6 +731,12 @@ class RagService:
             if not content:
                 skipped.append({"filename": relative, "reason": "File is empty"})
                 continue
+
+            if ext == TICKET_EXPORT_EXTENSION:
+                problem = ticket_export_problem(content)
+                if problem:
+                    skipped.append({"filename": relative, "reason": problem})
+                    continue
 
             dest = self.docs_dir / relative
             dest.parent.mkdir(parents=True, exist_ok=True)
