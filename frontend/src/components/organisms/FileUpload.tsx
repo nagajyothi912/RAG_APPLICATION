@@ -10,7 +10,7 @@ type FileUploadProps = {
   error: string | null;
   skipped: SkippedFile[];
   indexedChunks: number;
-  onFilesChosen: (files: FileList | null) => void;
+  onFilesChosen: (files: FileList | File[] | null) => void;
   onRemove: (name: string) => void;
   onClear: () => void;
   onUpload: () => void;

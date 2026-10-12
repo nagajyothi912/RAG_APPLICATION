@@ -1,6 +1,6 @@
 # Signing in: the User (chatbot) and Admin roles
 
-**In short:** the app has two kinds of login. A **User** gets the *AirFiber Support Assistant*, a single chat where customers ask questions about their AirFiber service. They get answers from the help centre, with the source article for each answer. An **Admin** gets the *Admin console*, which has one tab for each week of the project (Weeks 3–8), document upload and delete, and a preview of what users see. The backend checks the role on every request, so a User cannot reach admin data even by calling the API directly.
+**In short:** the app has two kinds of login. A **User** gets the *AirFiber Support Assistant*, a single chat where customers ask questions about their AirFiber service. They get answers from the help centre, with the source article for each answer. An **Admin** gets the *Admin console*. It opens on a home view with document upload and delete, the MCP servers, common questions and one chat that can answer with the assistant or either RAG pipeline. The week-by-week course labs (Weeks 3–9 and a preview of what users see) are behind a **Labs** switch. The backend checks the role on every request, so a User cannot reach admin data even by calling the API directly.
 
 ---
 
@@ -24,8 +24,8 @@
 | --- | --- | --- |
 | Who | A customer, or a support agent answering customers | The person who runs the knowledge base and the evaluations |
 | What they want | An answer to a question: "Why is my LED blinking red?", "Is there a late fee?" | To change which articles the assistant knows, and to see how well each week's work performed |
-| What they see | One chat screen, plain language, no technical controls | Seven tabs: Week 3, 4, 5, 6, 7, 8, and a Chatbot preview |
-| Answers use | The full pipeline every week built (see [§3.5](#35-what-happens-behind-the-scenes)) | Whichever pipeline the tab is about |
+| What they see | One chat screen, plain language, no technical controls | A home view (library, MCP servers, one chat with a choice of engine), plus course labs for Weeks 3–9 and a Chatbot preview behind a **Labs** switch |
+| Answers use | The full pipeline every week built (see [§3.5](#35-what-happens-behind-the-scenes)) | Whichever engine is picked in **Answer with**, or the pipeline the lab is about |
 
 The role is called **User** on screen and `chatbot` in code, config and the API. They are the same thing.
 
@@ -154,26 +154,29 @@ Upload, delete or rename articles, or open any week's evaluation pages. The inte
 ### 4.1 The screen
 
 ```
-AF  Ask My Documents · Admin console                         ● admin ADMIN  [Sign out]
-──────────────────────────────────────────────────────────────────────────────────────
-Week 3     Week 4      Week 5     Week 6      Week 7      Week 8                Chatbot
-Baseline   Hybrid      Error      Judge       Agent vs    Trajectory         What users
-RAG        retrieval   analysis   validation  workflow    evals                     see
+AF  Ask My Documents · Admin console     [● Labs] [Course labs ▾]   ● admin ADMIN  [Sign out]
+──────────────────────────────────────────────────────────────────────────────────────────
+ Upload · Indexed library ·           │  Answer with: [Assistant] [Hybrid RAG] [Dense RAG]
+ MCP servers · Common questions       │  …chat…
 ```
 
-Each tab has its own web address (`#week3` … `#week8`, `#chatbot`), so you can bookmark or share a tab, and reloading keeps you on it. Week 5 uses `#analysis`, so older links such as `#analysis/TR-0055` still open that trace. The chat tabs (Week 3, Week 4, Chatbot) keep their conversation when you switch tabs.
+The console opens on **home**:
+- **Left:** the knowledge base, the MCP servers and **Common questions**. Picking a question fills the chat box and picks what answers it; nothing is sent until **Send**.
+- **Right:** one chat. **Answer with** chooses the engine for each question: the **Assistant** customers use (help centre and tickets), **Hybrid RAG** (Week 4) or **Dense RAG** (Week 3). Every message is labelled with how it was answered.
 
-### 4.2 Managing the help centre (Week 3 and Week 4 tabs)
+The week pages are **course labs**. Turn on the **Labs** switch to get the **Course labs ▾** menu; your browser remembers the setting. Each lab has its own web address (`#week3` … `#week9`, `#chatbot`), and those addresses **work even with the switch off**, so bookmarks and shared links still open. Week 5 uses `#analysis`, so older links such as `#analysis/TR-0055` still open that trace. **← Console** returns to home. The chats (home, Week 3, Week 4, Week 9, Chatbot) keep their conversation when you switch views. How it's built: [admin_console_labs.md](admin_console_labs.md).
 
-The left column of the Week 3 and Week 4 tabs is the knowledge base. Changes here change what the User assistant knows, immediately.
+### 4.2 Managing the help centre (home, and the Week 3 and Week 4 labs)
 
-- **Upload:** **Choose files** or **Choose folder** (`.txt`, `.md` and `.pdf`), then **Upload & index**. Folder upload keeps sub-folder names, and the top-level folder becomes the article's topic if the file has no front-matter.
+The left column of the home view, and of the Week 3 and Week 4 labs, is the knowledge base. Changes here change what the User assistant knows, immediately.
+
+- **Upload:** **Choose files** or **Choose folder** (`.txt`, `.md` and `.pdf`), or drag files or folders onto the upload box, then **Upload & index**. Folder upload keeps sub-folder names, and the top-level folder becomes the article's topic if the file has no front-matter.
 - **Delete:** **Delete** next to an article removes it and rebuilds the index.
 - **Front-matter matters.** `article_id`, `product_area` and `last_updated` at the top of a Markdown file become the citation ID, the topic shown in the User's "I can help with" list, and the "last updated" date. The sample articles are in [`sample_documents/`](../sample_documents/).
 
-### 4.3 The tabs, week by week
+### 4.3 The course labs, week by week
 
-| Tab | What it shows | What you can do | Learn more |
+| Lab | What it shows | What you can do | Learn more |
 | --- | --- | --- | --- |
 | **Week 3 · Baseline RAG** | Chat locked to the original pipeline: meaning search (dense) only, the refusal gate, citations with scores | Ask questions; change **Top K** and **Product area**; use the **Golden set of questions**; manage documents | [WEEK3_GUIDE](week3/WEEK3_GUIDE.md) |
 | **Week 4 · Hybrid retrieval** | The same chat with the **Week 3 / Week 4** retrieval toggle. Answers show per-stage scores (dense, BM25, rerank) and how re-ranking moved each passage | Flip the toggle on the same question to compare; golden questions **G13/G14** are refused under Week 3 and answered under Week 4 | [WEEK4_GUIDE](week4/WEEK4_GUIDE.md) |
@@ -273,12 +276,12 @@ On startup the server logs a warning while either default password is still in u
 | *Incorrect username or password.* | Wrong credentials | Check `backend/.env`. Passwords are case-sensitive. |
 | *This account signs in as chatbot, not admin.* (or the reverse) | The role picked on the card doesn't match the account | Pick the other role card |
 | *Your session ended. Sign in again.* | Session expired, or the server restarted without `AUTH_SECRET` | Sign in again; set `AUTH_SECRET` so restarts don't sign people out |
-| User sees *The help centre is empty right now…* | No articles are indexed | An admin uploads articles on the Week 3 or Week 4 tab (e.g. the `sample_documents/` folder) |
+| User sees *The help centre is empty right now…* | No articles are indexed | An admin uploads articles on the console home (or the Week 3/4 lab), e.g. the `sample_documents/` folder |
 | User sees *The assistant is offline right now.* | The backend isn't reachable | Start it: `cd backend && uvicorn app.main:app --reload --port 8000` |
 | Every page asks for sign-in after updating the code | The backend now requires login | Expected. Sign in with the accounts in [§2](#2-signing-in). |
 | A script or `curl` gets 401 | It sends no token | Log in first: `curl -s localhost:8000/api/auth/login -H 'Content-Type: application/json' -d '{"username":"admin","password":"admin123"}'`, then send `Authorization: Bearer <token>` |
 | Week 7/8 numbers changed | Someone pressed a run button, which overwrote the results files | `git diff eval/` shows what changed; `git checkout eval/week7 eval/week8` restores the committed results |
-| An answer is wrong or a good question is refused | Retrieval or model behaviour, not the role system | Ask it on the Admin **Week 4** tab to see which passages were retrieved and their scores; the **Week 5** tab explains the known failure modes |
+| An answer is wrong or a good question is refused | Retrieval or model behaviour, not the role system | Ask it in the admin home chat with **Hybrid RAG** (or the **Week 4** lab) to see which passages were retrieved and their scores; the **Week 5** lab explains the known failure modes |
 
 ---
 
@@ -297,7 +300,7 @@ On startup the server logs a warning while either default password is still in u
 | [`frontend/src/components/pages/LoginPage.tsx`](../frontend/src/components/pages/LoginPage.tsx) | The sign-in card |
 | [`frontend/src/components/pages/ChatbotApp.tsx`](../frontend/src/components/pages/ChatbotApp.tsx) | The User assistant |
 | [`frontend/src/components/organisms/HelpSidebar.tsx`](../frontend/src/components/organisms/HelpSidebar.tsx) | "I can help with" and "Common questions" |
-| [`frontend/src/components/pages/AdminConsole.tsx`](../frontend/src/components/pages/AdminConsole.tsx) | The admin tabs |
+| [`frontend/src/components/pages/AdminConsole.tsx`](../frontend/src/components/pages/AdminConsole.tsx) | The admin console: home view, Labs switch, course labs ([admin_console_labs.md](admin_console_labs.md)) |
 | [`frontend/src/components/pages/Week6Page.tsx`](../frontend/src/components/pages/Week6Page.tsx) | The Week 6 tab |
 | [`frontend/src/components/atoms/RichText.tsx`](../frontend/src/components/atoms/RichText.tsx) | Safe display of bold, lists and tables in answers |
 

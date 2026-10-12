@@ -128,6 +128,12 @@ export default function MessageBubble({ message, technical = true }: MessageBubb
     <article className={`message-bubble ${isUser ? 'message-user' : 'message-assistant'}`}>
       <span className="message-role">{isUser ? 'You' : 'Assistant'}</span>
 
+      {isUser && options && technical && options.agent ? (
+        <div className="message-options">
+          <Badge tone="accent">Assistant · MCP</Badge>
+        </div>
+      ) : null}
+
       {isUser && options && technical && !options.agent ? (
         <div className="message-options">
           <Badge tone="accent">{MODE_LABEL[options.mode] ?? options.mode}</Badge>

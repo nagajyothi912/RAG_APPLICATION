@@ -5,9 +5,10 @@ import StatusMessage from '../atoms/StatusMessage';
 
 type McpServersPanelProps = {
   active: boolean;
-  examples: string[];
-  onAsk: (question: string) => void;
-  disabled: boolean;
+  /** Omitted on the admin home, where the examples live in Common questions. */
+  examples?: string[];
+  onAsk?: (question: string) => void;
+  disabled?: boolean;
 };
 
 /**
@@ -15,7 +16,7 @@ type McpServersPanelProps = {
  * tools/list on each server in config/mcp_servers.webapp.json), and example
  * questions that exercise each server.
  */
-export default function McpServersPanel({ active, examples, onAsk, disabled }: McpServersPanelProps) {
+export default function McpServersPanel({ active, examples = [], onAsk, disabled = false }: McpServersPanelProps) {
   const [discovery, setDiscovery] = useState<McpDiscovery | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,6 +64,7 @@ export default function McpServersPanel({ active, examples, onAsk, disabled }: M
         ) : null}
       </section>
 
+      {examples.length && onAsk ? (
       <section className="help-questions">
         <header className="section-heading">
           <h2>Try</h2>
@@ -78,6 +80,7 @@ export default function McpServersPanel({ active, examples, onAsk, disabled }: M
           ))}
         </ul>
       </section>
+      ) : null}
     </div>
   );
 }

@@ -35,7 +35,7 @@ export function useDocuments() {
     void refresh();
   }, [refresh]);
 
-  const addFiles = useCallback((fileList: FileList | null) => {
+  const addFiles = useCallback((fileList: FileList | File[] | null) => {
     if (!fileList) {
       return;
     }

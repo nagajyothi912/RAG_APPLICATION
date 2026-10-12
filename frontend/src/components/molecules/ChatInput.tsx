@@ -4,7 +4,22 @@ import TextArea from '../atoms/TextArea';
 import RetrievalControls from './RetrievalControls';
 import { areaLabel } from '../organisms/HelpSidebar';
 import GoldenQuestions from './GoldenQuestions';
-import { AGENT_VARIANTS, VARIANT_MODE, type AskOptions, type ChatVariant, type GoldenQuestion, type RetrievalMode } from '../../services/api';
+import EngineSelect from './EngineSelect';
+import {
+  AGENT_VARIANTS,
+  VARIANT_MODE,
+  type AskOptions,
+  type ChatEngine,
+  type ChatVariant,
+  type GoldenQuestion,
+  type RetrievalMode,
+} from '../../services/api';
+
+/**
+ * A question the admin home's sidebar puts in the box. `nonce` makes picking the
+ * same question twice still apply (the user may have edited the box since).
+ */
+export type ChatPrefill = { text: string; sourceFile: string | null; nonce: number };
 
 type ChatInputProps = {
   onSend: (text: string, options: AskOptions) => void;
@@ -16,6 +31,13 @@ type ChatInputProps = {
   hybridAvailable: boolean;
   rerankerAvailable: boolean;
   variant?: ChatVariant;
+  /** Admin home only: what answers the question, owned by the page. */
+  engine?: ChatEngine;
+  onEngineChange?: (engine: ChatEngine) => void;
+  /** The engine stays switchable while asking is blocked (e.g. RAG with nothing indexed). */
+  engineDisabled?: boolean;
+  /** Admin home only: a common question picked in the sidebar. */
+  prefill?: ChatPrefill | null;
 };
 
 export default function ChatInput({
@@ -28,11 +50,18 @@ export default function ChatInput({
   hybridAvailable,
   rerankerAvailable,
   variant = 'week4',
+  engine = 'assistant',
+  onEngineChange,
+  engineDisabled = false,
+  prefill = null,
 }: ChatInputProps) {
   const isChatbot = variant === 'chatbot';
+  // The admin home picks the engine per question; its golden set lives in the
+  // sidebar's common questions rather than in the panel above the box.
+  const isAdmin = variant === 'admin';
   // The MCP assistant picks its own tools and search area, so the RAG controls
   // (mode, top-k, product area, golden set) do not apply to it.
-  const isAgent = AGENT_VARIANTS.includes(variant);
+  const isAgent = AGENT_VARIANTS.includes(variant) || (isAdmin && engine === 'assistant');
   const [value, setValue] = useState('');
   const [mode, setMode] = useState<RetrievalMode>(VARIANT_MODE[variant]);
   const [topK, setTopK] = useState(defaultTopK);
@@ -49,6 +78,18 @@ export default function ChatInput({
       setTopK(defaultTopK);
     }
   }, [defaultTopK, topKTouched]);
+
+  useEffect(() => {
+    if (!prefill) {
+      return;
+    }
+    setValue(prefill.text);
+    setSourceFile(prefill.sourceFile ?? '');
+    if (prefill.sourceFile) {
+      setProductArea('');
+    }
+    setActiveGoldenId(null);
+  }, [prefill]);
 
   // A document can be deleted while it is selected; falling back to "all
   // documents" beats sending a filter the backend will 404 on.
@@ -74,14 +115,22 @@ export default function ChatInput({
       return;
     }
     onSend(next, {
-      mode,
+      mode: isAdmin ? (engine === 'assistant' ? 'week4' : engine) : mode,
       topK,
-      productArea: sourceFile ? null : productArea || null,
-      sourceFile: sourceFile || null,
+      // The assistant ignores retrieval scope; leaving it off keeps the message
+      // badges honest about how the question was asked.
+      productArea: isAgent || sourceFile ? null : productArea || null,
+      sourceFile: isAgent ? null : sourceFile || null,
       agent: isAgent,
     });
     setValue('');
     setActiveGoldenId(null);
+    // On the admin home a document scope comes with one picked question; the
+    // Document select is not shown there, so keeping it would silently narrow
+    // the next, unrelated question.
+    if (isAdmin) {
+      setSourceFile('');
+    }
     // Collapse the golden panel on send. It is a tall list and the answer lands
     // above it, so leaving it open pushes the thing the user just asked for off
     // screen. Same state the toggle writes, so reopening is one click.
@@ -122,6 +171,17 @@ export default function ChatInput({
     setActiveGoldenId(question.id);
   };
 
+  const engineSelect =
+    isAdmin && onEngineChange ? (
+      <EngineSelect
+        value={engine}
+        onChange={onEngineChange}
+        disabled={engineDisabled}
+        hybridAvailable={hybridAvailable}
+        rerankerAvailable={rerankerAvailable}
+      />
+    ) : null;
+
   return (
     <form
       className="chat-input"
@@ -130,7 +190,9 @@ export default function ChatInput({
         submit();
       }}
     >
-      {isChatbot || isAgent ? null : (
+      {isAdmin && isAgent && engineSelect ? <div className="retrieval-controls">{engineSelect}</div> : null}
+
+      {isChatbot || isAgent || isAdmin ? null : (
         <GoldenQuestions
           questions={goldenQuestions}
           open={goldenOpen}
@@ -143,6 +205,7 @@ export default function ChatInput({
 
       {isAgent ? null : (
       <RetrievalControls
+        leading={engineSelect}
         mode={mode}
         onModeChange={setMode}
         topK={topK}
@@ -160,11 +223,20 @@ export default function ChatInput({
         disabled={disabled}
         hybridAvailable={hybridAvailable}
         rerankerAvailable={rerankerAvailable}
-        showModeToggle={variant === 'week4'}
+        showModeToggle={variant === 'week4' && !isAdmin}
         showTopK={!isChatbot}
         areaLabel={isChatbot ? 'Topic' : 'Product area'}
       />
       )}
+
+      {isAdmin && !isAgent && sourceFile ? (
+        <div className="scope-chip">
+          Scoped to <strong>{sourceFile}</strong>
+          <button type="button" onClick={() => setSourceFile('')} disabled={disabled}>
+            Search all documents
+          </button>
+        </div>
+      ) : null}
 
       <div className="chat-input-row">
         <label className="visually-hidden" htmlFor="chat-message">

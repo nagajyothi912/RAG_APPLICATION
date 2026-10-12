@@ -4,15 +4,23 @@ export type RetrievalMode = 'week3' | 'week4';
  * Which chat a page is. The chatbot always runs the full pipeline with no
  * week-specific controls; the admin Week 3 tab is pinned to dense retrieval;
  * the admin Week 4 tab keeps the toggle and the golden set to compare them.
+ * The admin home chat ("admin") picks a ChatEngine per question instead.
  */
-export type ChatVariant = 'chatbot' | 'week3' | 'week4' | 'week9';
+export type ChatVariant = 'admin' | 'chatbot' | 'week3' | 'week4' | 'week9';
 
 export const VARIANT_MODE: Record<ChatVariant, RetrievalMode> = {
+  admin: 'week4',
   chatbot: 'week4',
   week3: 'week3',
   week4: 'week4',
   week9: 'week4',
 };
+
+/**
+ * What answers a question in the admin home chat: the MCP assistant (the
+ * Week 9 / chatbot path) or the RAG chat in one of its two retrieval modes.
+ */
+export type ChatEngine = 'assistant' | RetrievalMode;
 
 /**
  * Variants answered by the MCP assistant (/api/assistant: help centre + ticket

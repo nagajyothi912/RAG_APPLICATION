@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import ModeToggle from '../atoms/ModeToggle';
 import Select from '../atoms/Select';
 import type { RetrievalMode } from '../../services/api';
@@ -23,6 +24,8 @@ type RetrievalControlsProps = {
   areaLabel?: string;
   /** Display names for product areas; the raw value is still what is sent. */
   areaOptionLabel?: (area: string) => string;
+  /** Rendered first in the row - the admin home's engine selector. */
+  leading?: ReactNode;
 };
 
 const TOP_K_CHOICES = [1, 2, 3, 4, 5, 6, 8, 10];
@@ -45,6 +48,7 @@ export default function RetrievalControls({
   showTopK = true,
   areaLabel = 'Product area',
   areaOptionLabel = (area: string) => area,
+  leading = null,
 }: RetrievalControlsProps) {
   // A document filter already implies its own product area, and ANDing the two
   // can silently retrieve nothing. Pinning one document wins; the area select
@@ -53,6 +57,7 @@ export default function RetrievalControls({
 
   return (
     <div className="retrieval-controls">
+      {leading}
       {showModeToggle ? (
         <ModeToggle
           value={mode}

@@ -10,20 +10,7 @@ import HelpSidebar from '../organisms/HelpSidebar';
 import McpServersPanel from '../organisms/McpServersPanel';
 import ChatWindow from '../organisms/ChatWindow';
 import StatusMessage from '../atoms/StatusMessage';
-
-const TICKET_QUESTIONS = [
-  'Which support tickets are open right now?',
-  'Has anyone called back the customer on ticket TCK-4471?',
-  'What is happening with the relocation complaint that has been open for six weeks?',
-];
-
-const WEEK9_EXAMPLES = [
-  'Has anyone called back the customer on ticket TCK-4471?',
-  'What is happening with the relocation complaint that has been open for six weeks?',
-  'Customer on TCK-4518 wants a full refund for the outage. What happened and what does our policy allow?',
-  'What does a blinking red LED on my router mean?',
-  'Look up ticket 4471',
-];
+import { ASSISTANT_EXAMPLES, TICKET_QUESTIONS } from '../../data/exampleQuestions';
 
 type RagPageProps = {
   variant: ChatVariant;
@@ -100,7 +87,7 @@ export default function RagPage({ variant, active = true, resetKey = 0 }: RagPag
             />
           ) : null}
           {variant === 'week9' ? (
-            <McpServersPanel active={active} examples={WEEK9_EXAMPLES} onAsk={askAgent} disabled={chat.loading} />
+            <McpServersPanel active={active} examples={ASSISTANT_EXAMPLES} onAsk={askAgent} disabled={chat.loading} />
           ) : null}
           {canManage ? (
             <FileUpload

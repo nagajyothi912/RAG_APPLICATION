@@ -2,8 +2,8 @@ import { useEffect, useRef } from 'react';
 import StatusMessage from '../atoms/StatusMessage';
 import Spinner from '../atoms/Spinner';
 import MessageBubble from '../molecules/MessageBubble';
-import ChatInput from '../molecules/ChatInput';
-import type { AskOptions, ChatMessage, ChatVariant, GoldenQuestion } from '../../services/api';
+import ChatInput, { type ChatPrefill } from '../molecules/ChatInput';
+import type { AskOptions, ChatEngine, ChatMessage, ChatVariant, GoldenQuestion } from '../../services/api';
 
 const HEADER: Record<ChatVariant, { eyebrow: string; title: string; lede: string; empty: string }> = {
   chatbot: {
@@ -15,6 +15,17 @@ const HEADER: Record<ChatVariant, { eyebrow: string; title: string; lede: string
     empty:
       'Type your question below, or pick one on the left. For a ticket, give its id (like TCK-4471) ' +
       'or describe it ("the relocation complaint").',
+  },
+  admin: {
+    eyebrow: 'Admin console',
+    title: 'Ask the assistant or the RAG pipeline',
+    lede:
+      'Pick what answers each question: the MCP assistant customers use (help centre + ticket ' +
+      'history), Week 4 hybrid retrieval, or Week 3 dense retrieval. Every message is labelled with ' +
+      'how it was answered, so one conversation can compare them.',
+    empty:
+      'Pick a common question on the left or type your own. Ticket questions need the Assistant; ' +
+      'use Compare on the Week 3 vs Week 4 pair to see dense retrieval refuse what hybrid answers.',
   },
   week3: {
     eyebrow: 'Week 3 · baseline RAG',
@@ -62,6 +73,10 @@ type ChatWindowProps = {
   hybridAvailable: boolean;
   rerankerAvailable: boolean;
   variant?: ChatVariant;
+  /** Admin home only - see ChatInput. */
+  engine?: ChatEngine;
+  onEngineChange?: (engine: ChatEngine) => void;
+  prefill?: ChatPrefill | null;
 };
 
 export default function ChatWindow({
@@ -77,6 +92,9 @@ export default function ChatWindow({
   hybridAvailable,
   rerankerAvailable,
   variant = 'week4',
+  engine,
+  onEngineChange,
+  prefill,
 }: ChatWindowProps) {
   const copy = HEADER[variant];
   const isChatbot = variant === 'chatbot';
@@ -91,7 +109,9 @@ export default function ChatWindow({
   }, [messages, loading]);
 
   return (
-    <section className={`chat-window ${isChatbot ? 'chat-window--chatbot' : ''}`}>
+    <section
+      className={`chat-window ${isChatbot ? 'chat-window--chatbot' : ''} ${variant === 'admin' ? 'chat-window--admin' : ''}`}
+    >
       <header className="chat-header">
         <p className="eyebrow">{copy.eyebrow}</p>
         <h1>{copy.title}</h1>
@@ -108,7 +128,7 @@ export default function ChatWindow({
           <div className="typing-indicator">
             <Spinner size="sm" label="Generating answer" />
             <span>
-              {variant === 'week9'
+              {variant === 'week9' || (variant === 'admin' && engine === 'assistant')
                 ? 'Agent is calling MCP tools…'
                 : isChatbot
                   ? 'Checking the help centre and tickets…'
@@ -122,7 +142,9 @@ export default function ChatWindow({
         <StatusMessage tone="info">
           {isChatbot
             ? 'The help centre is empty right now. An admin needs to upload articles before questions can be answered.'
-            : 'Upload and index documents before chatting.'}
+            : variant === 'admin'
+              ? 'Nothing is indexed yet. Upload documents for RAG answers, or switch to the Assistant for ticket questions.'
+              : 'Upload and index documents before chatting.'}
         </StatusMessage>
       ) : null}
       <ChatInput
@@ -135,6 +157,10 @@ export default function ChatWindow({
         hybridAvailable={hybridAvailable}
         rerankerAvailable={rerankerAvailable}
         variant={variant}
+        engine={engine}
+        onEngineChange={onEngineChange}
+        engineDisabled={loading}
+        prefill={prefill}
       />
     </section>
   );
