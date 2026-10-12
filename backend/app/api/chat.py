@@ -34,6 +34,7 @@ def chat(payload: ChatRequest) -> ChatResponse:
             top_k=payload.top_k,
             filters=filters or None,
             mode=payload.mode,
+            history=payload.history,
         )
     except NoDocumentsError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

@@ -10,6 +10,11 @@ type MessageBubbleProps = {
    * answer and where it came from.
    */
   technical?: boolean;
+  /**
+   * Set only on the latest answer while a question can be asked: its follow-up
+   * suggestions become buttons that send the suggested question.
+   */
+  onFollowUp?: (question: string) => void;
 };
 
 /** "help_centre/billing_faq.md" -> "Billing faq": a readable article name for users. */
@@ -118,11 +123,12 @@ function rankMovement(source: SourceChunk, finalPosition: number) {
   return `dense #${source.dense_rank} → #${finalPosition} ${arrow}`;
 }
 
-export default function MessageBubble({ message, technical = true }: MessageBubbleProps) {
+export default function MessageBubble({ message, technical = true, onFollowUp }: MessageBubbleProps) {
   const isUser = message.role === 'user';
   const sources = message.sources ?? [];
   const retrieval = message.retrieval;
   const options = message.options;
+  const followUps = message.followUps ?? [];
 
   return (
     <article className={`message-bubble ${isUser ? 'message-user' : 'message-assistant'}`}>
@@ -150,6 +156,12 @@ export default function MessageBubble({ message, technical = true }: MessageBubb
           <RichText text={message.content} />
         </div>
       )}
+
+      {!isUser && message.rewrittenQuestion && technical ? (
+        <p className="rewritten-question">
+          <em>Follow-up searched as</em> {message.rewrittenQuestion}
+        </p>
+      ) : null}
 
       {!isUser && retrieval && technical ? (
         <div className="retrieval-summary">
@@ -230,6 +242,23 @@ export default function MessageBubble({ message, technical = true }: MessageBubb
             })}
           </ol>
         </details>
+      ) : null}
+
+      {!isUser && onFollowUp && followUps.length > 0 ? (
+        <div className="follow-ups" aria-label="Suggested follow-up questions">
+          <span className="follow-ups-label">{technical ? 'Follow up' : 'You might also ask'}</span>
+          {followUps.map((suggestion) => (
+            <button
+              key={suggestion.question}
+              type="button"
+              className="follow-up-chip"
+              title={suggestion.question}
+              onClick={() => onFollowUp(suggestion.question)}
+            >
+              {suggestion.label}
+            </button>
+          ))}
+        </div>
       ) : null}
     </article>
   );

@@ -89,6 +89,7 @@ async def run(
     instructions: str | None = None,
     request_options: dict | None = None,
     max_tool_chars: int | None = None,
+    history: list[dict] | None = None,
 ) -> dict:
     """
     Answer one ticket. Returns the full trace: discovery, every model turn, every tool call.
@@ -102,6 +103,10 @@ async def run(
                   (e.g. max_completion_tokens, reasoning_effort).
     max_tool_chars: cap on each tool result as sent back to the model (compact JSON,
                   then truncated); the trace keeps the full text.
+    history:      earlier {role, content} turns of a chat, oldest first, placed between
+                  the system prompt and the question so a follow-up ("and when was it
+                  opened?") resolves against them. Tool calls from earlier turns are not
+                  replayed; the model looks things up again if it needs them.
     """
     model = model or settings.groq_model
     client = client or AsyncOpenAI(api_key=settings.api_key, base_url=settings.groq_base_url)
@@ -110,6 +115,7 @@ async def run(
         "question": question,
         "model": model,
         "temperature": temperature,
+        "history_messages": len(history or []),
         "steps": [],
     }
 
@@ -118,6 +124,7 @@ async def run(
         tools = host.openai_tools()
         messages: list[dict] = [
             {"role": "system", "content": SYSTEM_PROMPT + (f"\n{instructions}\n" if instructions else "")},
+            *({"role": turn["role"], "content": turn["content"]} for turn in history or []),
             {"role": "user", "content": question},
         ]
 

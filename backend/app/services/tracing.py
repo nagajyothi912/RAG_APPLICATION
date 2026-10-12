@@ -198,6 +198,7 @@ def build_chat_record(
     include_prompts: bool = True,
     pool: Optional[str] = None,
     source_id: Optional[str] = None,
+    follow_up: Optional[dict] = None,
 ) -> dict:
     """
     Build one trace record. The whole schema lives here, so the replay script
@@ -307,4 +308,9 @@ def build_chat_record(
         record["pool"] = pool
     if source_id is not None:
         record["source_id"] = source_id
+    # Only on a request that carried history. `request.question` is then the
+    # rewritten question retrieval actually used (so replay reproduces it), and
+    # this holds the message as typed plus how the rewrite went.
+    if follow_up is not None:
+        record["request"]["follow_up"] = follow_up
     return record

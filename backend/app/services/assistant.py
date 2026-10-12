@@ -24,6 +24,7 @@ import openai
 from app.agents.week9 import agent as week9_agent
 from app.agents.week9.mcp_host import McpHost
 from app.config import settings
+from app.services import follow_up
 from app.services.auth import AuthUser
 
 logger = logging.getLogger(__name__)
@@ -96,7 +97,7 @@ class Assistant:
             raise AssistantUnavailable(self.error or "The assistant is not running.")
         return self.host.discovery()
 
-    async def ask(self, message: str, user: AuthUser) -> dict:
+    async def ask(self, message: str, user: AuthUser, history: list | None = None) -> dict:
         if self.host is None:
             raise AssistantUnavailable(self.error or "The assistant is not running.")
         temperature = settings.groq_temperature if settings.groq_temperature is not None else 0.0
@@ -111,6 +112,7 @@ class Assistant:
                 max_iterations=MAX_ITERATIONS,
                 request_options=REQUEST_OPTIONS,
                 max_tool_chars=MAX_TOOL_CHARS,
+                history=follow_up.trim_history(history),
             )
         except openai.APIStatusError as exc:
             if exc.status_code in (413, 429):
@@ -177,6 +179,16 @@ def _response(trace: dict) -> dict:
             tickets.append(ticket_id)
 
     turns = [s for s in trace["steps"] if s["type"] == "model"]
+    follow_ups: list[dict] = []
+    if sources:
+        try:
+            from app.services.rag_service import get_rag_service
+
+            follow_ups = get_rag_service().suggest_follow_ups(
+                [(source["article_id"], source["section"]) for source in sources]
+            )
+        except Exception as exc:  # suggestions are a nicety; the answer stands without them
+            logger.warning("Follow-up suggestions skipped: %s", exc)
     return {
         "answer": trace.get("final_reply", ""),
         "tool_calls": tool_calls,
@@ -185,6 +197,7 @@ def _response(trace: dict) -> dict:
         "stop_reason": trace.get("stop_reason", ""),
         "model_turns": len(turns),
         "total_tokens": sum((s.get("usage") or {}).get("total_tokens", 0) for s in turns),
+        "follow_ups": follow_ups,
     }
 
 

@@ -774,6 +774,61 @@ p {
   color: var(--ink-soft);
 }
 
+.rewritten-question {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.rewritten-question em {
+  font-style: normal;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-right: 6px;
+}
+
+.follow-ups {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(27, 36, 32, 0.1);
+}
+
+.follow-ups-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  margin-right: 2px;
+}
+
+.follow-up-chip {
+  appearance: none;
+  cursor: pointer;
+  border: 1px solid rgba(196, 92, 38, 0.45);
+  background: var(--white);
+  color: var(--copper-dark);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font: inherit;
+  font-size: 0.8rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.follow-up-chip:hover,
+.follow-up-chip:focus-visible {
+  background: var(--copper);
+  border-color: var(--copper);
+  color: var(--white);
+}
+
 .citation-list {
   margin-top: 12px;
   border-top: 1px solid rgba(27, 36, 32, 0.1);

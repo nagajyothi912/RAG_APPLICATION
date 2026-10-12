@@ -60,7 +60,7 @@ from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
 
 from app.config import settings
-from app.services import langfuse_sink, tracing
+from app.services import follow_up, langfuse_sink, tracing
 from app.services.chunking import DEFAULT_STRATEGY, STRATEGIES, chunk_document, chunk_fixed_text
 from app.services.retrieval import (
     BM25Index,
@@ -909,8 +909,16 @@ class RagService:
         mode: str = WEEK3,
         *,
         trace_extra: Optional[dict] = None,
+        history: Optional[Sequence] = None,
     ) -> dict:
         """
+        `history` is the earlier turns of the conversation, oldest first. When it
+        is non-empty the question is first rewritten into a standalone one (see
+        follow_up.py), and that rewrite is what is retrieved for, answered and
+        traced as `request.question`, so replaying the trace reproduces the
+        retrieval. The message as typed goes in `request.follow_up`. Without
+        history nothing changes, which is how every eval script calls this.
+
         `trace_extra` is written straight onto the emitted trace record and is
         used only by the Week 5 traffic simulator, to mark which pool a trace
         came from and to assign a readable trace id. It accepts `pool`,
@@ -942,14 +950,25 @@ class RagService:
         answer = ""
         mode_effective = mode if mode in RETRIEVAL_MODES else WEEK3
         gate_score = 0.0
+        searched_question = question
+        follow_up_info: dict | None = None
         reranked = False
         failure: BaseException | None = None
         t_retrieval_ms = 0.0
         t_generation_ms = 0.0
 
         try:
+            # A follow-up is rewritten before anything else sees it, so retrieval,
+            # generation, the refusal gate and the trace all use the standalone
+            # question. Done here, not in _ask_inner: that function is pinned
+            # byte-for-byte to the Week 5 prediction commit.
+            turns = follow_up.trim_history(history)
+            if turns and self.llm_configured and len(self.store.chunks) > 0:
+                searched_question, follow_up_info = follow_up.rewrite_question(
+                    self.client, settings.groq_model, question, turns, settings.groq_temperature
+                )
             payload = self._ask_inner(
-                question, top_k, filters, mode_effective, capture, trace_id
+                searched_question, top_k, filters, mode_effective, capture, trace_id
             )
             results = payload["_results"]
             answer = payload["answer"]
@@ -959,6 +978,11 @@ class RagService:
             t_generation_ms = payload["_generation_ms"]
             for key in ("_results", "_gate_score", "_retrieval_ms", "_generation_ms"):
                 payload.pop(key)
+            payload["rewritten_question"] = searched_question if searched_question != question else ""
+            # Nothing to follow up on a refusal: its chunks are below the gate.
+            payload["follow_ups"] = [] if payload["retrieval"]["refused"] else self.suggest_follow_ups(
+                [(chunk.article_id, chunk.section) for chunk, _ in results]
+            )
             # Only when a record was actually written. Handing back an id
             # that resolves to nothing is worse than handing back nothing.
             payload["trace_id"] = trace_id if tracing_on else ""
@@ -985,7 +1009,7 @@ class RagService:
                         trace_id=trace_id,
                         started_at=started_at,
                         finished_at=tracing.utc_now_iso(),
-                        question=question,
+                        question=searched_question,
                         mode_requested=mode,
                         mode_effective=mode_effective,
                         top_k_requested=top_k,
@@ -1011,6 +1035,7 @@ class RagService:
                         include_prompts=writer.include_prompts,
                         pool=(trace_extra or {}).get("pool"),
                         source_id=(trace_extra or {}).get("source_id"),
+                        follow_up=follow_up_info,
                     )
                     writer.write(record)
                     if langfuse_on:
@@ -1121,6 +1146,10 @@ class RagService:
             "_retrieval_ms": retrieval_ms,
             "_generation_ms": generation_ms,
         }
+
+    def suggest_follow_ups(self, cited: Iterable[tuple[str, str]]) -> list[dict]:
+        """Other sections of the cited articles, as clickable next questions."""
+        return follow_up.suggest_follow_ups(self.store.chunks, cited)
 
     def delete_document(self, raw_name: str) -> dict:
         try:

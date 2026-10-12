@@ -121,9 +121,19 @@ export default function ChatWindow({
         {messages.length === 0 && !loading ? (
           <div className="empty-chat">{copy.empty}</div>
         ) : null}
-        {messages.map((message) => (
-          <MessageBubble key={message.id} message={message} technical={!isChatbot} />
-        ))}
+        {messages.map((message, index) => {
+          // Only the latest answer offers follow-ups; they ask again with the
+          // same engine and filters that answer was produced with.
+          const askable = index === messages.length - 1 && !loading && canAsk && message.options;
+          return (
+            <MessageBubble
+              key={message.id}
+              message={message}
+              technical={!isChatbot}
+              onFollowUp={askable ? (question) => onSend(question, message.options!) : undefined}
+            />
+          );
+        })}
         {loading ? (
           <div className="typing-indicator">
             <Spinner size="sm" label="Generating answer" />

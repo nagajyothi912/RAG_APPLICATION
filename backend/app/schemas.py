@@ -3,6 +3,13 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 
+class ChatTurn(BaseModel):
+    """One earlier message of the conversation, sent back by the client."""
+
+    role: Literal["user", "assistant"]
+    content: str = Field(..., max_length=8000)
+
+
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=8000)
     product_area: str | None = Field(
@@ -22,6 +29,15 @@ class ChatRequest(BaseModel):
         description=(
             "week3 = dense vector retrieval only (the notebook pipeline). "
             "week4 = BM25 + dense fused with RRF, then cross-encoder reranked."
+        ),
+    )
+    history: list[ChatTurn] = Field(
+        default_factory=list,
+        max_length=40,
+        description=(
+            "Earlier turns of this conversation, oldest first. When present, the "
+            "message is rewritten into a standalone question before retrieval. "
+            "Only the last few turns are used (follow_up.MAX_HISTORY_MESSAGES)."
         ),
     )
 
@@ -46,6 +62,13 @@ class SourceChunk(BaseModel):
     retriever: str = "dense"
 
 
+class FollowUpSuggestion(BaseModel):
+    """A clickable next question: another section of an article the answer cited."""
+
+    label: str
+    question: str
+
+
 class RetrievalInfo(BaseModel):
     mode: str = "week3"
     top_k: int = 0
@@ -64,6 +87,10 @@ class ChatResponse(BaseModel):
     # Returned so a user reporting a bad answer can quote one string that finds
     # the whole trace. Empty when tracing is off, which is the default.
     trace_id: str = ""
+    # What retrieval actually searched for, when a follow-up was rewritten using
+    # the history. Empty when the message was searched as typed.
+    rewritten_question: str = ""
+    follow_ups: list[FollowUpSuggestion] = []
 
 
 class GoldenQuestion(BaseModel):

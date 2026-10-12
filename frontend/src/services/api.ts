@@ -58,6 +58,18 @@ export type RetrievalInfo = {
   refused: boolean;
 };
 
+/** One earlier message, sent back with the next question so follow-ups resolve. */
+export type ChatTurn = {
+  role: 'user' | 'assistant';
+  content: string;
+};
+
+/** A clickable next question: another section of an article the answer cited. */
+export type FollowUpSuggestion = {
+  label: string;
+  question: string;
+};
+
 export type ChatResponse = {
   answer: string;
   sources: SourceChunk[];
@@ -65,6 +77,9 @@ export type ChatResponse = {
   retrieval: RetrievalInfo;
   /** Present only when backend tracing is on; empty string otherwise. */
   trace_id?: string;
+  /** What retrieval searched for when a follow-up was rewritten; "" when searched as typed. */
+  rewritten_question?: string;
+  follow_ups?: FollowUpSuggestion[];
 };
 
 export type GoldenQuestion = {
@@ -124,6 +139,7 @@ export type AssistantResponse = {
   stop_reason: string;
   model_turns: number;
   total_tokens: number;
+  follow_ups?: FollowUpSuggestion[];
 };
 
 export type McpServerInfo = {
@@ -193,6 +209,9 @@ export type ChatMessage = {
   /** Echoed onto both bubbles so scrollback stays readable after the controls move on. */
   options?: AskOptions;
   retrieval?: RetrievalInfo;
+  /** RAG answers to a follow-up: the standalone question retrieval actually used. */
+  rewrittenQuestion?: string;
+  followUps?: FollowUpSuggestion[];
   /** Set on MCP assistant answers. */
   agent?: {
     toolCalls: ToolCallInfo[];
@@ -329,7 +348,7 @@ export function uploadDocuments(files: File[]) {
   });
 }
 
-export function sendChat(message: string, options: AskOptions) {
+export function sendChat(message: string, options: AskOptions, history: ChatTurn[] = []) {
   return request<ChatResponse>('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -339,15 +358,16 @@ export function sendChat(message: string, options: AskOptions) {
       source_file: options.sourceFile || null,
       top_k: options.topK,
       mode: options.mode,
+      history,
     }),
   });
 }
 
-export function sendAssistant(message: string) {
+export function sendAssistant(message: string, history: ChatTurn[] = []) {
   return request<AssistantResponse>('/api/assistant', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, history }),
   });
 }
 

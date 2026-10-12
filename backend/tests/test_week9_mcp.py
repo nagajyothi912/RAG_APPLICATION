@@ -258,13 +258,17 @@ def test_assistant_endpoint(monkeypatch):
         # the suite never starts the MCP servers, so the endpoint reports unavailable
         assert client.post("/api/assistant", json={"message": "hi"}).status_code == 503
 
-        async def fake_ask(message, user):
-            return {"answer": f"echo {message}", "tool_calls": [], "sources": [], "tickets": [],
-                    "stop_reason": "answered", "model_turns": 1, "total_tokens": 3}
+        async def fake_ask(message, user, history=None):
+            return {"answer": f"echo {message} after {len(history or [])}", "tool_calls": [], "sources": [],
+                    "tickets": [], "stop_reason": "answered", "model_turns": 1, "total_tokens": 3}
 
         monkeypatch.setattr(assistant_module.get_assistant(), "ask", fake_ask)
         response = client.post("/api/assistant", json={"message": "status of TCK-4471?"})
-        assert response.status_code == 200 and response.json()["answer"] == "echo status of TCK-4471?"
+        assert response.status_code == 200 and response.json()["answer"] == "echo status of TCK-4471? after 0"
+        assert response.json()["follow_ups"] == []
+        history = [{"role": "user", "content": "hi"}, {"role": "assistant", "content": "hello"}]
+        response = client.post("/api/assistant", json={"message": "and now?", "history": history})
+        assert response.json()["answer"] == "echo and now? after 2"
 
 
 def test_tool_output_is_compacted_and_capped_for_the_model():
