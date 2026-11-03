@@ -12,6 +12,7 @@ from app.api.documents import router as documents_router
 from app.api.week6 import router as week6_router
 from app.api.week7 import router as week7_router
 from app.api.week8 import router as week8_router
+from app.api.week10 import router as week10_router
 from app.config import settings
 from app.services import langfuse_sink
 from app.services.auth import current_user, require_admin, warn_on_default_credentials
@@ -73,3 +74,4 @@ app.include_router(analysis_router, prefix="/api", dependencies=admin_only)
 app.include_router(week6_router, prefix="/api", dependencies=admin_only)
 app.include_router(week7_router, prefix="/api", dependencies=admin_only)
 app.include_router(week8_router, prefix="/api", dependencies=admin_only)
+app.include_router(week10_router, prefix="/api", dependencies=admin_only)

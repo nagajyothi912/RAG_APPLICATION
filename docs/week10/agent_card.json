@@ -1,0 +1,51 @@
+{
+  "protocolVersion": "0.3.0",
+  "name": "AirFiber Triage Squad",
+  "description": "Drafts a reply to an AirFiber broadband support ticket. An orchestrator splits the ticket, a triage worker checks the account record and decides escalation, a policy-lookup worker finds the governing help-centre policy, and the orchestrator writes a cited reply.",
+  "url": "https://support-agents.airfiber.example/a2a/triage-squad",
+  "preferredTransport": "JSONRPC",
+  "version": "1.0.0",
+  "provider": {
+    "organization": "AirFiber Support Engineering (course project)",
+    "url": "https://airfiber.example"
+  },
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": true,
+    "stateTransitionHistory": true
+  },
+  "securitySchemes": {
+    "bearer": {
+      "type": "http",
+      "scheme": "bearer",
+      "bearerFormat": "HMAC-signed session token",
+      "description": "The same signed bearer token the web app issues; the caller must hold the admin (support agent) role."
+    }
+  },
+  "security": [{ "bearer": [] }],
+  "defaultInputModes": ["application/json", "text/plain"],
+  "defaultOutputModes": ["application/json", "text/plain"],
+  "skills": [
+    {
+      "id": "draft-ticket-reply",
+      "name": "Draft a support ticket reply",
+      "description": "Given a ticket (id, tier, tenure, refund flag, customer message), returns a drafted reply that echoes the ticket id, cites the policy, and carries an escalation tag when the account warrants one. If the policy cannot be looked up, the task pauses in input-required instead of drafting a reply.",
+      "tags": ["customer-support", "triage", "refunds", "escalation", "rag"],
+      "examples": [
+        "{\"ticket_id\": \"T017\", \"tier\": \"Priority\", \"tenure_days\": 5, \"refund_requested\": true, \"question\": \"I paid 1999, the engineer never turned up. Do I get my money back?\"}",
+        "My box has an orange light that is not flashing, what does that mean?"
+      ],
+      "inputModes": ["application/json", "text/plain"],
+      "outputModes": ["application/json", "text/plain"]
+    },
+    {
+      "id": "triage-ticket",
+      "name": "Triage a ticket",
+      "description": "Looks up the CRM order record and decides whether to escalate, returning the assigned team, SLA and the account facts that matter. No customer-facing text.",
+      "tags": ["triage", "escalation", "crm"],
+      "examples": ["{\"ticket_id\": \"T010\", \"tier\": \"Priority\", \"refund_requested\": true, \"brief\": \"relocation six weeks overdue, compensation asked\"}"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    }
+  ]
+}

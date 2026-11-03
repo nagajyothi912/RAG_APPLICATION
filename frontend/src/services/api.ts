@@ -740,3 +740,139 @@ export type Week6Response = {
 export function getWeek6Results() {
   return request<Week6Response>('/api/week6/results');
 }
+
+// ─── Week 10: single agent vs triage squad (read-only) ───────────────────────
+
+export type Week10ArmId = 'single' | 'multi';
+
+export type Week10Call = {
+  hop: string;
+  kind: 'tool-calling' | 'completion' | 'hand-off' | 'rejected';
+  status: string;
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+  cost_usd: number;
+  latency_ms: number;
+  rate_limit_wait_ms: number;
+  error?: string | null;
+};
+
+export type Week10ArmSummary = {
+  n: number;
+  judged: number;
+  passes: number;
+  judge_passes: number;
+  assertion_passes: number;
+  p50_ms: number;
+  p99_ms: number;
+  p50_net_ms: number;
+  p99_net_ms: number;
+  total_tokens: number;
+  prompt_tokens: number;
+  completion_tokens: number;
+  llm_calls: number;
+  rejected_calls: number;
+  cost_total: number;
+  cost_per_ticket: number;
+  rate_limit_wait_ms: number;
+};
+
+export type Week10HopShare = {
+  hop: string;
+  calls: number;
+  prompt: number;
+  completion: number;
+  total: number;
+  share: number;
+};
+
+type Week10Verdict = {
+  pass: boolean | null;
+  judge_score: number | null;
+  judge_explanation: string;
+  failed_assertions: string[];
+};
+
+export type Week10SingleRun = Week10Verdict & {
+  reply: string;
+  total_tokens: number;
+  cost_usd: number;
+  latency_ms: number;
+  tools_called: string[];
+  iterations: number | null;
+  calls: Week10Call[];
+};
+
+export type Week10HandOffAttempt = { attempt: number; status: number | null; elapsed_ms: number };
+
+export type Week10MultiRun = Week10Verdict & {
+  reply: string;
+  total_tokens: number;
+  cost_usd: number;
+  latency_ms: number;
+  plan: { parsed: boolean; triage_brief: string; policy_query: string };
+  triage_tools: string[];
+  policy_tools: string[];
+  escalated: boolean | null;
+  escalation_note: string;
+  policy_attempts: Week10HandOffAttempt[];
+  triage_attempts: Week10HandOffAttempt[];
+  degraded: string[];
+  synthesis_context: string;
+  calls: Week10Call[];
+};
+
+export type Week10Ticket = {
+  ticket_id: string;
+  tier: string;
+  tenure_days: number;
+  refund_requested: boolean;
+  question: string;
+  context: string;
+  single: Week10SingleRun;
+  multi: Week10MultiRun;
+};
+
+export type Week10Report = {
+  available: boolean;
+  reason?: string;
+  meta?: {
+    model: string;
+    started_at: string;
+    judge_repeats: number;
+    fail_case: string;
+    judge_tokens: number;
+    pricing_per_m: { input: number; output: number } | null;
+    arm_names: Record<Week10ArmId, string>;
+  };
+  arms?: Record<Week10ArmId, Week10ArmSummary>;
+  multiplier?: {
+    single_tokens: number;
+    multi_tokens: number;
+    counted: number | null;
+    estimated: number;
+    estimated_rejected_tokens: Record<Week10ArmId, number>;
+    top_hop: Week10HopShare;
+    line: string;
+  };
+  hops?: Record<Week10ArmId, Week10HopShare[]>;
+  tickets?: Week10Ticket[];
+  failure?: {
+    ticket_id: string;
+    tier: string;
+    question: string;
+    policy_context: string;
+    worker_500s: Record<string, number>;
+    run: Week10MultiRun;
+    clean_run: Week10MultiRun;
+    confirmed: string;
+  } | null;
+  verdict?: string;
+  a2a_lifecycle?: string;
+  agent_card?: Record<string, unknown> | null;
+};
+
+export function getWeek10Report() {
+  return request<Week10Report>('/api/week10/report');
+}

@@ -1,0 +1,558 @@
+{
+  "meta": {
+    "started_at": "2026-10-12T15:51:11+00:00",
+    "model": "openai/gpt-oss-120b",
+    "judge_repeats": 1,
+    "fail_case": "T017",
+    "cases": [
+      "T010",
+      "T017",
+      "T119",
+      "T001",
+      "T003",
+      "T016",
+      "T022",
+      "T073",
+      "T118",
+      "T007"
+    ],
+    "pricing_per_m": {
+      "input": 0.15,
+      "output": 0.6
+    }
+  },
+  "cases": {
+    "T010": {
+      "single": {
+        "reply": "[Ticket #T010] [Priority Escalation: Priority Support Lead]  \n\nWe understand how frustrating this delay has been. A relocation is normally completed within 3‑5 working days. Because your move has now exceeded 14 days due to technician delays, you are entitled to a credit of ₹100 for each day beyond the standard timeline.  \n\nWe will expedite the final connection and process the appropriate compensation for the excess downtime. Thank you for your patience.  \n\n**Source:** Account Management policy.",
+        "tools_called": [
+          "retrieve_kb_context",
+          "escalate_ticket",
+          "generate_ticket_reply",
+          "generate_ticket_reply",
+          "generate_ticket_reply"
+        ],
+        "iterations": 6,
+        "budget_hit": null,
+        "total_tokens": 12216,
+        "agent_reported_tokens": 10349,
+        "total_cost_usd": 0.00288945,
+        "latency_ms": 35139.6,
+        "rate_limit_wait_ms": 0.0,
+        "calls": [
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1033,
+            "completion_tokens": 236,
+            "total_tokens": 1269,
+            "cost_usd": 0.00029655,
+            "latency_ms": 1149.6,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1167,
+            "completion_tokens": 306,
+            "total_tokens": 1473,
+            "cost_usd": 0.00035864999999999996,
+            "latency_ms": 1147.4,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1308,
+            "completion_tokens": 261,
+            "total_tokens": 1569,
+            "cost_usd": 0.0003528,
+            "latency_ms": 1081.8,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent -> generate_ticket_reply",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 323,
+            "completion_tokens": 300,
+            "total_tokens": 623,
+            "cost_usd": 0.00022845,
+            "latency_ms": 1152.3,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1562,
+            "completion_tokens": 309,
+            "total_tokens": 1871,
+            "cost_usd": 0.00041969999999999996,
+            "latency_ms": 1199.2,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent -> generate_ticket_reply",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 323,
+            "completion_tokens": 300,
+            "total_tokens": 623,
+            "cost_usd": 0.00022845,
+            "latency_ms": 1340.3,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1761,
+            "completion_tokens": 229,
+            "total_tokens": 1990,
+            "cost_usd": 0.00040155,
+            "latency_ms": 6101.7,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent -> generate_ticket_reply",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 323,
+            "completion_tokens": 298,
+            "total_tokens": 621,
+            "cost_usd": 0.00022724999999999997,
+            "latency_ms": 4101.0,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 2067,
+            "completion_tokens": 110,
+            "total_tokens": 2177,
+            "cost_usd": 0.00037604999999999995,
+            "latency_ms": 17864.8,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "ticket_id": "T010"
+      },
+      "multi": {
+        "system": "orchestrator",
+        "ticket_id": "T010",
+        "reply": "[Ticket #T010] [Priority Escalation: Priority Support Lead]",
+        "plan": {
+          "parsed": true,
+          "triage_brief": "Customer requests timeline for a connection shift that has been delayed six weeks with repeated missed callbacks and asks about compensation.",
+          "policy_query": "AirFiber connection relocation delay compensation policy"
+        },
+        "triage": {
+          "ok": true,
+          "result": {
+            "worker": "triage",
+            "escalated": true,
+            "escalation_note": "[Priority Escalation: Priority Support Lead] Ticket T010 escalated — reason: priority_customer, severity: high.",
+            "account_facts": "Priority-tier customer with a pending relocation order delayed 42 days, no activation, and eligible for compensation.",
+            "parsed_output": true,
+            "tools_called": [
+              "lookup_order_record",
+              "escalate_ticket"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 11300.0
+            }
+          ]
+        },
+        "policy": {
+          "ok": true,
+          "result": {
+            "worker": "policy",
+            "answerable": true,
+            "policy_text": "\"Relocations take 3-5 working days. If relocation exceeds 14 days due to technician delay, account is credited ₹100/day for downtime beyond standard timeline.\"",
+            "parsed_output": true,
+            "tools_called": [
+              "retrieve_kb_context"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 1999.1
+            }
+          ]
+        },
+        "degraded": [],
+        "synthesis_context": "\"Relocations take 3-5 working days. If relocation exceeds 14 days due to technician delay, account is credited ₹100/day for downtime beyond standard timeline.\"\n\nAccount record: Priority-tier customer with a pending relocation order delayed 42 days, no activation, and eligible for compensation.",
+        "escalation_note": "[Priority Escalation: Priority Support Lead] Ticket T010 escalated — reason: priority_customer, severity: high.",
+        "total_tokens": 4928,
+        "total_cost_usd": 0.0012315,
+        "rate_limit_wait_ms": 0.0,
+        "latency_ms": 14922.7,
+        "calls": [
+          {
+            "hop": "ticket -> orchestrator (decompose)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 218,
+            "completion_tokens": 120,
+            "total_tokens": 338,
+            "cost_usd": 0.0001047,
+            "latency_ms": 631.9,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 424,
+            "completion_tokens": 69,
+            "total_tokens": 493,
+            "cost_usd": 0.000105,
+            "latency_ms": 558.9,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 560,
+            "completion_tokens": 236,
+            "total_tokens": 796,
+            "cost_usd": 0.0002256,
+            "latency_ms": 1356.8,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 604,
+            "completion_tokens": 141,
+            "total_tokens": 745,
+            "cost_usd": 0.00017519999999999998,
+            "latency_ms": 599.9,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 771,
+            "completion_tokens": 186,
+            "total_tokens": 957,
+            "cost_usd": 0.00022724999999999997,
+            "latency_ms": 2968.3,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 912,
+            "completion_tokens": 42,
+            "total_tokens": 954,
+            "cost_usd": 0.00016199999999999998,
+            "latency_ms": 7641.5,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "workers -> orchestrator (synthesis)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 345,
+            "completion_tokens": 300,
+            "total_tokens": 645,
+            "cost_usd": 0.00023174999999999997,
+            "latency_ms": 2985.0,
+            "rate_limit_wait_ms": 0.0
+          }
+        ]
+      }
+    },
+    "T017": {
+      "multi": {
+        "system": "orchestrator",
+        "ticket_id": "T017",
+        "reply": "[Ticket #T017]  \n[Priority Escalation: Priority Support Lead]  \n\nI’m very sorry for the repeated inconvenience. Since the technician missed the appointment and your service has not been activated within 7 days of payment, you are entitled to a full refund of ₹1999, which will be processed within 5",
+        "plan": {
+          "parsed": true,
+          "triage_brief": "Customer demands a refund after paying $1999; engineer never arrived and no callback despite multiple contacts.",
+          "policy_query": "AirFiber refund policy for missed engineer appointment"
+        },
+        "triage": {
+          "ok": true,
+          "result": {
+            "worker": "triage",
+            "escalated": true,
+            "escalation_note": "[Priority Escalation: Priority Support Lead] Ticket T017 escalated — reason: priority_customer, severity: high.",
+            "account_facts": "Priority tier customer paid $1999, order remains unactivated after three missed engineer visits and multiple contacts.",
+            "parsed_output": true,
+            "tools_called": [
+              "lookup_order_record",
+              "escalate_ticket"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 13351.8
+            }
+          ]
+        },
+        "policy": {
+          "ok": true,
+          "result": {
+            "worker": "policy",
+            "answerable": true,
+            "policy_text": "Refund Policy: If installation appointment is missed by technician and service not activated within 7 days of payment, 100% refund of ₹1999 is processed within 5-7 business days.",
+            "parsed_output": true,
+            "tools_called": [
+              "retrieve_kb_context"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 5599.2
+            }
+          ]
+        },
+        "degraded": [],
+        "synthesis_context": "Refund Policy: If installation appointment is missed by technician and service not activated within 7 days of payment, 100% refund of ₹1999 is processed within 5-7 business days.\n\nAccount record: Priority tier customer paid $1999, order remains unactivated after three missed engineer visits and multiple contacts.",
+        "escalation_note": "[Priority Escalation: Priority Support Lead] Ticket T017 escalated — reason: priority_customer, severity: high.",
+        "total_tokens": 4931,
+        "total_cost_usd": 0.00124005,
+        "rate_limit_wait_ms": 0.0,
+        "latency_ms": 17857.4,
+        "calls": [
+          {
+            "hop": "ticket -> orchestrator (decompose)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 215,
+            "completion_tokens": 141,
+            "total_tokens": 356,
+            "cost_usd": 0.00011685,
+            "latency_ms": 679.1,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 422,
+            "completion_tokens": 70,
+            "total_tokens": 492,
+            "cost_usd": 0.00010529999999999998,
+            "latency_ms": 619.0,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 559,
+            "completion_tokens": 197,
+            "total_tokens": 756,
+            "cost_usd": 0.00020205,
+            "latency_ms": 4969.8,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 602,
+            "completion_tokens": 96,
+            "total_tokens": 698,
+            "cost_usd": 0.0001479,
+            "latency_ms": 533.6,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 766,
+            "completion_tokens": 266,
+            "total_tokens": 1032,
+            "cost_usd": 0.0002745,
+            "latency_ms": 1207.8,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 908,
+            "completion_tokens": 42,
+            "total_tokens": 950,
+            "cost_usd": 0.0001614,
+            "latency_ms": 11591.9,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "workers -> orchestrator (synthesis)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 347,
+            "completion_tokens": 300,
+            "total_tokens": 647,
+            "cost_usd": 0.00023204999999999998,
+            "latency_ms": 3824.4,
+            "rate_limit_wait_ms": 0.0
+          }
+        ]
+      },
+      "single": {
+        "reply": "[Ticket #T017]  \n\nI’m very sorry for the repeated inconvenience. Since the technician missed your appointment and the service has not been activated within 7 days of your ₹1999 payment, you are eligible for a full refund. The refund will be processed within 5‑7 business days.\n\n[Source: Refund Policy]",
+        "tools_called": [
+          "retrieve_kb_context",
+          "escalate_ticket",
+          "generate_ticket_reply"
+        ],
+        "iterations": 4,
+        "budget_hit": null,
+        "total_tokens": 6503,
+        "agent_reported_tokens": 5926,
+        "total_cost_usd": 0.0014456999999999998,
+        "latency_ms": 24120.2,
+        "rate_limit_wait_ms": 0.0,
+        "calls": [
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1030,
+            "completion_tokens": 328,
+            "total_tokens": 1358,
+            "cost_usd": 0.0003513,
+            "latency_ms": 1251.8,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1179,
+            "completion_tokens": 157,
+            "total_tokens": 1336,
+            "cost_usd": 0.00027105,
+            "latency_ms": 1210.8,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1321,
+            "completion_tokens": 233,
+            "total_tokens": 1554,
+            "cost_usd": 0.00033794999999999995,
+            "latency_ms": 3904.4,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent -> generate_ticket_reply",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 323,
+            "completion_tokens": 254,
+            "total_tokens": 577,
+            "cost_usd": 0.00020084999999999998,
+            "latency_ms": 4007.8,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1605,
+            "completion_tokens": 73,
+            "total_tokens": 1678,
+            "cost_usd": 0.00028455,
+            "latency_ms": 13743.9,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "ticket_id": "T017"
+      }
+    },
+    "T119": {
+      "single": {
+        "reply": "[Ticket #T119]  \n\nI’m sorry you’ve been experiencing slow speeds. Since you’ve had persistent performance issues for more than 48 hours and are within the 30‑day window, you qualify for a full refund of the ₹1199 plan charge and cancellation of your service. I’ll initiate the refund process right away and you should see the amount returned to your original payment method within a few business days.  \n\nIf you have any further questions, please let us know.  \n\n[Source: Refund Policy]",
+        "tools_called": [
+          "retrieve_kb_context",
+          "generate_ticket_reply"
+        ],
+        "iterations": 3,
+        "budget_hit": null,
+        "total_tokens": 4916,
+        "agent_reported_tokens": 4395,
+        "total_cost_usd": 0.0011937,
+        "latency_ms": 16277.7,
+        "rate_limit_wait_ms": 0.0,
+        "calls": [
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1021,
+            "completion_tokens": 321,
+            "total_tokens": 1342,
+            "cost_usd": 0.00034575,
+            "latency_ms": 1258.7,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1168,
+            "completion_tokens": 338,
+            "total_tokens": 1506,
+            "cost_usd": 0.00037799999999999997,
+            "latency_ms": 1522.7,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent -> generate_ticket_reply",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 276,
+            "completion_tokens": 245,
+            "total_tokens": 521,
+            "cost_usd": 0.0001884,
+            "latency_ms": 794.5,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1437,
+            "completion_tokens": 110,
+            "total_tokens": 1547,
+            "cost_usd": 0.00028155,
+            "latency_ms": 12700.8,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "ticket_id": "T119"
+      }
+    }
+  },
+  "failure_run": null
+}

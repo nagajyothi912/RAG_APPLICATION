@@ -3692,3 +3692,233 @@ p {
   font-size: 0.8rem;
   color: #f0a58a;
 }
+
+/* ── Week 10: single agent vs triage squad ───────────────────────────────── */
+.w10-page {
+  --w10-line: rgba(27, 36, 32, 0.14);
+  --w10-good: var(--moss);
+  --w10-bad: var(--danger);
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+}
+
+.w10-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 24px 28px 80px;
+}
+
+.w10-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.w10-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+
+.w10-chip {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--w10-line);
+  color: var(--ink-soft);
+  background: var(--white);
+}
+
+.w10-title { font-family: var(--serif); font-size: 1.8rem; margin: 0 0 6px; }
+.w10-subtitle { margin: 0; color: var(--ink-soft); max-width: 760px; line-height: 1.5; }
+.w10-meta { margin: 8px 0 0; font-size: 0.8rem; color: var(--ink-soft); }
+.w10-sub { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; }
+
+.w10-btn {
+  border: 1px solid var(--w10-line);
+  background: var(--white);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.w10-btn:disabled { opacity: 0.6; cursor: default; }
+
+.w10-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--w10-line);
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.w10-tab {
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--ink-soft);
+  padding: 10px 14px;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.w10-tab.is-active { color: var(--ink); border-bottom-color: var(--copper); }
+
+.w10-section { display: flex; flex-direction: column; gap: 20px; }
+
+.w10-panel {
+  background: var(--white);
+  border: 1px solid var(--w10-line);
+  border-radius: 14px;
+  padding: 20px 22px;
+  min-width: 0;
+}
+.w10-panel h3 { margin: 0 0 10px; font-size: 1.05rem; }
+.w10-panel h4 { margin: 16px 0 8px; font-size: 0.92rem; }
+.w10-panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.w10-error { border-color: var(--w10-bad); color: var(--w10-bad); }
+
+/* Comparison tiles: the four numbers, both arms in one tile */
+.w10-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+
+.w10-tile {
+  background: var(--white);
+  border: 1px solid var(--w10-line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.w10-tile-title {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+}
+.w10-tile-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; }
+.w10-tile-arm { font-size: 0.8rem; color: var(--ink-soft); min-width: 84px; }
+.w10-tile-val { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.w10-tile-row.is-better .w10-tile-val { color: var(--w10-good); }
+.w10-tile-flag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--w10-good);
+  border: 1px solid var(--w10-good);
+  border-radius: 8px;
+  padding: 0 6px;
+}
+.w10-tile-note { font-size: 0.74rem; color: var(--ink-soft); margin-top: auto; }
+
+/* Tables */
+.w10-table-wrap { overflow-x: auto; }
+.w10-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.w10-table th {
+  text-align: left;
+  padding: 8px 12px;
+  background: var(--paper-2);
+  color: var(--ink-soft);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.w10-table td { padding: 9px 12px; border-bottom: 1px solid var(--w10-line); vertical-align: top; }
+.w10-table-dense td { padding: 6px 10px; font-size: 0.8rem; }
+.w10-table-click tbody tr { cursor: pointer; }
+.w10-table-click tbody tr:hover td { background: var(--paper); }
+.w10-table tr.is-selected td { background: rgba(196, 92, 38, 0.08); }
+.w10-table tr.is-warn td { background: rgba(155, 44, 44, 0.06); }
+
+.w10-badge {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--w10-line);
+  white-space: nowrap;
+}
+.w10-badge-pass { color: var(--w10-good); border-color: var(--w10-good); }
+.w10-badge-fail { color: var(--w10-bad); border-color: var(--w10-bad); }
+.w10-badge-why { font-weight: 500; }
+
+/* Ticket inspector and failure comparison */
+.w10-question { font-style: italic; color: var(--ink-soft); margin: 0 0 10px; line-height: 1.5; }
+.w10-two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.w10-run { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.w10-run-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.w10-run-meta { font-size: 0.8rem; color: var(--ink-soft); }
+.w10-run-fail { border-color: var(--w10-bad); }
+.w10-judge { font-size: 0.84rem; margin: 4px 0 0; line-height: 1.45; }
+
+.w10-reply,
+.w10-pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  background: var(--paper);
+  border: 1px solid var(--w10-line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 4px 0 0;
+}
+
+.w10-details summary { cursor: pointer; font-size: 0.84rem; font-weight: 600; margin: 6px 0; }
+.w10-details p { font-size: 0.84rem; margin: 6px 0; }
+
+.w10-select {
+  font: inherit;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--w10-line);
+  background: var(--white);
+}
+
+/* Multiplier hero */
+.w10-hero { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+.w10-hero-num { display: flex; flex-direction: column; gap: 4px; min-width: 180px; }
+.w10-hero-val { font-family: var(--serif); font-size: 3.2rem; font-weight: 700; line-height: 1; }
+.w10-hero-label { font-size: 0.78rem; color: var(--ink-soft); line-height: 1.4; }
+.w10-hero-text { flex: 1; min-width: 260px; }
+.w10-hero-text p { margin: 0 0 8px; line-height: 1.5; }
+
+/* Token bars: one series, one hue, shared scale, value labelled on every bar */
+.w10-bars { margin-bottom: 16px; }
+.w10-bar-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 290px) 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 0;
+}
+.w10-bar-label { font-size: 0.82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.w10-bar-track { height: 14px; background: var(--paper); border-radius: 4px; overflow: hidden; }
+.w10-bar-fill { display: block; height: 100%; background: var(--moss); border-radius: 0 4px 4px 0; }
+.w10-bar-row:hover .w10-bar-fill { background: var(--sidebar-2); }
+.w10-bar-value { font-size: 0.8rem; font-variant-numeric: tabular-nums; color: var(--ink-soft); white-space: nowrap; }
+
+.w10-steps { margin: 0; padding-left: 20px; line-height: 1.7; font-size: 0.9rem; }
+.w10-confirmed, .w10-verdict { border-left: 4px solid var(--copper); }
+.w10-md-section { margin-bottom: 12px; }
+
+@media (max-width: 720px) {
+  .w10-container { padding: 16px 16px 60px; }
+  .w10-title { font-size: 1.4rem; }
+  .w10-bar-row { grid-template-columns: 1fr; gap: 4px; }
+  .w10-two-col { grid-template-columns: 1fr; }
+}

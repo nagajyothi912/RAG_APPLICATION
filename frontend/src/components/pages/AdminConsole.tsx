@@ -9,8 +9,9 @@ import ErrorAnalysisPage from './ErrorAnalysisPage';
 import Week6Page from './Week6Page';
 import Week7Page from './Week7Page';
 import Week8Page from './Week8Page';
+import Week10Page from './Week10Page';
 
-type LabId = 'week3' | 'week4' | 'week5' | 'week6' | 'week7' | 'week8' | 'week9' | 'chatbot';
+type LabId = 'week3' | 'week4' | 'week5' | 'week6' | 'week7' | 'week8' | 'week9' | 'week10' | 'chatbot';
 type ViewId = 'home' | LabId;
 
 type LabDef = { id: LabId; hash: string; label: string; caption: string };
@@ -27,6 +28,7 @@ const LABS: LabDef[] = [
   { id: 'week7', hash: 'week7', label: 'Week 7', caption: 'Agent vs workflow' },
   { id: 'week8', hash: 'week8', label: 'Week 8', caption: 'Trajectory evals' },
   { id: 'week9', hash: 'week9', label: 'Week 9', caption: 'MCP agent' },
+  { id: 'week10', hash: 'week10', label: 'Week 10', caption: 'Squad vs single agent' },
   { id: 'chatbot', hash: 'chatbot', label: 'Chatbot', caption: 'What users see' },
 ];
 
@@ -140,6 +142,7 @@ export default function AdminConsole({ user, onLogout }: AdminConsoleProps) {
         {view === 'week6' ? <Week6Page /> : null}
         {view === 'week7' ? <Week7Page /> : null}
         {view === 'week8' ? <Week8Page /> : null}
+        {view === 'week10' ? <Week10Page /> : null}
       </main>
     </div>
   );

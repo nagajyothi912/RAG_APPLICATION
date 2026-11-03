@@ -1,0 +1,2449 @@
+{
+  "meta": {
+    "started_at": "2026-10-12T15:55:49+00:00",
+    "model": "openai/gpt-oss-120b",
+    "judge_repeats": 1,
+    "fail_case": "T017",
+    "cases": [
+      "T010",
+      "T017",
+      "T119",
+      "T001",
+      "T003",
+      "T016",
+      "T022",
+      "T073",
+      "T118",
+      "T007"
+    ],
+    "pricing_per_m": {
+      "input": 0.15,
+      "output": 0.6
+    },
+    "judge_tokens": 26002
+  },
+  "cases": {
+    "T010": {
+      "single": {
+        "reply": "[Ticket #T010]  \n\nI understand how frustrating this delay has been. A relocation is normally completed within 3‑5 working days. Because your move has now exceeded 14 days due to technician delays, you are entitled to a credit of ₹100 for each day beyond that period. We will expedite the final connection and apply the appropriate compensation for the downtime you’ve experienced.  \n\nThank you for your patience while we resolve this.  \n\n*Source: Account Management policy*",
+        "tools_called": [
+          "retrieve_kb_context",
+          "escalate_ticket",
+          "generate_ticket_reply"
+        ],
+        "iterations": 4,
+        "budget_hit": null,
+        "total_tokens": 6744,
+        "agent_reported_tokens": 6123,
+        "total_cost_usd": 0.0015938999999999999,
+        "latency_ms": 5750.2,
+        "rate_limit_wait_ms": 0.0,
+        "calls": [
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1033,
+            "completion_tokens": 332,
+            "total_tokens": 1365,
+            "cost_usd": 0.00035415,
+            "latency_ms": 1409.4,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1167,
+            "completion_tokens": 299,
+            "total_tokens": 1466,
+            "cost_usd": 0.00035444999999999997,
+            "latency_ms": 1079.5,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1308,
+            "completion_tokens": 261,
+            "total_tokens": 1569,
+            "cost_usd": 0.0003528,
+            "latency_ms": 1478.1,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent -> generate_ticket_reply",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 323,
+            "completion_tokens": 298,
+            "total_tokens": 621,
+            "cost_usd": 0.00022724999999999997,
+            "latency_ms": 1009.4,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1619,
+            "completion_tokens": 104,
+            "total_tokens": 1723,
+            "cost_usd": 0.00030524999999999997,
+            "latency_ms": 773.3,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "ticket_id": "T010",
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "The reply correctly states the standard relocation timeline, acknowledges the six‑week delay, confirms the customer is eligible for ₹100 per day compensation, and commits to expediting the connection, thus fully addressing both timeline and compensation queries.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": false,
+            "no_refund_outside_30_days": true
+          },
+          "pass": false
+        }
+      },
+      "multi": {
+        "system": "orchestrator",
+        "ticket_id": "T010",
+        "reply": "[Ticket #T010] [Priority Escalation: Priority Support Lead]  \nWe sincerely apologize for the prolonged delay. A relocation is normally completed within 3‑5 working days. Because your move has now taken",
+        "plan": {
+          "parsed": true,
+          "triage_brief": "Customer requests timeline for a connection shift that has been delayed six weeks with repeated missed callbacks and asks about compensation.",
+          "policy_query": "AirFiber connection relocation delay compensation policy"
+        },
+        "triage": {
+          "ok": true,
+          "result": {
+            "worker": "triage",
+            "escalated": true,
+            "escalation_note": "[Priority Escalation: Priority Support Lead] Ticket T010 escalated — reason: priority_customer, severity: high.",
+            "account_facts": "Priority-tier customer with a pending relocation order delayed 42 days, no activation, and eligible for compensation.",
+            "parsed_output": true,
+            "tools_called": [
+              "lookup_order_record",
+              "escalate_ticket"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 2802.8
+            }
+          ]
+        },
+        "policy": {
+          "ok": true,
+          "result": {
+            "worker": "policy",
+            "answerable": true,
+            "policy_text": "\"Relocations take 3-5 working days. If relocation exceeds 14 days due to technician delay, account is credited ₹100/day for downtime beyond standard timeline.\"",
+            "parsed_output": true,
+            "tools_called": [
+              "retrieve_kb_context"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 2201.4
+            }
+          ]
+        },
+        "degraded": [],
+        "synthesis_context": "\"Relocations take 3-5 working days. If relocation exceeds 14 days due to technician delay, account is credited ₹100/day for downtime beyond standard timeline.\"\n\nAccount record: Priority-tier customer with a pending relocation order delayed 42 days, no activation, and eligible for compensation.",
+        "escalation_note": "[Priority Escalation: Priority Support Lead] Ticket T010 escalated — reason: priority_customer, severity: high.",
+        "total_tokens": 4845,
+        "total_cost_usd": 0.0011817,
+        "rate_limit_wait_ms": 0.0,
+        "latency_ms": 4329.8,
+        "calls": [
+          {
+            "hop": "ticket -> orchestrator (decompose)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 218,
+            "completion_tokens": 120,
+            "total_tokens": 338,
+            "cost_usd": 0.0001047,
+            "latency_ms": 608.4,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 424,
+            "completion_tokens": 69,
+            "total_tokens": 493,
+            "cost_usd": 0.000105,
+            "latency_ms": 1470.7,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 560,
+            "completion_tokens": 183,
+            "total_tokens": 743,
+            "cost_usd": 0.0001938,
+            "latency_ms": 668.4,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 604,
+            "completion_tokens": 115,
+            "total_tokens": 719,
+            "cost_usd": 0.00015959999999999998,
+            "latency_ms": 1361.9,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 771,
+            "completion_tokens": 182,
+            "total_tokens": 953,
+            "cost_usd": 0.00022485,
+            "latency_ms": 830.9,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 912,
+            "completion_tokens": 42,
+            "total_tokens": 954,
+            "cost_usd": 0.00016199999999999998,
+            "latency_ms": 545.9,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "workers -> orchestrator (synthesis)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 345,
+            "completion_tokens": 300,
+            "total_tokens": 645,
+            "cost_usd": 0.00023174999999999997,
+            "latency_ms": 916.4,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "judge": {
+          "score": 0,
+          "votes": [
+            0
+          ],
+          "explanation": "The reply is incomplete and does not provide the requested timeline or compensation details, failing to resolve the customer's inquiry.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": false
+        }
+      }
+    },
+    "T017": {
+      "multi": {
+        "system": "orchestrator",
+        "ticket_id": "T017",
+        "reply": "[Ticket #T017] [Priority Escalation: Priority Support Lead]  \nI’m very sorry for the repeated inconvenience. Because the engineer missed three appointments and your service has not been activated within 7 days of payment, you qualify for a full refund of ₹1999, which will be processed within 5‑7 business days. You will receive a confirmation once the refund is issued.",
+        "plan": {
+          "parsed": true,
+          "triage_brief": "Customer demands a refund after paying $1999; engineer never arrived and no callback despite multiple contacts.",
+          "policy_query": "AirFiber refund policy for missed engineer appointment"
+        },
+        "triage": {
+          "ok": true,
+          "result": {
+            "worker": "triage",
+            "escalated": true,
+            "escalation_note": "[Priority Escalation: Priority Support Lead] Ticket T017 escalated — reason: priority_customer, severity: high.",
+            "account_facts": "Priority tier customer paid $1999, order remains unactivated after 5 days, with three missed engineer visits and multiple contacts.",
+            "parsed_output": true,
+            "tools_called": [
+              "lookup_order_record",
+              "escalate_ticket"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 2664.2
+            }
+          ]
+        },
+        "policy": {
+          "ok": true,
+          "result": {
+            "worker": "policy",
+            "answerable": true,
+            "policy_text": "Refund Policy: If installation appointment is missed by technician and service not activated within 7 days of payment, 100% refund of ₹1999 is processed within 5-7 business days.",
+            "parsed_output": true,
+            "tools_called": [
+              "retrieve_kb_context"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 1636.5
+            }
+          ]
+        },
+        "degraded": [],
+        "synthesis_context": "Refund Policy: If installation appointment is missed by technician and service not activated within 7 days of payment, 100% refund of ₹1999 is processed within 5-7 business days.\n\nAccount record: Priority tier customer paid $1999, order remains unactivated after 5 days, with three missed engineer visits and multiple contacts.",
+        "escalation_note": "[Priority Escalation: Priority Support Lead] Ticket T017 escalated — reason: priority_customer, severity: high.",
+        "total_tokens": 4973,
+        "total_cost_usd": 0.001263,
+        "rate_limit_wait_ms": 0.0,
+        "latency_ms": 4338.2,
+        "calls": [
+          {
+            "hop": "ticket -> orchestrator (decompose)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 215,
+            "completion_tokens": 141,
+            "total_tokens": 356,
+            "cost_usd": 0.00011685,
+            "latency_ms": 637.0,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 422,
+            "completion_tokens": 70,
+            "total_tokens": 492,
+            "cost_usd": 0.00010529999999999998,
+            "latency_ms": 590.1,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 559,
+            "completion_tokens": 197,
+            "total_tokens": 756,
+            "cost_usd": 0.00020205,
+            "latency_ms": 1038.7,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 602,
+            "completion_tokens": 113,
+            "total_tokens": 715,
+            "cost_usd": 0.0001581,
+            "latency_ms": 1048.6,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 766,
+            "completion_tokens": 281,
+            "total_tokens": 1047,
+            "cost_usd": 0.0002835,
+            "latency_ms": 1200.3,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 908,
+            "completion_tokens": 47,
+            "total_tokens": 955,
+            "cost_usd": 0.0001644,
+            "latency_ms": 406.9,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "workers -> orchestrator (synthesis)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 352,
+            "completion_tokens": 300,
+            "total_tokens": 652,
+            "cost_usd": 0.00023279999999999997,
+            "latency_ms": 1035.5,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "The reply correctly states that the customer is eligible for a full ₹1999 refund and that it will be processed within the policy's 5‑7 business day window, directly answering the customer's query.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": true
+        }
+      },
+      "single": {
+        "reply": "[Ticket #T017]  \n\nWe sincerely apologize for the repeated inconvenience. Since the technician missed the appointment and the service has not been activated within 7 days of your ₹1999 payment, you are eligible for a full refund. The refund will be processed within 5‑7 business days.\n\n*Source: Refund Policy*",
+        "tools_called": [
+          "retrieve_kb_context",
+          "lookup_order_record",
+          "escalate_ticket",
+          "generate_ticket_reply"
+        ],
+        "iterations": 5,
+        "budget_hit": null,
+        "total_tokens": 8474,
+        "agent_reported_tokens": 7899,
+        "total_cost_usd": 0.0018885,
+        "latency_ms": 18368.0,
+        "rate_limit_wait_ms": 0.0,
+        "calls": [
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1030,
+            "completion_tokens": 337,
+            "total_tokens": 1367,
+            "cost_usd": 0.00035669999999999994,
+            "latency_ms": 3959.0,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1173,
+            "completion_tokens": 161,
+            "total_tokens": 1334,
+            "cost_usd": 0.00027255,
+            "latency_ms": 739.2,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1337,
+            "completion_tokens": 225,
+            "total_tokens": 1562,
+            "cost_usd": 0.00033555,
+            "latency_ms": 821.7,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1479,
+            "completion_tokens": 325,
+            "total_tokens": 1804,
+            "cost_usd": 0.00041684999999999997,
+            "latency_ms": 1080.9,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent -> generate_ticket_reply",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 323,
+            "completion_tokens": 252,
+            "total_tokens": 575,
+            "cost_usd": 0.00019965,
+            "latency_ms": 968.5,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1760,
+            "completion_tokens": 72,
+            "total_tokens": 1832,
+            "cost_usd": 0.0003072,
+            "latency_ms": 10794.1,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "ticket_id": "T017",
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "PASS: The reply correctly confirms the customer is entitled to a full ₹1999 refund and states the correct processing timeframe per the policy.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": false,
+            "no_refund_outside_30_days": true
+          },
+          "pass": false
+        }
+      }
+    },
+    "T119": {
+      "single": {
+        "reply": "[Ticket #T119]  \n\nWe’re sorry to hear about the ongoing speed issues. Because you’ve experienced performance below 10 Mbps for 8 days, you qualify for a full refund of the ₹1199 plan charge, as the issue has persisted beyond the 48‑hour resolution window and you are within the 30‑day refund period. Please confirm you’d like to cancel, and we’ll process the refund promptly.  \n\n(Source: Billing FAQ)",
+        "tools_called": [
+          "retrieve_kb_context",
+          "lookup_order_record",
+          "generate_ticket_reply"
+        ],
+        "iterations": 4,
+        "budget_hit": null,
+        "total_tokens": 6510,
+        "agent_reported_tokens": 6007,
+        "total_cost_usd": 0.0014831999999999998,
+        "latency_ms": 17654.6,
+        "rate_limit_wait_ms": 0.0,
+        "calls": [
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1021,
+            "completion_tokens": 324,
+            "total_tokens": 1345,
+            "cost_usd": 0.00034754999999999996,
+            "latency_ms": 1219.0,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1158,
+            "completion_tokens": 205,
+            "total_tokens": 1363,
+            "cost_usd": 0.0002967,
+            "latency_ms": 861.3,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1330,
+            "completion_tokens": 277,
+            "total_tokens": 1607,
+            "cost_usd": 0.0003657,
+            "latency_ms": 6011.5,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent -> generate_ticket_reply",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 282,
+            "completion_tokens": 221,
+            "total_tokens": 503,
+            "cost_usd": 0.0001749,
+            "latency_ms": 885.2,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1593,
+            "completion_tokens": 99,
+            "total_tokens": 1692,
+            "cost_usd": 0.00029834999999999996,
+            "latency_ms": 8676.3,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "ticket_id": "T119",
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "The reply correctly confirms the customer is eligible for a full ₹1199 refund under the policy and offers to process it, fully addressing the request.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": true
+        }
+      },
+      "multi": {
+        "system": "orchestrator",
+        "ticket_id": "T119",
+        "reply": "[Ticket #T119]  \nWe can process a cancellation and a full refund of ₹1199 for your plan. Since your service has been active for only 8 days, the average speed is well below the promised 100 Mbps, and the issue has not been resolved within 48 hours, you meet the refund criteria (full refund within 30 days of activation). Please confirm you would like to proceed, and we’ll initiate the cancellation and refund immediately.  \n\nSource: Refund Policy; Account record.",
+        "plan": {
+          "parsed": true,
+          "triage_brief": "Customer reports persistent speeds under 10 Mbps for 8 days and requests cancellation with a ₹1199 refund.",
+          "policy_query": "refund policy for low speed service and cancellation within trial period"
+        },
+        "triage": {
+          "ok": true,
+          "result": {
+            "worker": "triage",
+            "escalated": false,
+            "escalation_note": "",
+            "account_facts": "Order ORD-7719 is active for 8 days with average speed 8.2 Mbps (far below promised 100 Mbps) and the customer is eligible for a cancellation refund of ₹1199.",
+            "parsed_output": true,
+            "tools_called": [
+              "lookup_order_record"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 2216.1
+            }
+          ]
+        },
+        "policy": {
+          "ok": true,
+          "result": {
+            "worker": "policy",
+            "answerable": true,
+            "policy_text": "Refund Policy: Full refund of ₹1199 plan charges is provided within 30 days of activation if persistent performance issues cannot be resolved within 48 hours.",
+            "parsed_output": true,
+            "tools_called": [
+              "retrieve_kb_context"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 1655.7
+            }
+          ]
+        },
+        "degraded": [],
+        "synthesis_context": "Refund Policy: Full refund of ₹1199 plan charges is provided within 30 days of activation if persistent performance issues cannot be resolved within 48 hours.\n\nAccount record: Order ORD-7719 is active for 8 days with average speed 8.2 Mbps (far below promised 100 Mbps) and the customer is eligible for a cancellation refund of ₹1199.",
+        "escalation_note": "",
+        "total_tokens": 3899,
+        "total_cost_usd": 0.0010353,
+        "rate_limit_wait_ms": 0.0,
+        "latency_ms": 3853.4,
+        "calls": [
+          {
+            "hop": "ticket -> orchestrator (decompose)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 206,
+            "completion_tokens": 113,
+            "total_tokens": 319,
+            "cost_usd": 9.869999999999999e-05,
+            "latency_ms": 716.3,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 416,
+            "completion_tokens": 89,
+            "total_tokens": 505,
+            "cost_usd": 0.0001158,
+            "latency_ms": 880.5,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 573,
+            "completion_tokens": 201,
+            "total_tokens": 774,
+            "cost_usd": 0.00020655,
+            "latency_ms": 763.9,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 605,
+            "completion_tokens": 122,
+            "total_tokens": 727,
+            "cost_usd": 0.00016395,
+            "latency_ms": 715.9,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 777,
+            "completion_tokens": 239,
+            "total_tokens": 1016,
+            "cost_usd": 0.00025995,
+            "latency_ms": 1486.5,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "workers -> orchestrator (synthesis)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 321,
+            "completion_tokens": 237,
+            "total_tokens": 558,
+            "cost_usd": 0.00019035,
+            "latency_ms": 916.2,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "The reply correctly confirms the customer meets the refund criteria and offers to cancel and refund the ₹1199, fully addressing the request per the policy.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": true
+        }
+      }
+    },
+    "T001": {
+      "multi": {
+        "system": "orchestrator",
+        "ticket_id": "T001",
+        "reply": "[Ticket #T001]  \nYes, we offer dedicated business enterprise plans that include a formal 99.9% uptime SLA. These plans are available under our Enterprise AirFiber tier and can be arranged by contacting enterprise-sales@airfiber.in.  \n\nSource: Dedicated business enterprise plans with formal 99.9% uptime SLAs are available under our Enterprise AirFiber tier by contacting enterprise-sales@airfiber.in.",
+        "plan": {
+          "parsed": true,
+          "triage_brief": "Customer asks whether AirFiber offers a business plan that includes an SLA.",
+          "policy_query": "AirFiber business plan SLA policy"
+        },
+        "triage": {
+          "ok": true,
+          "result": {
+            "worker": "triage",
+            "escalated": false,
+            "escalation_note": "",
+            "account_facts": "The customer has an active Enterprise plan (ORD-1100) that has been active for 120 days.",
+            "parsed_output": true,
+            "tools_called": [
+              "lookup_order_record"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 1200.0
+            }
+          ]
+        },
+        "policy": {
+          "ok": true,
+          "result": {
+            "worker": "policy",
+            "answerable": true,
+            "policy_text": "Dedicated business enterprise plans with formal 99.9% uptime SLAs are available under our Enterprise AirFiber tier by contacting enterprise-sales@airfiber.in.",
+            "parsed_output": true,
+            "tools_called": [
+              "retrieve_kb_context"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 1430.6
+            }
+          ]
+        },
+        "degraded": [],
+        "synthesis_context": "Dedicated business enterprise plans with formal 99.9% uptime SLAs are available under our Enterprise AirFiber tier by contacting enterprise-sales@airfiber.in.\n\nAccount record: The customer has an active Enterprise plan (ORD-1100) that has been active for 120 days.",
+        "escalation_note": "",
+        "total_tokens": 1966,
+        "total_cost_usd": 0.00052575,
+        "rate_limit_wait_ms": 0.0,
+        "latency_ms": 4213.1,
+        "calls": [
+          {
+            "hop": "ticket -> orchestrator (decompose)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 186,
+            "completion_tokens": 158,
+            "total_tokens": 344,
+            "cost_usd": 0.0001227,
+            "latency_ms": 818.0,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 596,
+            "completion_tokens": 107,
+            "total_tokens": 703,
+            "cost_usd": 0.0001536,
+            "latency_ms": 522.3,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "rejected",
+            "status": "api_400",
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 667.7,
+            "rate_limit_wait_ms": 0.0,
+            "error": "{'message': \"Tool call validation failed: tool call validation failed: attempted to call tool 'json' which was not in request.tools\", 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'faile"
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 391,
+            "completion_tokens": 72,
+            "total_tokens": 463,
+            "cost_usd": 0.00010185,
+            "latency_ms": 473.8,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "rejected",
+            "status": "api_400",
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 945.8,
+            "rate_limit_wait_ms": 0.0,
+            "error": "{'message': \"Tool call validation failed: tool call validation failed: attempted to call tool 'json' which was not in request.tools\", 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'faile"
+          },
+          {
+            "hop": "workers -> orchestrator (synthesis)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 280,
+            "completion_tokens": 176,
+            "total_tokens": 456,
+            "cost_usd": 0.00014759999999999998,
+            "latency_ms": 1960.8,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "The reply correctly confirms that a business plan with a 99.9% uptime SLA exists and provides the appropriate contact, directly answering the customer's question.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": true
+        }
+      },
+      "single": {
+        "reply": "[Ticket #T001]  \n\nYes, we offer dedicated business enterprise plans that include a formal 99.9% uptime SLA. These plans are available under our Enterprise AirFiber tier; you can inquire further by emailing **enterprise-sales@airfiber.in**.\n\n*Source: AirFiber provides residential broadband plans (AirFiber 599, 1199, 1999). Dedicated business enterprise plans with formal 99.9% uptime SLAs are available under our Enterprise AirFiber tier by contacting enterprise-sales@airfiber.in.*",
+        "tools_called": [
+          "retrieve_kb_context",
+          "generate_ticket_reply"
+        ],
+        "iterations": 3,
+        "budget_hit": null,
+        "total_tokens": 4417,
+        "agent_reported_tokens": 3961,
+        "total_cost_usd": 0.0009249,
+        "latency_ms": 8077.1,
+        "rate_limit_wait_ms": 0.0,
+        "calls": [
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1001,
+            "completion_tokens": 104,
+            "total_tokens": 1105,
+            "cost_usd": 0.00021255,
+            "latency_ms": 579.0,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1146,
+            "completion_tokens": 187,
+            "total_tokens": 1333,
+            "cost_usd": 0.0002841,
+            "latency_ms": 864.7,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent -> generate_ticket_reply",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 275,
+            "completion_tokens": 181,
+            "total_tokens": 456,
+            "cost_usd": 0.00014984999999999998,
+            "latency_ms": 754.1,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1412,
+            "completion_tokens": 111,
+            "total_tokens": 1523,
+            "cost_usd": 0.0002784,
+            "latency_ms": 5878.1,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "ticket_id": "T001",
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "The reply correctly confirms that a business plan with a 99.9% SLA exists and provides the appropriate contact, matching the provided context.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": true
+        }
+      }
+    },
+    "T003": {
+      "single": {
+        "reply": "[Ticket #T003]  \n\nAn official speed test for a refund claim must be performed using the AirFiber Desktop App **or** the website speed.airfiber.in, with the testing device connected via Ethernet directly to the ONT. You need to run **three consecutive tests**, spaced **one hour apart**.  \n\nSource: Refund Policy.",
+        "tools_called": [
+          "retrieve_kb_context",
+          "generate_ticket_reply"
+        ],
+        "iterations": 3,
+        "budget_hit": null,
+        "total_tokens": 4401,
+        "agent_reported_tokens": 3943,
+        "total_cost_usd": 0.0009431999999999999,
+        "latency_ms": 2892.0,
+        "rate_limit_wait_ms": 0.0,
+        "calls": [
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1003,
+            "completion_tokens": 146,
+            "total_tokens": 1149,
+            "cost_usd": 0.00023805,
+            "latency_ms": 683.7,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1143,
+            "completion_tokens": 217,
+            "total_tokens": 1360,
+            "cost_usd": 0.00030165,
+            "latency_ms": 828.9,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent -> generate_ticket_reply",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 266,
+            "completion_tokens": 192,
+            "total_tokens": 458,
+            "cost_usd": 0.0001551,
+            "latency_ms": 696.7,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1360,
+            "completion_tokens": 74,
+            "total_tokens": 1434,
+            "cost_usd": 0.00024839999999999997,
+            "latency_ms": 681.4,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "ticket_id": "T003",
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "PASS: The reply correctly states the required methods, Ethernet connection, three consecutive tests, and one‑hour spacing, matching the policy.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": true
+        }
+      },
+      "multi": {
+        "system": "orchestrator",
+        "ticket_id": "T003",
+        "reply": "[Ticket #T003]  \nAn official speed test for a refund claim must be performed using the official AirFiber Desktop App or via speed.airfiber.in, with the testing device connected by Ethernet directly to the ONT. You need to run three consecutive tests, spaced one hour apart. 【Official speed tests must be conducted via the official AirFiber Desktop App or speed.airfiber.in connected via ethernet directly to the ONT, taking 3 consecutive tests 1 hour apart.】",
+        "plan": {
+          "parsed": true,
+          "triage_brief": "Customer wants to know the criteria for an official speed test that qualifies for a refund claim.",
+          "policy_query": "official speed test requirements for refund claim policy"
+        },
+        "triage": {
+          "ok": true,
+          "result": {
+            "worker": "triage",
+            "escalated": false,
+            "escalation_note": "",
+            "account_facts": "Order ORD-2200 is active on the AirFiber_1199 plan, with 18 days of service to date.",
+            "parsed_output": true,
+            "tools_called": [
+              "lookup_order_record"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 2221.3
+            }
+          ]
+        },
+        "policy": {
+          "ok": true,
+          "result": {
+            "worker": "policy",
+            "answerable": true,
+            "policy_text": "Official speed tests must be conducted via the official AirFiber Desktop App or speed.airfiber.in connected via ethernet directly to the ONT, taking 3 consecutive tests 1 hour apart.",
+            "parsed_output": true,
+            "tools_called": [
+              "retrieve_kb_context"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 1912.4
+            }
+          ]
+        },
+        "degraded": [],
+        "synthesis_context": "Official speed tests must be conducted via the official AirFiber Desktop App or speed.airfiber.in connected via ethernet directly to the ONT, taking 3 consecutive tests 1 hour apart.\n\nAccount record: Order ORD-2200 is active on the AirFiber_1199 plan, with 18 days of service to date.",
+        "escalation_note": "",
+        "total_tokens": 2763,
+        "total_cost_usd": 0.00075195,
+        "rate_limit_wait_ms": 0.0,
+        "latency_ms": 3862.0,
+        "calls": [
+          {
+            "hop": "ticket -> orchestrator (decompose)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 188,
+            "completion_tokens": 171,
+            "total_tokens": 359,
+            "cost_usd": 0.0001308,
+            "latency_ms": 956.5,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 395,
+            "completion_tokens": 95,
+            "total_tokens": 490,
+            "cost_usd": 0.00011624999999999999,
+            "latency_ms": 1106.1,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 539,
+            "completion_tokens": 190,
+            "total_tokens": 729,
+            "cost_usd": 0.00019485,
+            "latency_ms": 798.4,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 600,
+            "completion_tokens": 110,
+            "total_tokens": 710,
+            "cost_usd": 0.000156,
+            "latency_ms": 1436.8,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "rejected",
+            "status": "api_400",
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 771.8,
+            "rate_limit_wait_ms": 0.0,
+            "error": "{'message': \"Tool call validation failed: tool call validation failed: attempted to call tool 'json' which was not in request.tools\", 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'faile"
+          },
+          {
+            "hop": "workers -> orchestrator (synthesis)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 291,
+            "completion_tokens": 184,
+            "total_tokens": 475,
+            "cost_usd": 0.00015405,
+            "latency_ms": 683.2,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "PASS: The reply correctly restates the policy, specifying the required app or website, Ethernet connection to the ONT, and three tests one hour apart, fully answering the customer's question.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": true
+        }
+      }
+    },
+    "T016": {
+      "multi": {
+        "system": "orchestrator",
+        "ticket_id": "T016",
+        "reply": "[Ticket #T016]  \nA full refund is available only if both of the following conditions are met:  \n1. You are within the first 30 days of plan activation.  \n2. Your service experiences a persistent speed drop to less than 50 % of the promised speed, and this issue cannot be resolved within 48 hours.  \n\nYour account is currently within the 30‑day eligibility window, so you meet the time requirement. 【Refund Policy】",
+        "plan": {
+          "parsed": true,
+          "triage_brief": "Customer wants to know the conditions required to receive a refund on their plan, indicating a potential refund request.",
+          "policy_query": "AirFiber plan refund conditions policy"
+        },
+        "triage": {
+          "ok": true,
+          "result": {
+            "worker": "triage",
+            "escalated": false,
+            "escalation_note": "",
+            "account_facts": "The plan is active and the customer is within the 30‑day refund eligibility window (eligible for a trial refund).",
+            "parsed_output": true,
+            "tools_called": [
+              "lookup_order_record"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 1430.4
+            }
+          ]
+        },
+        "policy": {
+          "ok": true,
+          "result": {
+            "worker": "policy",
+            "answerable": true,
+            "policy_text": "Refund Policy: Full refund of plan charges is available within the first 30 days of activation if persistent speed drops below 50% of promised speed cannot be resolved within 48 hours.",
+            "parsed_output": true,
+            "tools_called": [
+              "retrieve_kb_context"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 1310.1
+            }
+          ]
+        },
+        "degraded": [],
+        "synthesis_context": "Refund Policy: Full refund of plan charges is available within the first 30 days of activation if persistent speed drops below 50% of promised speed cannot be resolved within 48 hours.\n\nAccount record: The plan is active and the customer is within the 30‑day refund eligibility window (eligible for a trial refund).",
+        "escalation_note": "",
+        "total_tokens": 2817,
+        "total_cost_usd": 0.0007892999999999999,
+        "rate_limit_wait_ms": 0.0,
+        "latency_ms": 2989.1,
+        "calls": [
+          {
+            "hop": "ticket -> orchestrator (decompose)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 188,
+            "completion_tokens": 152,
+            "total_tokens": 340,
+            "cost_usd": 0.00011939999999999999,
+            "latency_ms": 632.2,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 393,
+            "completion_tokens": 69,
+            "total_tokens": 462,
+            "cost_usd": 0.00010035,
+            "latency_ms": 424.5,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 528,
+            "completion_tokens": 227,
+            "total_tokens": 755,
+            "cost_usd": 0.0002154,
+            "latency_ms": 878.3,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 603,
+            "completion_tokens": 137,
+            "total_tokens": 740,
+            "cost_usd": 0.00017265,
+            "latency_ms": 733.8,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "rejected",
+            "status": "api_400",
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 686.0,
+            "rate_limit_wait_ms": 0.0,
+            "error": "{'message': \"Tool call validation failed: tool call validation failed: attempted to call tool 'json' which was not in request.tools\", 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'faile"
+          },
+          {
+            "hop": "workers -> orchestrator (synthesis)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 290,
+            "completion_tokens": 230,
+            "total_tokens": 520,
+            "cost_usd": 0.0001815,
+            "latency_ms": 925.5,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "PASS: The reply correctly lists the two conditions from the policy—30‑day activation window and unresolved speed drop below 50% for 48 hours—and thus fully answers the customer's question.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": true
+        }
+      },
+      "single": {
+        "reply": "[Ticket #T016]  \n\nA refund is available only if both of the following conditions are met:\n\n* The request is made within the first 30 days after your plan’s activation.  \n* You have experienced a persistent speed drop to less than 50 % of the promised speed that could not be resolved within 48 hours.  \n\nIf these criteria are satisfied, you may submit a refund request through your account portal or contact our support team for assistance.  \n\n[Refund Policy]",
+        "tools_called": [
+          "retrieve_kb_context",
+          "generate_ticket_reply"
+        ],
+        "iterations": 3,
+        "budget_hit": null,
+        "total_tokens": 4390,
+        "agent_reported_tokens": 3964,
+        "total_cost_usd": 0.0009433499999999999,
+        "latency_ms": 3062.6,
+        "rate_limit_wait_ms": 0.0,
+        "calls": [
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1003,
+            "completion_tokens": 94,
+            "total_tokens": 1097,
+            "cost_usd": 0.00020684999999999999,
+            "latency_ms": 721.3,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1136,
+            "completion_tokens": 272,
+            "total_tokens": 1408,
+            "cost_usd": 0.0003336,
+            "latency_ms": 1005.4,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent -> generate_ticket_reply",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 263,
+            "completion_tokens": 163,
+            "total_tokens": 426,
+            "cost_usd": 0.00013725,
+            "latency_ms": 625.9,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1355,
+            "completion_tokens": 104,
+            "total_tokens": 1459,
+            "cost_usd": 0.00026565,
+            "latency_ms": 709.0,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "ticket_id": "T016",
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "PASS: The reply correctly lists the exact conditions from the policy—30‑day window and unresolved speed drop below 50%—fully answering the customer's question.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": true
+        }
+      }
+    },
+    "T022": {
+      "single": {
+        "reply": "[Ticket #T022]  \n\nTo close your account, please return the ONT device and its power adapter within **14 days**.  \n\n- **If you do not return the equipment**, a non‑return fee of **₹2,500** for the ONT (and **₹1,500** for any mesh extender) will be charged.  \n- Your **security deposit of ₹1,000** will be refunded **within 7 days** after we receive the returned equipment.  \n\nIf you have any further questions or need assistance with the return process, feel free to let us know.  \n\n*Source: Account Closure Policy*",
+        "tools_called": [
+          "retrieve_kb_context",
+          "generate_ticket_reply"
+        ],
+        "iterations": 3,
+        "budget_hit": null,
+        "total_tokens": 4642,
+        "agent_reported_tokens": 4108,
+        "total_cost_usd": 0.0010194,
+        "latency_ms": 7226.3,
+        "rate_limit_wait_ms": 0.0,
+        "calls": [
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1020,
+            "completion_tokens": 152,
+            "total_tokens": 1172,
+            "cost_usd": 0.00024419999999999997,
+            "latency_ms": 804.4,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1173,
+            "completion_tokens": 190,
+            "total_tokens": 1363,
+            "cost_usd": 0.00028995,
+            "latency_ms": 862.1,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent -> generate_ticket_reply",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 294,
+            "completion_tokens": 240,
+            "total_tokens": 534,
+            "cost_usd": 0.00018810000000000002,
+            "latency_ms": 926.8,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1437,
+            "completion_tokens": 136,
+            "total_tokens": 1573,
+            "cost_usd": 0.00029715,
+            "latency_ms": 4632.2,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "ticket_id": "T022",
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "The reply correctly lists the required equipment, the applicable non‑return fees, and the deposit refund timeline, matching the policy.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": true
+        }
+      },
+      "multi": {
+        "system": "orchestrator",
+        "ticket_id": "T022",
+        "reply": "[Ticket #T022]  \nTo close your account you must return the ONT device and its power adapter within 14 days. If the ONT is not returned you will be charged a non‑return fee of ₹2,500; the mesh extender fee of ₹1,500 does not apply since you did not receive one. Your ₹1,000 security deposit will be refunded within 7 days after we receive the equipment.  \n\nSource: Account Closure Policy.",
+        "plan": {
+          "parsed": true,
+          "triage_brief": "Customer wants to close their account and is asking which equipment must be returned, any fees for not returning it, and when the deposit will be refunded.",
+          "policy_query": "account closure equipment return deposit refund policy"
+        },
+        "triage": {
+          "ok": true,
+          "result": {
+            "worker": "triage",
+            "escalated": false,
+            "escalation_note": "",
+            "account_facts": "The order (ORD-4401) is in closing status after 365 days of active service; the customer has been issued an ONT device and power adapter, with a $1000 security deposit refundable within 7 days of equipment return.",
+            "parsed_output": true,
+            "tools_called": [
+              "lookup_order_record"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 3535.2
+            }
+          ]
+        },
+        "policy": {
+          "ok": true,
+          "result": {
+            "worker": "policy",
+            "answerable": true,
+            "policy_text": "Account Closure Policy: Return the ONT device and power adapter within 14 days. Non-return fee is ₹2500 for ONT and ₹1500 for mesh extender. Security deposit of ₹1000 is refunded within 7 days of device receipt.",
+            "parsed_output": true,
+            "tools_called": [
+              "retrieve_kb_context"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 2214.5
+            }
+          ]
+        },
+        "degraded": [],
+        "synthesis_context": "Account Closure Policy: Return the ONT device and power adapter within 14 days. Non-return fee is ₹2500 for ONT and ₹1500 for mesh extender. Security deposit of ₹1000 is refunded within 7 days of device receipt.\n\nAccount record: The order (ORD-4401) is in closing status after 365 days of active service; the customer has been issued an ONT device and power adapter, with a $1000 security deposit refundable within 7 days of equipment return.",
+        "escalation_note": "",
+        "total_tokens": 3085,
+        "total_cost_usd": 0.0008889,
+        "rate_limit_wait_ms": 0.0,
+        "latency_ms": 7533.2,
+        "calls": [
+          {
+            "hop": "ticket -> orchestrator (decompose)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 205,
+            "completion_tokens": 202,
+            "total_tokens": 407,
+            "cost_usd": 0.00015194999999999998,
+            "latency_ms": 927.6,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 411,
+            "completion_tokens": 66,
+            "total_tokens": 477,
+            "cost_usd": 0.00010125,
+            "latency_ms": 579.7,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 564,
+            "completion_tokens": 313,
+            "total_tokens": 877,
+            "cost_usd": 0.0002724,
+            "latency_ms": 1627.0,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 612,
+            "completion_tokens": 108,
+            "total_tokens": 720,
+            "cost_usd": 0.0001566,
+            "latency_ms": 654.8,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "rejected",
+            "status": "api_400",
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 2867.7,
+            "rate_limit_wait_ms": 0.0,
+            "error": "{'message': \"Tool call validation failed: tool call validation failed: attempted to call tool 'json' which was not in request.tools\", 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'faile"
+          },
+          {
+            "hop": "workers -> orchestrator (synthesis)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 346,
+            "completion_tokens": 258,
+            "total_tokens": 604,
+            "cost_usd": 0.00020669999999999998,
+            "latency_ms": 3068.8,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "The reply correctly states the required equipment, the applicable non‑return fees, and the deposit refund timeline, fully matching the provided policy.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": true
+        }
+      }
+    },
+    "T073": {
+      "multi": {
+        "system": "orchestrator",
+        "ticket_id": "T073",
+        "reply": "[Ticket #T073]  \nA solid orange LED on your ONT means it is either in firmware‑update mode or detecting a degraded optical signal (typically between –27 dBm and –30 dBm). This condition is not a flashing alert but indicates the device is currently handling a firmware update or experiencing low signal strength. If the orange light persists, you may need to check the fiber connection quality or allow the update to complete.  \n\n*Source: Solid orange LED indicates ONT is in firmware update mode or degraded optical signal (-27 dBm to -30 dBm).*",
+        "plan": {
+          "parsed": true,
+          "triage_brief": "Customer wants to know the meaning of a steady orange light on their box.",
+          "policy_query": "steady orange light on box meaning"
+        },
+        "triage": {
+          "ok": true,
+          "result": {
+            "worker": "triage",
+            "escalated": false,
+            "escalation_note": "",
+            "account_facts": "The order (ORD-3305) is active and has been paid for; the service has been active for 30 days with the box already activated.",
+            "parsed_output": true,
+            "tools_called": [
+              "lookup_order_record"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 4375.2
+            }
+          ]
+        },
+        "policy": {
+          "ok": true,
+          "result": {
+            "worker": "policy",
+            "answerable": true,
+            "policy_text": "Solid orange LED indicates ONT is in firmware update mode or degraded optical signal (-27 dBm to -30 dBm).",
+            "parsed_output": true,
+            "tools_called": [
+              "retrieve_kb_context"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 2897.4
+            }
+          ]
+        },
+        "degraded": [],
+        "synthesis_context": "Solid orange LED indicates ONT is in firmware update mode or degraded optical signal (-27 dBm to -30 dBm).\n\nAccount record: The order (ORD-3305) is active and has been paid for; the service has been active for 30 days with the box already activated.",
+        "escalation_note": "",
+        "total_tokens": 2024,
+        "total_cost_usd": 0.00055065,
+        "rate_limit_wait_ms": 0.0,
+        "latency_ms": 7047.4,
+        "calls": [
+          {
+            "hop": "ticket -> orchestrator (decompose)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 192,
+            "completion_tokens": 181,
+            "total_tokens": 373,
+            "cost_usd": 0.0001374,
+            "latency_ms": 766.6,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 397,
+            "completion_tokens": 77,
+            "total_tokens": 474,
+            "cost_usd": 0.00010575,
+            "latency_ms": 1928.0,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "rejected",
+            "status": "api_400",
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 959.4,
+            "rate_limit_wait_ms": 0.0,
+            "error": "{'message': \"Tool call validation failed: tool call validation failed: attempted to call tool 'json' which was not in request.tools\", 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'faile"
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 597,
+            "completion_tokens": 102,
+            "total_tokens": 699,
+            "cost_usd": 0.00015075,
+            "latency_ms": 1875.9,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "rejected",
+            "status": "api_400",
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 2491.3,
+            "rate_limit_wait_ms": 0.0,
+            "error": "{'message': \"Tool call validation failed: tool call validation failed: attempted to call tool 'json' which was not in request.tools\", 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'faile"
+          },
+          {
+            "hop": "workers -> orchestrator (synthesis)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 289,
+            "completion_tokens": 189,
+            "total_tokens": 478,
+            "cost_usd": 0.00015675,
+            "latency_ms": 1903.1,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "PASS: The reply correctly explains that a solid orange LED indicates firmware update mode or a degraded optical signal, directly answering the customer's question.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": true
+        }
+      },
+      "single": {
+        "reply": "[Ticket #T073]  \n\nA solid orange LED on your ONT means it is either in firmware‑update mode or detecting a degraded optical signal (approximately ‑27 dBm to ‑30 dBm). Please wait about 10 minutes; if the light remains solid orange, perform a single power‑cycle of the device.  \n\nIf the orange light persists after the power‑cycle, let us know and we’ll investigate further.  \n\n*Source: Troubleshooting guide*",
+        "tools_called": [
+          "retrieve_kb_context",
+          "generate_ticket_reply"
+        ],
+        "iterations": 3,
+        "budget_hit": null,
+        "total_tokens": 4625,
+        "agent_reported_tokens": 4075,
+        "total_cost_usd": 0.0010447499999999999,
+        "latency_ms": 4991.9,
+        "rate_limit_wait_ms": 0.0,
+        "calls": [
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1007,
+            "completion_tokens": 123,
+            "total_tokens": 1130,
+            "cost_usd": 0.00022484999999999996,
+            "latency_ms": 1667.4,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1156,
+            "completion_tokens": 279,
+            "total_tokens": 1435,
+            "cost_usd": 0.0003408,
+            "latency_ms": 954.4,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent -> generate_ticket_reply",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 276,
+            "completion_tokens": 274,
+            "total_tokens": 550,
+            "cost_usd": 0.0002058,
+            "latency_ms": 876.3,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1406,
+            "completion_tokens": 104,
+            "total_tokens": 1510,
+            "cost_usd": 0.0002733,
+            "latency_ms": 1490.8,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "ticket_id": "T073",
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "PASS: The reply accurately explains that a solid orange LED means firmware‑update mode or a degraded optical signal, advises the 10‑minute wait and power‑cycle as per the context, and offers further help, fully addressing the customer's query.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": true
+        }
+      }
+    },
+    "T118": {
+      "single": {
+        "reply": "[Ticket #T118]  \n\nI understand how frustrating a 2‑day outage can be, especially after three months of service. According to our Billing Knowledge Base, full plan refunds are only available within the first 30 days of activation. Since your service has been active for three months, a full refund isn’t applicable. However, outages that exceed 24 consecutive hours qualify for a pro‑rata credit of ₹100 per outage day, so you’re eligible for a ₹200 credit on your account.  \n\n(Source: Billing Knowledge Base)",
+        "tools_called": [
+          "retrieve_kb_context",
+          "generate_ticket_reply"
+        ],
+        "iterations": 3,
+        "budget_hit": null,
+        "total_tokens": 4849,
+        "agent_reported_tokens": 4276,
+        "total_cost_usd": 0.0011602499999999998,
+        "latency_ms": 4368.1,
+        "rate_limit_wait_ms": 0.0,
+        "calls": [
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1012,
+            "completion_tokens": 287,
+            "total_tokens": 1299,
+            "cost_usd": 0.00032399999999999996,
+            "latency_ms": 1344.7,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1156,
+            "completion_tokens": 270,
+            "total_tokens": 1426,
+            "cost_usd": 0.00033539999999999997,
+            "latency_ms": 1221.5,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent -> generate_ticket_reply",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 283,
+            "completion_tokens": 290,
+            "total_tokens": 573,
+            "cost_usd": 0.00021645,
+            "latency_ms": 1079.6,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1436,
+            "completion_tokens": 115,
+            "total_tokens": 1551,
+            "cost_usd": 0.0002844,
+            "latency_ms": 721.2,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "ticket_id": "T118",
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "The reply correctly applies the policy: it explains that a full refund is not available after 30 days and offers the appropriate ₹200 pro‑rata credit for the 2‑day outage, fully answering the customer's request.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": false,
+            "no_refund_outside_30_days": true
+          },
+          "pass": false
+        }
+      },
+      "multi": {
+        "system": "orchestrator",
+        "ticket_id": "T118",
+        "reply": "[Ticket #T118] [Priority Escalation: Priority Support Lead]\n\nWe’re sorry for the inconvenience caused by the recent 2‑day outage. As your service has been active for 85 days, it falls",
+        "plan": {
+          "parsed": true,
+          "triage_brief": "Customer demands a full refund for a 2‑day outage that occurred last month after three months of service.",
+          "policy_query": "AirFiber refund policy for service outage"
+        },
+        "triage": {
+          "ok": true,
+          "result": {
+            "worker": "triage",
+            "escalated": true,
+            "escalation_note": "[Priority Escalation: Priority Support Lead] Ticket T118 escalated — reason: priority_customer, severity: high.",
+            "account_facts": "Priority-tier customer with 85 days tenure; active service experienced a 2‑day outage and is not eligible for a full refund but qualifies for a $200 credit.",
+            "parsed_output": true,
+            "tools_called": [
+              "lookup_order_record",
+              "escalate_ticket"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 2880.0
+            }
+          ]
+        },
+        "policy": {
+          "ok": true,
+          "result": {
+            "worker": "policy",
+            "answerable": true,
+            "policy_text": "\"Outages exceeding 24 consecutive hours qualify for pro-rata billing credit of ₹100 per outage day upon verification. Full plan refunds are only applicable within the initial 30 days of activation.\"",
+            "parsed_output": true,
+            "tools_called": [
+              "retrieve_kb_context"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 2400.1
+            }
+          ]
+        },
+        "degraded": [],
+        "synthesis_context": "\"Outages exceeding 24 consecutive hours qualify for pro-rata billing credit of ₹100 per outage day upon verification. Full plan refunds are only applicable within the initial 30 days of activation.\"\n\nAccount record: Priority-tier customer with 85 days tenure; active service experienced a 2‑day outage and is not eligible for a full refund but qualifies for a $200 credit.",
+        "escalation_note": "[Priority Escalation: Priority Support Lead] Ticket T118 escalated — reason: priority_customer, severity: high.",
+        "total_tokens": 4208,
+        "total_cost_usd": 0.0010722,
+        "rate_limit_wait_ms": 0.0,
+        "latency_ms": 6947.5,
+        "calls": [
+          {
+            "hop": "ticket -> orchestrator (decompose)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 197,
+            "completion_tokens": 151,
+            "total_tokens": 348,
+            "cost_usd": 0.00012014999999999999,
+            "latency_ms": 776.3,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 403,
+            "completion_tokens": 82,
+            "total_tokens": 485,
+            "cost_usd": 0.00010965,
+            "latency_ms": 630.7,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "rejected",
+            "status": "api_400",
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 1757.9,
+            "rate_limit_wait_ms": 0.0,
+            "error": "{'message': \"Tool call validation failed: tool call validation failed: attempted to call tool 'json' which was not in request.tools\", 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'faile"
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 604,
+            "completion_tokens": 147,
+            "total_tokens": 751,
+            "cost_usd": 0.0001788,
+            "latency_ms": 449.3,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 771,
+            "completion_tokens": 245,
+            "total_tokens": 1016,
+            "cost_usd": 0.00026265,
+            "latency_ms": 1676.1,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 912,
+            "completion_tokens": 55,
+            "total_tokens": 967,
+            "cost_usd": 0.00016979999999999998,
+            "latency_ms": 743.8,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "workers -> orchestrator (synthesis)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 341,
+            "completion_tokens": 300,
+            "total_tokens": 641,
+            "cost_usd": 0.00023114999999999998,
+            "latency_ms": 3289.2,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "judge": {
+          "score": 0,
+          "votes": [
+            0
+          ],
+          "explanation": "The reply is truncated and never addresses whether a full refund is possible or offers the correct pro‑rata credit, thus it fails to resolve the customer's request.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": false
+        }
+      }
+    },
+    "T007": {
+      "multi": {
+        "system": "orchestrator",
+        "ticket_id": "T007",
+        "reply": "[Ticket #T007]  \nYes, the registered account holder or an authorized adult must be present at the new premises during the technician’s setup. There is no charge for the relocation, and the process typically takes 3‑5 working days.  \n\nSource: “Relocation within the same city is free of charge and takes 3-5 working days.” “The registered account holder or an authorized adult must be present at the new premises during technician setup.”",
+        "plan": {
+          "parsed": true,
+          "triage_brief": "Customer wants to know if they must be present for a service address transfer, whether there is a charge, and how long the transfer takes.",
+          "policy_query": "address transfer presence requirement fee timeline policy"
+        },
+        "triage": {
+          "ok": true,
+          "result": {
+            "worker": "triage",
+            "escalated": false,
+            "escalation_note": "",
+            "account_facts": "The account (order ORD-3310) has an active relocation request with no fee and the service is already activated.",
+            "parsed_output": true,
+            "tools_called": [
+              "lookup_order_record"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 1604.2
+            }
+          ]
+        },
+        "policy": {
+          "ok": true,
+          "result": {
+            "worker": "policy",
+            "answerable": true,
+            "policy_text": "\"Relocation within the same city is free of charge and takes 3-5 working days.\" \"The registered account holder or an authorized adult must be present at the new premises during technician setup.\"",
+            "parsed_output": true,
+            "tools_called": [
+              "retrieve_kb_context"
+            ]
+          },
+          "attempts": [
+            {
+              "attempt": 1,
+              "status": 200,
+              "elapsed_ms": 2559.9
+            }
+          ]
+        },
+        "degraded": [],
+        "synthesis_context": "\"Relocation within the same city is free of charge and takes 3-5 working days.\" \"The registered account holder or an authorized adult must be present at the new premises during technician setup.\"\n\nAccount record: The account (order ORD-3310) has an active relocation request with no fee and the service is already activated.",
+        "escalation_note": "",
+        "total_tokens": 2294,
+        "total_cost_usd": 0.00068925,
+        "rate_limit_wait_ms": 0.0,
+        "latency_ms": 5327.7,
+        "calls": [
+          {
+            "hop": "ticket -> orchestrator (decompose)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 202,
+            "completion_tokens": 181,
+            "total_tokens": 383,
+            "cost_usd": 0.0001389,
+            "latency_ms": 875.6,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 610,
+            "completion_tokens": 230,
+            "total_tokens": 840,
+            "cost_usd": 0.0002295,
+            "latency_ms": 763.5,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> triage worker",
+            "kind": "rejected",
+            "status": "api_400",
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 831.0,
+            "rate_limit_wait_ms": 0.0,
+            "error": "{'message': \"Tool call validation failed: tool call validation failed: attempted to call tool 'json' which was not in request.tools\", 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'faile"
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 408,
+            "completion_tokens": 89,
+            "total_tokens": 497,
+            "cost_usd": 0.0001146,
+            "latency_ms": 1363.6,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "orchestrator -> policy worker",
+            "kind": "rejected",
+            "status": "api_400",
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 1185.5,
+            "rate_limit_wait_ms": 0.0,
+            "error": "{'message': \"Tool call validation failed: tool call validation failed: attempted to call tool 'json' which was not in request.tools\", 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'faile"
+          },
+          {
+            "hop": "workers -> orchestrator (synthesis)",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 307,
+            "completion_tokens": 267,
+            "total_tokens": 574,
+            "cost_usd": 0.00020625,
+            "latency_ms": 1889.2,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "The reply correctly states that the account holder or authorized adult must be present, there is no charge, and the relocation takes 3‑5 working days, fully answering the customer's three-part question.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": true
+        }
+      },
+      "single": {
+        "reply": "[Ticket #T007]  \n\nYes, the registered account holder or an authorized adult must be present at the new premises during the technician’s setup. Relocating your service within the same city is free of charge and typically takes **3‑5 working days** to complete.  \n\n*Source: Account Management*",
+        "tools_called": [
+          "retrieve_kb_context",
+          "generate_ticket_reply"
+        ],
+        "iterations": 3,
+        "budget_hit": null,
+        "total_tokens": 4410,
+        "agent_reported_tokens": 3985,
+        "total_cost_usd": 0.0009108,
+        "latency_ms": 3819.4,
+        "rate_limit_wait_ms": 0.0,
+        "calls": [
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1017,
+            "completion_tokens": 118,
+            "total_tokens": 1135,
+            "cost_usd": 0.00022334999999999998,
+            "latency_ms": 1206.1,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1166,
+            "completion_tokens": 224,
+            "total_tokens": 1390,
+            "cost_usd": 0.0003093,
+            "latency_ms": 1242.8,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent -> generate_ticket_reply",
+            "kind": "completion",
+            "status": "ok",
+            "prompt_tokens": 281,
+            "completion_tokens": 144,
+            "total_tokens": 425,
+            "cost_usd": 0.00012855,
+            "latency_ms": 719.7,
+            "rate_limit_wait_ms": 0.0
+          },
+          {
+            "hop": "single agent loop",
+            "kind": "tool-calling",
+            "status": "ok",
+            "prompt_tokens": 1392,
+            "completion_tokens": 68,
+            "total_tokens": 1460,
+            "cost_usd": 0.0002496,
+            "latency_ms": 649.6,
+            "rate_limit_wait_ms": 0.0
+          }
+        ],
+        "ticket_id": "T007",
+        "judge": {
+          "score": 1,
+          "votes": [
+            1
+          ],
+          "explanation": "The reply correctly confirms presence is required, states there is no charge, and gives the 3‑5 working‑day timeframe, matching the provided context.",
+          "judge_error": false,
+          "assertions": {
+            "ticket_id_echoed": true,
+            "refund_amount_numeric": true,
+            "priority_escalation": true,
+            "no_refund_outside_30_days": true
+          },
+          "pass": true
+        }
+      }
+    }
+  },
+  "failure_run": {
+    "ticket_id": "T017",
+    "multi": {
+      "system": "orchestrator",
+      "ticket_id": "T017",
+      "reply": "[Ticket #T017] [Priority Escalation: Priority Support Lead]  \nI’m very sorry for the repeated inconvenience. Our records show you paid $1,999, the order has not been activated after five days,",
+      "plan": {
+        "parsed": true,
+        "triage_brief": "Customer demands a refund after paying $1999; engineer never arrived and no callback despite multiple contacts.",
+        "policy_query": "AirFiber refund policy for missed engineer appointment"
+      },
+      "triage": {
+        "ok": true,
+        "result": {
+          "worker": "triage",
+          "escalated": true,
+          "escalation_note": "[Priority Escalation: Priority Support Lead] Ticket T017 escalated — reason: priority_customer, severity: high.",
+          "account_facts": "Priority-tier customer paid $1999, order remains unactivated after 5 days, with three missed engineer visits and a refund request.",
+          "parsed_output": true,
+          "tools_called": [
+            "lookup_order_record",
+            "escalate_ticket"
+          ]
+        },
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": 200,
+            "elapsed_ms": 1846.7
+          }
+        ]
+      },
+      "policy": {
+        "ok": false,
+        "result": null,
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": 500,
+            "elapsed_ms": 9.1
+          },
+          {
+            "attempt": 2,
+            "status": 500,
+            "elapsed_ms": 0.9
+          }
+        ]
+      },
+      "degraded": [
+        "policy"
+      ],
+      "synthesis_context": "[Policy lookup unavailable: the policy-lookup worker failed and returned no policy text.]\n\nAccount record: Priority-tier customer paid $1999, order remains unactivated after 5 days, with three missed engineer visits and a refund request.",
+      "escalation_note": "[Priority Escalation: Priority Support Lead] Ticket T017 escalated — reason: priority_customer, severity: high.",
+      "total_tokens": 3712,
+      "total_cost_usd": 0.0009572999999999999,
+      "rate_limit_wait_ms": 0.0,
+      "latency_ms": 4182.3,
+      "calls": [
+        {
+          "hop": "ticket -> orchestrator (decompose)",
+          "kind": "completion",
+          "status": "ok",
+          "prompt_tokens": 215,
+          "completion_tokens": 141,
+          "total_tokens": 356,
+          "cost_usd": 0.00011685,
+          "latency_ms": 1033.5,
+          "rate_limit_wait_ms": 0.0
+        },
+        {
+          "hop": "orchestrator -> policy worker",
+          "kind": "hand-off",
+          "status": "http_500",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0,
+          "cost_usd": 0.0,
+          "latency_ms": 9.1,
+          "rate_limit_wait_ms": 0.0,
+          "error": "policy-lookup worker: injected failure"
+        },
+        {
+          "hop": "orchestrator -> policy worker",
+          "kind": "hand-off",
+          "status": "http_500",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0,
+          "cost_usd": 0.0,
+          "latency_ms": 0.9,
+          "rate_limit_wait_ms": 0.0,
+          "error": "policy-lookup worker: injected failure"
+        },
+        {
+          "hop": "orchestrator -> triage worker",
+          "kind": "tool-calling",
+          "status": "ok",
+          "prompt_tokens": 602,
+          "completion_tokens": 113,
+          "total_tokens": 715,
+          "cost_usd": 0.0001581,
+          "latency_ms": 523.4,
+          "rate_limit_wait_ms": 0.0
+        },
+        {
+          "hop": "orchestrator -> triage worker",
+          "kind": "tool-calling",
+          "status": "ok",
+          "prompt_tokens": 766,
+          "completion_tokens": 288,
+          "total_tokens": 1054,
+          "cost_usd": 0.0002877,
+          "latency_ms": 904.1,
+          "rate_limit_wait_ms": 0.0
+        },
+        {
+          "hop": "orchestrator -> triage worker",
+          "kind": "tool-calling",
+          "status": "ok",
+          "prompt_tokens": 908,
+          "completion_tokens": 48,
+          "total_tokens": 956,
+          "cost_usd": 0.000165,
+          "latency_ms": 409.8,
+          "rate_limit_wait_ms": 0.0
+        },
+        {
+          "hop": "workers -> orchestrator (synthesis)",
+          "kind": "completion",
+          "status": "ok",
+          "prompt_tokens": 331,
+          "completion_tokens": 300,
+          "total_tokens": 631,
+          "cost_usd": 0.00022964999999999997,
+          "latency_ms": 1300.7,
+          "rate_limit_wait_ms": 0.0
+        }
+      ]
+    },
+    "worker_500s": {
+      "T017": 2
+    },
+    "judge": {
+      "score": 0,
+      "votes": [
+        0
+      ],
+      "explanation": "The reply is incomplete and does not confirm the customer's refund entitlement, leaving the question unanswered.",
+      "judge_error": false,
+      "assertions": {
+        "ticket_id_echoed": true,
+        "refund_amount_numeric": true,
+        "priority_escalation": true,
+        "no_refund_outside_30_days": true
+      },
+      "pass": false
+    }
+  }
+}
