@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 
+from app.services.auth import current_user
 from app.schemas import ChatRequest, ChatResponse
 from app.services.rag_service import NoDocumentsError, RagGenerationError, get_rag_service
 
@@ -7,7 +8,11 @@ router = APIRouter(tags=["chat"])
 
 
 @router.post("/chat", response_model=ChatResponse)
-def chat(payload: ChatRequest) -> ChatResponse:
+def chat(
+    payload: ChatRequest,
+    user=Depends(current_user),
+    x_session_id: str | None = Header(default=None),
+) -> ChatResponse:
     question = payload.message.strip()
     if not question:
         raise HTTPException(status_code=400, detail="Message cannot be empty.")
@@ -35,6 +40,9 @@ def chat(payload: ChatRequest) -> ChatResponse:
             filters=filters or None,
             mode=payload.mode,
             history=payload.history,
+            # Who asked: the one fact a "wrong answer yesterday" complaint can
+            # usually be narrowed by once the time window is known.
+            trace_extra={"user": {"user": user.username, "role": user.role, "session_id": x_session_id}},
         )
     except NoDocumentsError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

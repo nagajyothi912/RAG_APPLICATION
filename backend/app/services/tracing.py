@@ -50,10 +50,13 @@ from pathlib import Path
 from typing import Any, Iterable, Optional
 
 from app.config import settings
+from app.services import pricing
 
 logger = logging.getLogger(__name__)
 
-SCHEMA_VERSION = "1"
+# "2" (Week 11) only adds keys: session, input_type, spans, cost_usd, tokens,
+# context_ids, cache. Every key a version-1 reader uses is unchanged.
+SCHEMA_VERSION = "2"
 
 # Three consecutive write failures and the writer gives up for the life of the
 # process. A read-only mount would otherwise emit one warning per request.
@@ -173,6 +176,75 @@ def _i(value: Any) -> Optional[int]:
         return None
 
 
+def build_spans(
+    *,
+    latency_ms: dict,
+    capture: dict,
+    follow_up: Optional[dict],
+    retrieval_attrs: dict,
+    cache_hit: bool,
+) -> tuple[list[dict], dict, dict]:
+    """
+    Turn the stage timings and usage the request already collected into spans.
+
+    Returns (spans, cost_usd by stage, token totals). Stages run one after the
+    other, so `start_ms` is the running sum of the stages before it. The
+    `tools` stage exists in the cost split even though /api/chat calls no tool:
+    it is 0.0 here and non-zero on the assistant path, which is what makes the
+    same report usable for both.
+    """
+    spans: list[dict] = []
+    cursor = 0.0
+    totals = {"prompt": 0, "completion": 0}
+    cost = {"rewrite": 0.0, "retrieval": 0.0, "generation": 0.0, "tools": 0.0}
+    model = capture.get("model")
+
+    def add(name: str, ms: Optional[float], usage: Optional[dict], span_model: Optional[str], attrs: dict) -> None:
+        nonlocal cursor
+        ms = float(ms or 0.0)
+        tin = _i((usage or {}).get("prompt_tokens"))
+        tout = _i((usage or {}).get("completion_tokens"))
+        usd = pricing.call_cost(span_model, tin, tout) if usage else 0.0
+        totals["prompt"] += tin or 0
+        totals["completion"] += tout or 0
+        if name in cost:
+            cost[name] += usd
+        spans.append(
+            {
+                "name": name,
+                "start_ms": round(cursor, 2),
+                "latency_ms": round(ms, 2),
+                "tokens_in": tin,
+                "tokens_out": tout,
+                "cost_usd": round(usd, 8),
+                "model": span_model,
+                "attrs": attrs,
+            }
+        )
+        cursor += ms
+
+    if follow_up and follow_up.get("latency_ms") is not None:
+        add("rewrite", follow_up.get("latency_ms"), follow_up.get("usage"), follow_up.get("model"),
+            {"rewritten": bool(follow_up.get("rewritten")), "error": follow_up.get("error")})
+    add("retrieval", latency_ms.get("retrieval"), None, None, retrieval_attrs)
+    gen_attrs = {
+        "called": bool(capture.get("called", False)),
+        "cache_hit": cache_hit,
+        "finish_reason": capture.get("finish_reason"),
+        "llm_api_ms": _f(capture.get("api_latency_ms"), 2),
+        "prompt_version": capture.get("prompt_version"),
+    }
+    add("generation", latency_ms.get("generation"), None if cache_hit else capture.get("usage"), model, gen_attrs)
+    # Whatever the request spent outside the timed stages (prompt build, cache
+    # lookup, writing the trace) gets its own span, so the spans add up to the total.
+    unaccounted = float(latency_ms.get("total") or 0.0) - cursor
+    if unaccounted >= 1.0:
+        add("other", unaccounted, None, None, {"what": "prompt build, cache lookup, trace write"})
+    cost_out = {k: round(v, 8) for k, v in cost.items()}
+    cost_out["total"] = round(sum(cost.values()), 8)
+    return spans, cost_out, {**totals, "total": totals["prompt"] + totals["completion"]}
+
+
 def build_chat_record(
     *,
     trace_id: str,
@@ -199,6 +271,9 @@ def build_chat_record(
     pool: Optional[str] = None,
     source_id: Optional[str] = None,
     follow_up: Optional[dict] = None,
+    user: Optional[dict] = None,
+    input_type: str = "question",
+    cache_hit: bool = False,
 ) -> dict:
     """
     Build one trace record. The whole schema lives here, so the replay script
@@ -256,6 +331,20 @@ def build_chat_record(
         "api_latency_ms": _f(capture.get("api_latency_ms"), 2),
     }
 
+    spans, cost_usd, tokens = build_spans(
+        latency_ms=latency_ms or {},
+        capture=capture,
+        follow_up=follow_up,
+        retrieval_attrs={
+            "mode": mode_effective,
+            "hybrid": bool(hybrid),
+            "reranked": bool(reranked),
+            "chunks": len(chunks),
+            "gate_score": _f(gate_score, 4),
+        },
+        cache_hit=cache_hit,
+    )
+
     if error is not None:
         status = "error"
     elif gate_score < score_threshold:
@@ -301,6 +390,20 @@ def build_chat_record(
             "chars": len(answer_text or ""),
         },
         "latency_ms": {k: _f(v, 2) for k, v in (latency_ms or {}).items()},
+        # Week 11: who asked, what kind of input, and the per-stage time/cost.
+        "session": {
+            "user": (user or {}).get("user", "anonymous"),
+            "role": (user or {}).get("role", "unknown"),
+            "session_id": (user or {}).get("session_id"),
+        },
+        "input_type": input_type,
+        "spans": spans,
+        "cost_usd": cost_usd,
+        "tokens": tokens,
+        # Every chunk the model was shown, as one flat list - the field a
+        # "which answers used this article?" search needs.
+        "context_ids": [c["chunk_uid"] for c in chunks],
+        "cache": {"hit": bool(cache_hit)},
     }
     # Set only by the traffic simulator, so the sampler can tell the random
     # pool from the curated demo pool. A live request has neither.

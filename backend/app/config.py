@@ -38,6 +38,18 @@ class Settings(BaseSettings):
     trace_path: Path = BACKEND_ROOT / "data" / "traces" / "chat_traces.jsonl"
     trace_include_prompts: bool = True
 
+    # Week 11. A SQLite index beside the JSONL makes any past request findable by
+    # time, user, prompt version, input type, cost or the words of the question
+    # and the answer. It is a derived copy: delete it and find_trace.py rebuilds
+    # it from the JSONL (it lives beside the log as trace_index.db), which stays the source of truth.
+    trace_index_enabled: bool = True
+    # Exact-match answer cache (cost lever). OFF by default so tests and eval
+    # runs always hit the model. Deliberately exact, not semantic: see
+    # docs/week11/cost_by_stage.md for why a semantic cache is unsafe on a refund policy.
+    cache_enabled: bool = False
+    cache_ttl_seconds: int = 3600
+    cache_max_entries: int = 256
+
     # Langfuse is a second sink for the same trace record, not a replacement.
     # The JSONL is what the committed error analysis is pinned to; this is where
     # the traces are read. Independent of TRACE_ENABLED on purpose, so a server

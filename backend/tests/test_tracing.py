@@ -226,7 +226,7 @@ def test_the_prompt_id_is_pinned_so_an_edit_cannot_change_the_prompt_silently():
     update the literal, and note it, because every trace already on disk was
     produced by the old prompt and must stay attributable to it.
     """
-    assert rag_module.PROMPT_SHA == "cfc04156c4e7"
+    assert rag_module.PROMPT_SHA == "e875686be844"
     assert rag_module.PROMPT_ID == f"{rag_module.PROMPT_VERSION}-{rag_module.PROMPT_SHA}"
 
 

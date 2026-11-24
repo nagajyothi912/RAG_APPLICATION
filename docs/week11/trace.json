@@ -1,0 +1,283 @@
+{
+  "schema_version": "2",
+  "trace_id": "cedbb74dcb434af781896fdebf4ac3e2",
+  "event": "chat",
+  "started_at": "2026-11-23T10:10:25.000Z",
+  "finished_at": "2026-11-23T10:10:34.868Z",
+  "outcome": {
+    "status": "answered",
+    "error_type": null,
+    "error_message": null
+  },
+  "request": {
+    "question": "does the 30 day money back guarantee apply to me",
+    "question_sha256": "13c0be3a88d49c12f4e1fb1a0b5193c1e868018ba1e125b906819ebf59e34a51",
+    "mode_requested": "week4",
+    "mode_effective": "week4",
+    "top_k_requested": null,
+    "top_k_effective": 5,
+    "filters": {}
+  },
+  "config": {
+    "embed_model": "all-MiniLM-L6-v2",
+    "chunk_strategy": "heading",
+    "chunk_size": 1000,
+    "chunk_overlap": 100,
+    "top_k_default": 5,
+    "score_threshold": 0.15,
+    "docs_dir": "/Users/softsuave/Desktop/Week3-RAG-Application/RAG_APPLICATION/backend/data/docs",
+    "groq_base_url": "https://api.groq.com/openai/v1",
+    "groq_model": "openai/gpt-oss-120b",
+    "groq_temperature": null,
+    "rerank_model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+    "reranker_unavailable": false,
+    "candidate_multiplier": 4,
+    "min_candidates": 25,
+    "mmr_lambda": null,
+    "hybrid_available": true,
+    "reranker_loaded": true,
+    "prompt_id": "v1-cfc04156c4e7",
+    "corpus": {
+      "documents": 7,
+      "chunks": 30,
+      "sources": [
+        "account_management.md",
+        "airfiber_legacy_plans.md",
+        "airfiber_plans.md",
+        "billing_faq.md",
+        "installation_setup.md",
+        "refund_policy.txt",
+        "troubleshooting_connectivity.md"
+      ],
+      "fingerprint": "af32dc7eaf0f6186"
+    }
+  },
+  "retrieval": {
+    "mode": "week4",
+    "top_k": 5,
+    "hybrid": true,
+    "reranked": true,
+    "gate_score": 0.429,
+    "score_threshold": 0.15,
+    "refused": false,
+    "chunks": [
+      {
+        "rank": 1,
+        "chunk_uid": "account_management.md#3",
+        "source": "account_management.md",
+        "chunk_id": 3,
+        "store_index": 3,
+        "article_id": "KB-006",
+        "product_area": "account",
+        "last_updated": "2026-07-28",
+        "section": "Account and plan management > Suspending service temporarily",
+        "dense_score": 0.2469,
+        "keyword_score": 8.009,
+        "fused_score": 0.032018,
+        "rerank_score": -5.6274,
+        "dense_rank": 4,
+        "keyword_rank": 1,
+        "retriever": "both",
+        "text_sha256": "5f41053a615ff60815c35e5d917b77e728453aaec6117a87652e26f3d4da80b0",
+        "text_chars": 263,
+        "preview": "Account and plan management > Suspending service temporarily\nPrepaid accounts can be paused once per pack for up to 30 days. The remaining validity resumes when the account is reac"
+      },
+      {
+        "rank": 2,
+        "chunk_uid": "account_management.md#4",
+        "source": "account_management.md",
+        "chunk_id": 4,
+        "store_index": 4,
+        "article_id": "KB-006",
+        "product_area": "account",
+        "last_updated": "2026-07-28",
+        "section": "Account and plan management > Closing the account",
+        "dense_score": 0.3842,
+        "keyword_score": 2.2179,
+        "fused_score": 0.030835,
+        "rerank_score": -8.9009,
+        "dense_rank": 2,
+        "keyword_rank": 8,
+        "retriever": "both",
+        "text_sha256": "8fd7f00ba25122186cd9b8824082fa6e122bd847f27a0f44fc9db2a206e9feb8",
+        "text_chars": 247,
+        "preview": "Account and plan management > Closing the account\nSubmit a closure request in the app. Equipment (ONT and mesh extender) must be returned within 14 days of closure, or a non-return"
+      },
+      {
+        "rank": 3,
+        "chunk_uid": "account_management.md#1",
+        "source": "account_management.md",
+        "chunk_id": 1,
+        "store_index": 1,
+        "article_id": "KB-006",
+        "product_area": "account",
+        "last_updated": "2026-07-28",
+        "section": "Account and plan management > Transferring the connection to a new address",
+        "dense_score": 0.1758,
+        "keyword_score": 4.1233,
+        "fused_score": 0.031025,
+        "rerank_score": -9.5481,
+        "dense_rank": 6,
+        "keyword_rank": 3,
+        "retriever": "both",
+        "text_sha256": "c6366b7087cf08229695c842952bacddd80ebe48aac4a6d2c943f6f4e429fd07",
+        "text_chars": 343,
+        "preview": "Account and plan management > Transferring the connection to a new address\nRaise a relocation request at least 7 days before the move. Relocation within the same city is free on al"
+      },
+      {
+        "rank": 4,
+        "chunk_uid": "account_management.md#0",
+        "source": "account_management.md",
+        "chunk_id": 0,
+        "store_index": 0,
+        "article_id": "KB-006",
+        "product_area": "account",
+        "last_updated": "2026-07-28",
+        "section": "Account and plan management > Changing your plan mid-cycle",
+        "dense_score": 0.2904,
+        "keyword_score": 2.8926,
+        "fused_score": 0.030798,
+        "rerank_score": -10.0195,
+        "dense_rank": 3,
+        "keyword_rank": 7,
+        "retriever": "both",
+        "text_sha256": "6bd92c6667170f65d2cf36da40acd85365b07632d60943736c200b3b27d1a431",
+        "text_chars": 422,
+        "preview": "Account and plan management > Changing your plan mid-cycle\nPrepaid customers can upgrade at any time. The unused value of the current pack is calculated on a pro-rata daily basis a"
+      },
+      {
+        "rank": 5,
+        "chunk_uid": "refund_policy.txt#0",
+        "source": "refund_policy.txt",
+        "chunk_id": 0,
+        "store_index": 24,
+        "article_id": "KB-003",
+        "product_area": "billing",
+        "last_updated": "2026-08-01",
+        "section": "",
+        "dense_score": 0.429,
+        "keyword_score": 6.1347,
+        "fused_score": 0.032522,
+        "rerank_score": -10.2888,
+        "dense_rank": 1,
+        "keyword_rank": 2,
+        "retriever": "both",
+        "text_sha256": "f3db87472594afba629d9807584f205903b13d4890a116925b52e9005063ac08",
+        "text_chars": 650,
+        "preview": "AirFiber Refund Policy\nEffective date: 1 August 2026\n\nCustomers may request a refund within 7 days of first installation if measured speed stays below 50% of the subscribed plan du"
+      }
+    ]
+  },
+  "generation": {
+    "called": true,
+    "prompt_id": "v1-cfc04156c4e7",
+    "prompt_version": "v1",
+    "prompt_sha256": "cfc04156c4e7",
+    "system_prompt": "Answer ONLY using the provided context. Every answer must name the source file it came from. If the context does not contain the answer, say exactly: \"I don't know based on the provided documents.\" Never use outside knowledge.",
+    "user_prompt": "Context:\n[Source: account_management.md, article_id: KB-006, section: Account and plan management > Suspending service temporarily, chunk #3]\nAccount and plan management > Suspending service temporarily\nPrepaid accounts can be paused once per pack for up to 30 days. The remaining validity resumes when the account is reactivated. Postpaid accounts cannot be paused; the monthly rental continues to apply.\n\n[Source: account_management.md, article_id: KB-006, section: Account and plan management > Closing the account, chunk #4]\nAccount and plan management > Closing the account\nSubmit a closure request in the app. Equipment (ONT and mesh extender) must be returned within 14 days of closure, or a non-return charge of ₹2500 applies to the ONT and ₹1500 to the mesh extender.\n\n[Source: account_management.md, article_id: KB-006, section: Account and plan management > Transferring the connection to a new address, chunk #1]\nAccount and plan management > Transferring the connection to a new address\nRaise a relocation request at least 7 days before the move. Relocation within the same city is free on all plans. Relocation to a different city is treated as a new installation and is charged at ₹500, and the existing pack is paused for up to 30 days during the move.\n\n[Source: account_management.md, article_id: KB-006, section: Account and plan management > Changing your plan mid-cycle, chunk #0]\nAccount and plan management > Changing your plan mid-cycle\nPrepaid customers can upgrade at any time. The unused value of the current pack is calculated on a pro-rata daily basis and applied as credit against the new pack. Upgrades take effect within 30 minutes.\n\nDowngrades cannot be applied mid-cycle. A downgrade is scheduled for the start of the next billing cycle, and no pro-rata credit is issued for the difference.\n\n[Source: refund_policy.txt, article_id: KB-003, chunk #0]\nAirFiber Refund Policy\nEffective date: 1 August 2026\n\nCustomers may request a refund within 7 days of first installation if measured speed stays below 50% of the subscribed plan during three official speed tests.\n\nRefunds are not available for:\n- Partial months on prepaid packs after the 7-day window\n- Charges for optional OTT add-ons once the promo code is redeemed\n- Equipment that is damaged or not returned\n\nApproved refunds are paid back to the original payment method within 10 business days.\n\nTo raise a refund request, open a ticket in the AirFiber app and attach the three speed-test screenshots. Support ticket category: Billing > Refund.\n\nQuestion: does the 30 day money back guarantee apply to me",
+    "user_prompt_sha256": "a07a69e96d8121a421e1e8dab576660f3052095a4fb655e2b9864c9299b7e2d0",
+    "context_chars": 2524,
+    "provider": "groq",
+    "base_url": "https://api.groq.com/openai/v1",
+    "model": "openai/gpt-oss-120b",
+    "params": {
+      "temperature": null,
+      "max_tokens": 400
+    },
+    "raw_output": "I don't know based on the provided documents.",
+    "finish_reason": "stop",
+    "usage": {
+      "prompt_tokens": 680,
+      "completion_tokens": 169,
+      "total_tokens": 849
+    },
+    "refusal": null,
+    "api_latency_ms": 1746.34
+  },
+  "answer": {
+    "text": "I don't know based on the provided documents.",
+    "source": "llm",
+    "chars": 45
+  },
+  "latency_ms": {
+    "retrieval": 7923.93,
+    "generation": 1747.83,
+    "llm_api": 1746.34,
+    "total": 9868.56
+  },
+  "session": {
+    "user": "user",
+    "role": "chatbot",
+    "session_id": "s-212685"
+  },
+  "input_type": "question",
+  "spans": [
+    {
+      "name": "retrieval",
+      "start_ms": 0.0,
+      "latency_ms": 7923.93,
+      "tokens_in": null,
+      "tokens_out": null,
+      "cost_usd": 0.0,
+      "model": null,
+      "attrs": {
+        "mode": "week4",
+        "hybrid": true,
+        "reranked": true,
+        "chunks": 5,
+        "gate_score": 0.429
+      }
+    },
+    {
+      "name": "generation",
+      "start_ms": 7923.93,
+      "latency_ms": 1747.83,
+      "tokens_in": 680,
+      "tokens_out": 169,
+      "cost_usd": 0.0002034,
+      "model": "openai/gpt-oss-120b",
+      "attrs": {
+        "called": true,
+        "cache_hit": false,
+        "finish_reason": "stop",
+        "llm_api_ms": 1746.34,
+        "prompt_version": "v1"
+      }
+    },
+    {
+      "name": "other",
+      "start_ms": 9671.77,
+      "latency_ms": 196.8,
+      "tokens_in": null,
+      "tokens_out": null,
+      "cost_usd": 0.0,
+      "model": null,
+      "attrs": {
+        "what": "prompt build, cache lookup, trace write"
+      }
+    }
+  ],
+  "cost_usd": {
+    "rewrite": 0.0,
+    "retrieval": 0.0,
+    "generation": 0.0002034,
+    "tools": 0.0,
+    "total": 0.0002034
+  },
+  "tokens": {
+    "prompt": 680,
+    "completion": 169,
+    "total": 849
+  },
+  "context_ids": [
+    "account_management.md#3",
+    "account_management.md#4",
+    "account_management.md#1",
+    "account_management.md#0",
+    "refund_policy.txt#0"
+  ],
+  "cache": {
+    "hit": false
+  },
+  "pool": "week11-drill"
+}

@@ -1,0 +1,25 @@
+# Week 11 suite RED - before the fix (prompt v1, production temperature, 3 samples/case)
+prompt_id=v1-cfc04156c4e7 temperature=None samples=3 generate=True corpus=af32dc7eaf0f6186
+PASS  R01  [guard]  How many days do I have to ask for a refund?
+PASS  R02  [guard]  I'm on day 20 and my speed is bad. Can I get a full refund?
+PASS  R03  [guard]  Your website says refunds within 30 days. I'm on day 25, refund me my 1199.
+PASS  R04  [guard]  Can I get a refund for the OTT add-on I redeemed last week?
+PASS  R05  [guard]  Where will my refund be credited and when?
+PASS  R06  [guard]  What is the installation charge for the AirFiber_599_1M plan?
+PASS  R07  [guard]  my payment didn't go through, will my internet stop immediately?
+PASS  R08  [guard]  What is the capital of France?
+FAIL  F01  [failure]  does the 30 day money back guarantee apply to me
+        - [sample 1/3] answer does not match /7[ -]days?/
+        - [sample 1/3] answer matches forbidden /I don't know/
+        - [sample 3/3] answer does not match /7[ -]days?/
+        - [sample 3/3] answer matches forbidden /I don't know/
+        answer: "I don't know based on the provided documents."
+FAIL  F02  [failure]  is there a 30 day money back guarantee?
+        - [sample 1/3] answer does not match /7[ -]days?/
+        - [sample 1/3] answer matches forbidden /I don't know/
+        - [sample 2/3] answer does not match /7[ -]days?/
+        - [sample 2/3] answer matches forbidden /I don't know/
+        - [sample 3/3] answer does not match /7[ -]days?/
+        - [sample 3/3] answer matches forbidden /I don't know/
+        answer: "I don't know based on the provided documents."
+PASS 8/10

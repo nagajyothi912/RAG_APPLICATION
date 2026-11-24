@@ -1,0 +1,13 @@
+# Week 11 suite GREEN - after the fix (prompt v2, production temperature, 3 samples/case)
+prompt_id=v2-e875686be844 temperature=None samples=3 generate=True corpus=af32dc7eaf0f6186
+PASS  R01  [guard]  How many days do I have to ask for a refund?
+PASS  R02  [guard]  I'm on day 20 and my speed is bad. Can I get a full refund?
+PASS  R03  [guard]  Your website says refunds within 30 days. I'm on day 25, refund me my 1199.
+PASS  R04  [guard]  Can I get a refund for the OTT add-on I redeemed last week?
+PASS  R05  [guard]  Where will my refund be credited and when?
+PASS  R06  [guard]  What is the installation charge for the AirFiber_599_1M plan?
+PASS  R07  [guard]  my payment didn't go through, will my internet stop immediately?
+PASS  R08  [guard]  What is the capital of France?
+PASS  F01  [failure]  does the 30 day money back guarantee apply to me
+PASS  F02  [failure]  is there a 30 day money back guarantee?
+PASS 10/10

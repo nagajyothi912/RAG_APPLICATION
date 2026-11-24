@@ -42,13 +42,17 @@ Added for the Week 5 error analysis (not in the notebook):
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import logging
 import os
 import shutil
+import re
+import threading
 import time
 import uuid
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, List, Optional, Sequence
@@ -60,7 +64,7 @@ from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
 
 from app.config import settings
-from app.services import follow_up, langfuse_sink, tracing
+from app.services import follow_up, langfuse_sink, trace_index, tracing
 from app.services.chunking import DEFAULT_STRATEGY, STRATEGIES, chunk_document, chunk_fixed_text
 from app.services.retrieval import (
     BM25Index,
@@ -115,7 +119,10 @@ SYSTEM_PROMPT = (
     "Answer ONLY using the provided context. Every answer must name "
     "the source file it came from. If the context does not contain "
     "the answer, say exactly: \"I don't know based on the provided "
-    "documents.\" Never use outside knowledge."
+    "documents.\" Never use outside knowledge. If the question assumes something "
+    "the context does not offer (for example a guarantee, window or amount the "
+    "context never mentions), do not answer \"I don't know\": say the documents do "
+    "not mention it, then state what the context does say about that topic."
 )
 USER_PROMPT_TEMPLATE = "Context:\n{context}\n\nQuestion: {question}"
 MAX_TOKENS = 400
@@ -126,7 +133,10 @@ MAX_TOKENS = 400
 # the strings it names: edit either template and it changes, and the test
 # pinning the literal goes red. Both templates are hashed, because the user
 # prompt's framing is as much a prompt choice as the system message.
-PROMPT_VERSION = "v1"
+# v2 (Week 11): false-premise refund questions ("does the 30 day money back
+# guarantee apply to me") got a bare refusal while the refund policy was in the
+# context. See docs/week11/fix_and_rollout.md.
+PROMPT_VERSION = "v2"
 PROMPT_SHA = hashlib.sha256(
     (SYSTEM_PROMPT + "\x00" + USER_PROMPT_TEMPLATE).encode("utf-8")
 ).hexdigest()[:12]
@@ -653,6 +663,8 @@ class RagService:
         self.top_k = settings.top_k
         self.strategy = settings.chunk_strategy if settings.chunk_strategy in STRATEGIES else DEFAULT_STRATEGY
         self.store = VectorStore()
+        self._cache: "OrderedDict[str, tuple[float, dict]]" = OrderedDict()
+        self._cache_lock = threading.Lock()
         self.client = None
         if settings.api_key:
             self.client = OpenAI(api_key=settings.api_key, base_url=settings.groq_base_url)
@@ -901,6 +913,43 @@ class RagService:
             },
         }
 
+    @staticmethod
+    def _normalise(question: str) -> str:
+        return re.sub(r"[\s]+", " ", question.strip().lower()).rstrip("?.! ")
+
+    def _cache_key(self, question: str, top_k, filters, mode: str) -> str:
+        """
+        Everything that can change the answer is in the key: the question (case,
+        spacing and trailing punctuation folded), the retrieval settings, the
+        prompt, the model and the corpus fingerprint. Edit a document or bump the
+        prompt and every old entry simply stops matching - no purge step.
+        """
+        parts = [
+            self._normalise(question), mode, str(top_k or self.top_k),
+            json.dumps(filters or {}, sort_keys=True), PROMPT_ID, settings.groq_model,
+            str(settings.groq_temperature), self.store.fingerprint,
+        ]
+        return hashlib.sha256("\x00".join(parts).encode()).hexdigest()
+
+    def _cache_get(self, key: str) -> dict | None:
+        with self._cache_lock:
+            hit = self._cache.get(key)
+            if hit is None:
+                return None
+            stored_at, entry = hit
+            if time.time() - stored_at > settings.cache_ttl_seconds:
+                del self._cache[key]
+                return None
+            self._cache.move_to_end(key)
+            return entry
+
+    def _cache_put(self, key: str, entry: dict) -> None:
+        with self._cache_lock:
+            self._cache[key] = (time.time(), entry)
+            self._cache.move_to_end(key)
+            while len(self._cache) > settings.cache_max_entries:
+                self._cache.popitem(last=False)
+
     def ask(
         self,
         question: str,
@@ -944,7 +993,9 @@ class RagService:
         # produce a half-built record. Either sink turns record-building on.
         langfuse_on = langfuse_sink.enabled()
         tracing_on = writer.enabled or langfuse_on
-        capture: dict | None = {} if tracing_on else None
+        # The cache also needs the capture: it must not store an answer the model
+        # was cut off in the middle of (finish_reason == "length").
+        capture: dict | None = {} if (tracing_on or settings.cache_enabled) else None
 
         results: list = []
         answer = ""
@@ -956,6 +1007,8 @@ class RagService:
         failure: BaseException | None = None
         t_retrieval_ms = 0.0
         t_generation_ms = 0.0
+        cache_hit = False
+        turns: list = []
 
         try:
             # A follow-up is rewritten before anything else sees it, so retrieval,
@@ -967,9 +1020,41 @@ class RagService:
                 searched_question, follow_up_info = follow_up.rewrite_question(
                     self.client, settings.groq_model, question, turns, settings.groq_temperature
                 )
-            payload = self._ask_inner(
-                searched_question, top_k, filters, mode_effective, capture, trace_id
+            cache_key = (
+                self._cache_key(searched_question, top_k, filters, mode_effective)
+                if settings.cache_enabled
+                else None
             )
+            cached = self._cache_get(cache_key) if cache_key else None
+            if cached is not None:
+                t_lookup = time.perf_counter()
+                payload = copy.deepcopy(cached["payload"])
+                payload["_retrieval_ms"] = (time.perf_counter() - t_lookup) * 1000
+                payload["_generation_ms"] = 0.0
+                cache_hit = True
+                if capture is not None:
+                    capture.update(cached["capture"])
+                    capture.update(
+                        called=False, usage=None, api_latency_ms=None, prompt_id=PROMPT_ID,
+                        prompt_version=PROMPT_VERSION, prompt_sha256=PROMPT_SHA, model=settings.groq_model,
+                    )
+            else:
+                payload = self._ask_inner(
+                    searched_question, top_k, filters, mode_effective, capture, trace_id
+                )
+                # Only a real, grounded model answer is worth replaying: a gate
+                # refusal costs nothing to recompute and an "I don't know" must
+                # not outlive the document upload that would fix it.
+                if (
+                    cache_key
+                    and not payload["retrieval"]["refused"]
+                    and not payload["answer"].startswith("I don't know")
+                    and (capture or {}).get("finish_reason") != "length"
+                ):
+                    self._cache_put(
+                        cache_key,
+                        {"payload": copy.deepcopy(payload), "capture": dict(capture or {})},
+                    )
             results = payload["_results"]
             answer = payload["answer"]
             gate_score = payload["_gate_score"]
@@ -1001,6 +1086,8 @@ class RagService:
                     answer_source = (
                         "none"
                         if failure is not None
+                        else "cache"
+                        if cache_hit
                         else {"gate": "gate_refusal", "empty_content": "empty_fallback"}.get(
                             refusal, "llm"
                         )
@@ -1036,8 +1123,14 @@ class RagService:
                         pool=(trace_extra or {}).get("pool"),
                         source_id=(trace_extra or {}).get("source_id"),
                         follow_up=follow_up_info,
+                        user=(trace_extra or {}).get("user"),
+                        input_type=(trace_extra or {}).get("input_type")
+                        or ("follow_up" if turns else "question"),
+                        cache_hit=cache_hit,
                     )
                     writer.write(record)
+                    if writer.enabled and settings.trace_index_enabled:
+                        trace_index.index_for(writer.path).upsert(record)
                     if langfuse_on:
                         langfuse_sink.emit(record)
                 except Exception as exc:  # noqa: BLE001
